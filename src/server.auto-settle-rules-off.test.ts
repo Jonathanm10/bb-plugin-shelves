@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { BbPluginApi } from "@get-bb/plugin-sdk";
 import plugin from "./server";
 import {
-  createFakePluginHost,
+  createLegacyPolicyHost as createFakePluginHost,
   disposers,
   projectThread,
   projectsWith,
@@ -16,14 +16,14 @@ const quiet = { createdAt: old, updatedAt: old, latestAttentionAt: old, status: 
 
 type Rules = { autoSettleInactive: boolean; autoSettleOnMerge: boolean };
 
-// With both rules off and nothing the policy settled, a pass can change
-// nothing, so it skips listing every thread. Counts full thread listings.
+// Count full thread listings: closed PRs are checked even when the optional
+// inactivity and merge rules are off.
 async function load(threads: ProjectThread[], rules?: Rules) {
   let lists = 0;
   const missing = new Set<string>();
   const listed = () => threads.filter((thread) => !missing.has(thread.id));
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar",
+    pluginId: "bb-sidebar-clean",
     sdk: {
       projects: { list: async () => projectsWith(listed()) },
       threads: {
@@ -60,8 +60,8 @@ async function load(threads: ProjectThread[], rules?: Rules) {
 
 const off = { autoSettleInactive: false, autoSettleOnMerge: false };
 
-describe("automatic settle with both rules off", () => {
-  it("lists threads on the first pass only", async () => {
+describe("closed-PR checks with optional rules off", () => {
+  it("continues checking live threads for closed PRs", async () => {
     const policy = await load([projectThread({ id: "thr", environmentId: "env_thr", ...quiet })], off);
     // A thread the user settled is not the policy's to change.
     policy.bb.storage
@@ -72,7 +72,7 @@ describe("automatic settle with both rules off", () => {
     expect(policy.lists()).toBe(1);
     await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: [] });
     await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: [] });
-    expect(policy.lists()).toBe(1);
+    expect(policy.lists()).toBe(3);
     await expect(policy.settledIds()).resolves.toEqual(["thr"]);
   });
 
@@ -87,18 +87,18 @@ describe("automatic settle with both rules off", () => {
     expect(policy.lists()).toBe(3);
   });
 
-  it("runs one full pass after the rules are turned off, then skips", async () => {
+  it("continues checking after the optional rules are turned off", async () => {
     const policy = await load([projectThread({ id: "thr", environmentId: "env_thr", updatedAt: Date.now() })]);
     await policy.evaluate();
     await policy.evaluate();
     expect(policy.lists()).toBe(2);
     await policy.changeRules(off);
     await policy.evaluate();
-    expect(policy.lists()).toBe(3);
+    expect(policy.lists()).toBeGreaterThanOrEqual(3);
     await policy.evaluate();
     await policy.evaluate();
     await new Promise((resolve) => setTimeout(resolve, 20));
-    expect(policy.lists()).toBe(3);
+    expect(policy.lists()).toBeGreaterThanOrEqual(5);
   });
 
   it.each([

@@ -134,7 +134,7 @@ describe("parking threads", () => {
   // share the slot with — but it must still show its status on touch.
   it("keeps the status on rows that offer no park actions", async () => {
     const now = Math.floor(Date.now() / 60_000) * 60_000;
-    window.localStorage.setItem("bb-sidebar:working-since:v1", JSON.stringify({ thr_working: now - 5 * 60_000 }));
+    window.localStorage.setItem("bb-sidebar-clean:working-since:v1", JSON.stringify({ thr_working: now - 5 * 60_000 }));
     renderSlot(inbox, listProps, {
       sidebarThreads: {
         status: "ready",
@@ -243,7 +243,7 @@ describe("parking threads", () => {
   // outranks any stored shelf: the row stays on Active with no park controls.
   it("prefers a pending question to a running indicator on a parent card", async () => {
     const now = Math.floor(Date.now() / 60_000) * 60_000;
-    window.localStorage.setItem("bb-sidebar:working-since:v1", JSON.stringify({ thr_ask: now - 5 * 60_000 }));
+    window.localStorage.setItem("bb-sidebar-clean:working-since:v1", JSON.stringify({ thr_ask: now - 5 * 60_000 }));
     renderSlot(inbox, listProps, {
       sidebarThreads: {
         status: "ready",

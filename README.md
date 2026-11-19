@@ -1,58 +1,63 @@
-# BB Sidebar
+# BB Sidebar Clean
 
-A stable thread list for [bb](https://github.com/get-bb/bb). Threads stay where you put them while status, snooze, and settle actions remain close at hand.
+A compact BB sidebar with three everyday sections:
 
-![BB Sidebar in light mode](docs/screenshots/sidebar-light.jpeg)
+- **Active** - completed results, questions, errors, and conversations ready for you.
+- **Working** - agents still running or waiting on work. They return to Active automatically.
+- **Settled** - quiet and finished work, collapsed and available when you need it. New agent activity brings it back.
 
-![BB Sidebar in dark mode](docs/screenshots/sidebar-dark.jpeg)
+Threads use one line by default. Reading a conversation does not file it. You do not need to settle every completed thread manually.
 
-![BB Sidebar empty state](docs/screenshots/sidebar-empty.jpeg)
+## Automatic settling
 
-## Features
+| Rule | Default |
+| --- | --- |
+| Auto-settle inactive threads | On, after 7 days |
+| Auto-settle merged threads | On |
+| Closed pull requests | Settle automatically, independently of the merge switch |
+| Keep threads with a PR | Off; enable to exempt PR threads from inactivity settling |
 
-- Manual ordering plus Recent activity, Waiting longest, Date created, and Project sort modes
-- Subtle project grouping for projects with multiple active threads
-- Optional worktree grouping in Project sort: threads that share a worktree get collapsible groups
-- Pinned, Active, Inactive, Snoozed, Parked, and Settled shelves
-- Full cards, compact working threads, or compact all threads, with options to keep pinned or woken threads full
-- Searchable multi-project filtering, remembered per window across reloads
-- Optional project colors with per-project color selection. Names stay colored in every mode; show stripes in full and collapsed mode, full mode only, grouped projects only, or not at all
-- Automatic project icons with custom overrides
-- Expandable child-thread indicators with running and attention states, on shelf rows too
-- Live status, branch, pull request, and provider details, plus statuses set by other plugins
-- Command palette commands that snooze or unsnooze the thread in view
-- A `bb sidebar` command so agents can list, snooze, settle, park, resume, pin, and re-parent threads
-- Persistent provider-limit warnings with one-click scheduled Continue after reset and a cancel option
-- Workspace port discovery, hover-card details, and optional browser links
-- A Clean button in Settled that previews and closes live terminals and verified thread-owned listening ports, while protecting Active and Working threads
-- Configurable inactive-thread and automatic cleanup rules
-- Native bb navigation, split, rename, archive, and delete flows
-- Project submenu on thread cards for settings, rename, local paths, and removal
-- Regenerate a thread title with bb's title generation and the AI service selected for thread titles
-- Name threads bb left untitled, such as those whose first prompt is shorter than five words, with up to three background attempts
+Rules run when the sidebar opens and every five minutes on the BB server. They continue with the browser closed while BB is running. A completed result stays Active until a rule applies. Settings save automatically.
 
-Park threads while waiting on someone else. Use **Park thread** in the context menu and **Resume** when ready. Parked threads have no timer and are excluded from automatic cleanup. Opening one leaves it parked; new thread activity brings it back to Active.
+Running work, queued messages, pending questions, pinned threads, and live descendants prevent settling. Missing PR data keeps a thread visible until it can be checked. PR rules use BB's GitHub PR Status plugin. Automatic settling never archives or deletes a conversation.
 
-Use **Parent** in a thread's context menu to search threads in the same project, choose a parent, or select **None** to remove it. The current parent is checked; the thread itself and its descendants are excluded.
+Appearance, grouping, child-thread controls, and project management are under **Advanced settings**. Compact menus hide Park and Snooze; the inherited full-card layout retains those optional actions. Pinning and legacy shelves remain compatible. The extra Inactive shelf is off by default.
 
-## Install
+## Install the review branch
+
+Requires BB 0.49.0 or newer.
 
 ```sh
-bb plugin install git:https://github.com/yusuf8834/bb-sidebar.git
+bb plugin install git:github.com/ysskrishna/bb-sidebar-clean@feature/t3-clean-sidebar --yes
+bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
-Requires bb 0.49.0 or later. Pull request badges and automatic settling read pull request status from bb's bundled GitHub PR Status plugin. While it is disabled, badges are hidden and threads with a workspace are not settled automatically.
+Disable other sidebar plugins' automatic policies before trying this one. Selecting a different visual provider alone does not stop its background jobs.
 
-Then choose **BB Sidebar** under **Settings > Appearance > Sidebar**.
-
-## Development
+For development:
 
 ```sh
-npm install
-npm run build
-bb plugin install path:. --yes
+git clone https://github.com/ysskrishna/bb-sidebar-clean.git
+cd bb-sidebar-clean
+git switch feature/t3-clean-sidebar
+npm ci
+npm run check
+bb plugin install .
+bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
-## Credits
+The plugin has its own database, browser-storage namespace, and `bb clean-sidebar` command. It does not import or overwrite Beside or BB Sidebar settings. Disable this plugin to stop its background policy before switching back.
 
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details.
+## Implementation and checks
+
+This independent repository starts from [BB Sidebar v0.3.12](https://github.com/yusuf8834/bb-sidebar/tree/a2f65687517cc5e3513d71017cea5a3306c11313). Its original license and notices are preserved. [T3 Code's settlement service](https://github.com/pingdotgg/t3code/blob/475ae52ac279152dd2c13a86a59227d3e1441e3d/apps/server/src/orchestration-v2/ThreadSettlementService.ts) and [thread behavior documentation](https://github.com/pingdotgg/t3code/blob/475ae52ac279152dd2c13a86a59227d3e1441e3d/docs/user/thread-sidebar.md) informed the lifecycle rules. No model or decision API is used.
+
+This is a BB adaptation. BB exposes different activity and PR signals: terminal PR eligibility compares the PR update time with the latest thread activity, and background commands or serving ports conservatively keep a thread visible. It does not reproduce every T3 lifecycle detail.
+
+```sh
+npm run check
+npm test -- src/auto-settle-t3.test.ts src/ThreadInbox.clean.test.tsx
+env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --grep 'clean sidebar'
+```
+
+The browser runner uses a disposable BB server and test threads. It does not operate on your live conversations. See [browser test isolation](e2e/README.md).

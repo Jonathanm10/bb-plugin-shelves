@@ -11,7 +11,7 @@ afterEach(async () => {
 });
 
 function setup(useRealGenerator = false) {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
   const db = bb.storage.database();
   bb.storage.migrate(db, [AUTO_TITLE_RECOVERY_MIGRATION]);
   let thread = makeThreadResponse({

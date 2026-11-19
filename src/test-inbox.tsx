@@ -1,4 +1,4 @@
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { loadPluginApp } from "@get-bb/plugin-sdk/testing/app";
 import type { useSdk } from "@get-bb/plugin-sdk/app";
@@ -85,6 +85,12 @@ let RowContextMenu: typeof RowContextMenuType;
 export async function loadInboxApp() {
   // Register cleanup for each calling file, even if this helper is reused.
   afterEach(cleanupInboxTest);
+  beforeEach(() => {
+    localStorage.setItem(
+      "bb-sidebar-clean:settings-cache:v1",
+      JSON.stringify({ ...defaultSidebarSettings, inactiveThreadsEnabled: false }),
+    );
+  });
   if (app) return;
   app = await loadPluginApp(() => import("../app"));
   ({ RowContextMenu } = await import("./RowContextMenu"));
@@ -112,7 +118,19 @@ export const SETTLED_NOTHING = {
   stoppedRuntime: false,
 };
 
-export { DEFAULT_SIDEBAR_SETTINGS as defaultSidebarSettings } from "./sidebar-settings-values";
+import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings-values";
+
+// Existing rendering cases exercise the retained full-card layout explicitly.
+export const defaultSidebarSettings = {
+  ...DEFAULT_SIDEBAR_SETTINGS,
+  inactiveThreadsEnabled: true,
+  autoSettleAfterDays: 3,
+  autoSettleOnMerge: false,
+  autoSettleKeepPullRequests: true,
+  threadDisplay: "full" as const,
+  compactWorkingThreads: false,
+  workingShelf: false,
+};
 
 let nextPinnedKey = 0;
 

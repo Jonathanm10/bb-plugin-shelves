@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Added
+
+- Independent BB Sidebar Clean identity, storage, and `bb clean-sidebar` command.
+- Keep threads with a PR setting, matching T3's inactivity exemption.
+
+### Changed
+
+- Compact rows and Working enabled by default, with no Inactive shelf.
+- Park and Snooze actions hidden in the default compact menus.
+- Auto-settle controls shown first; other preferences under Advanced settings.
+- Quiet threads settle after seven days by default; merged-PR settling is on.
+- Closed PRs settle independently of the merged-PR switch.
+
+The history below is inherited from BB Sidebar; its version numbers refer to upstream releases.
+
 ## [0.3.12] - 2026-11-16
 
 ### Changed

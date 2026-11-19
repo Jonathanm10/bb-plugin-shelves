@@ -10,7 +10,7 @@ test.beforeEach(async ({ request, page }) => {
 
 test("selected sidebar renders all seeded threads in Active", async ({ page }) => {
   const settings = await cli(["settings", "ui", "get", "sidebar.threadListProvider"]);
-  expect(settings.value).toBe("bb-sidebar/inbox");
+  expect(settings.value).toBe("bb-sidebar-clean/inbox");
   for (const thread of fixture.threads) {
     await expect(link(page, thread.title)).toBeVisible();
     const state = await cli(["thread", "get", thread.id]);

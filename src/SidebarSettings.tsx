@@ -33,6 +33,7 @@ const SECTION_BY_SETTING: Record<keyof SidebarSettingsValues, string> = {
   autoSettleInactive: "Thread behavior",
   autoSettleAfterDays: "Thread behavior",
   autoSettleOnMerge: "Thread behavior",
+  autoSettleKeepPullRequests: "Thread behavior",
   showRunningChildrenWhenCollapsed: "Child threads",
   childSortField: "Child threads",
   childSortDirection: "Child threads",
@@ -216,15 +217,6 @@ export function SidebarSettings() {
 
   return (
     <div className="max-w-3xl space-y-8 pb-4">
-      <SidebarLayoutSettings
-        draft={draft}
-        update={update}
-        status={statusFor("Sidebar layout")}
-        inactiveHoursValid={inactiveHoursValid}
-      />
-
-      <ProjectAppearanceSection draft={draft} update={update} status={statusFor("Project appearance")} />
-
       <ThreadBehaviorSettings
         draft={draft}
         update={update}
@@ -234,14 +226,26 @@ export function SidebarSettings() {
         snoozePreview={snoozePreview}
       />
 
-      <ChildThreadSettings draft={draft} update={update} status={statusFor("Child threads")} />
+      <details className="space-y-8">
+        <summary className="cursor-pointer text-sm text-muted-foreground">Advanced settings</summary>
+        <SidebarLayoutSettings
+          draft={draft}
+          update={update}
+          status={statusFor("Sidebar layout")}
+          inactiveHoursValid={inactiveHoursValid}
+        />
 
-      <DeviceSettings
-        status={statusFor("This device")}
-        onSaved={() => setSaveFeedback({ section: "This device", status: "saved" })}
-      />
+        <ProjectAppearanceSection draft={draft} update={update} status={statusFor("Project appearance")} />
 
-      <ProjectManagement />
+        <ChildThreadSettings draft={draft} update={update} status={statusFor("Child threads")} />
+
+        <DeviceSettings
+          status={statusFor("This device")}
+          onSaved={() => setSaveFeedback({ section: "This device", status: "saved" })}
+        />
+
+        <ProjectManagement />
+      </details>
     </div>
   );
 }

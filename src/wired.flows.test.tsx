@@ -48,6 +48,7 @@ it("snoozes through the picker, wakes on the clock, and dismisses the durable Wo
 
 it("parks through the card and resumes from Parked", async () => {
   const wired = await createWired([item()]);
+  await wired.call("updateSidebarSettings", { threadDisplay: "full" });
   wired.mount();
   await screen.findByText("Work a");
   await parkFromCard(row(), "park");
@@ -119,7 +120,7 @@ it("pins from the menu and persists a keyboard manual reorder through server and
     ]),
   );
   await wired.flush();
-  expect(JSON.parse(localStorage.getItem("bb-sidebar:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+  expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
   await waitFor(() =>
     expect(within(observer.getByRole("region", { name: "Active" })).getAllByRole("listitem")[0]!.textContent).toContain(
       "Work b",
@@ -133,7 +134,7 @@ it("pins from the menu and persists a keyboard manual reorder through server and
     "Work b",
   );
   wired.unmount(slot);
-  localStorage.removeItem("bb-sidebar:inbox-order-cache:v1");
+  localStorage.removeItem("bb-sidebar-clean:inbox-order-cache:v1");
   wired.mount();
   await waitFor(() =>
     expect(within(screen.getByRole("region", { name: "Active" })).getAllByRole("listitem")[0]!.textContent).toContain(
@@ -144,6 +145,7 @@ it("pins from the menu and persists a keyboard manual reorder through server and
 
 it("saves settings in the real settings slot and publishes the Working shelf to the inbox", async () => {
   const wired = await createWired([item("busy", { indicator: "runtime", runtimeStatus: "active" })]);
+  await wired.call("updateSidebarSettings", { workingShelf: false });
   wired.mount();
   wired.mount("settings");
   const toggle = await screen.findByRole("switch", { name: "Working shelf" });
@@ -232,9 +234,13 @@ it("thread.deleted clears lifecycle and order and publishes both channels to the
   await wired.event("thread.deleted", "a");
   expect(lifecycle(wired)).toBeUndefined();
   expect(wired.db.prepare("SELECT thread_id FROM inbox_order ORDER BY sort_index").all()).toEqual([{ thread_id: "b" }]);
-  await waitFor(() => expect(JSON.parse(localStorage.getItem("bb-sidebar:inbox-order-cache:v1")!)).toEqual(["b"]));
+  await waitFor(() =>
+    expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:inbox-order-cache:v1")!)).toEqual(["b"]),
+  );
   expect(
-    JSON.parse(localStorage.getItem("bb-sidebar:lifecycle-cache:v1")!).map((row: { threadId: string }) => row.threadId),
+    JSON.parse(localStorage.getItem("bb-sidebar-clean:lifecycle-cache:v1")!).map(
+      (row: { threadId: string }) => row.threadId,
+    ),
   ).toEqual(["b"]);
   const remaining = screen.getByRole("region", { name: "Parked" });
   expect(within(remaining).getByText("Work b")).toBeDefined();

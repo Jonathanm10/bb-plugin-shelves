@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import plugin from "./server";
 import {
   availablePullRequest,
-  createFakePluginHost,
+  createLegacyPolicyHost as createFakePluginHost,
   deferred,
   disposers,
   projectThread,
@@ -28,7 +28,7 @@ async function load(threads: ProjectThread[], row: (environmentId: string) => Ro
   let failList = false;
   const callRpc = pullRequestStatus(row, batches);
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar",
+    pluginId: "bb-sidebar-clean",
     sdk: {
       projects: {
         list: async () => {

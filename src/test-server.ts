@@ -25,6 +25,37 @@ export const createFakePluginHost = (options: Parameters<typeof createHost>[0]) 
   return result;
 };
 
+// Historical policy cases keep their explicit three-day/open-PR-protection fixtures.
+// New behavior tests use createFakePluginHost and the shipped defaults.
+export function createLegacyPolicyHost(options: Parameters<typeof createHost>[0]) {
+  const getSettings = options?.sdk?.plugins?.getSettings;
+  return createFakePluginHost({
+    ...options,
+    sdk: {
+      ...options?.sdk,
+      plugins: {
+        ...options?.sdk?.plugins,
+        getSettings: async (...args) => {
+          const saved = (getSettings ? await getSettings(...args) : { values: {} }) as {
+            values: Record<string, unknown>;
+          };
+          return {
+            ...saved,
+            ok: true as const,
+            schema: {},
+            values: {
+              autoSettleAfterDays: "3",
+              autoSettleOnMerge: true,
+              autoSettleKeepPullRequests: true,
+              ...saved.values,
+            },
+          };
+        },
+      },
+    },
+  });
+}
+
 export interface LifecycleListResult {
   rows: StoredLifecycleRow[];
 }
@@ -207,7 +238,7 @@ export async function loadPlugin(
     makeThreadResponse({ id: threadId }),
 ) {
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar",
+    pluginId: "bb-sidebar-clean",
     sdk: {
       projects: { list: async () => projectsWith([projectThread({ id: "thr_1" })]) },
       threads: {

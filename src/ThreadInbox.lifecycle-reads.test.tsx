@@ -29,7 +29,7 @@ const activeTitles = () =>
 
 describe("lifecycle rows through bb's query cache", () => {
   it("classifies threads from the saved lifecycle rows while the server is slow", async () => {
-    localStorage.setItem("bb-sidebar:lifecycle-cache:v1", JSON.stringify([settledRow("a")]));
+    localStorage.setItem("bb-sidebar-clean:lifecycle-cache:v1", JSON.stringify([settledRow("a")]));
     const slow = deferred<Rows>();
     renderSlot(inbox, listProps, {
       sidebarThreads,

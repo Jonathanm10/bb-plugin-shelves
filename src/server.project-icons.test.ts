@@ -6,7 +6,7 @@ describe("project icons", () => {
   it("stores per-project choices and searches only supported image files", async () => {
     const project = standardProject();
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           get: async () => project,
@@ -107,7 +107,7 @@ describe("project icons", () => {
   it("serves an automatically discovered favicon through the local route", async () => {
     const project = standardProject();
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           get: async () => project,
@@ -144,7 +144,7 @@ describe("project icons", () => {
     const project = standardProject();
     const svg = '<svg xmlns="http://www.w3.org/2000/svg"/>';
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           get: async () => project,
@@ -187,7 +187,7 @@ describe("project icons", () => {
   it("prefers the image declared in package.json bb.branding", async () => {
     const project = standardProject();
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           get: async () => project,
@@ -215,7 +215,7 @@ describe("project icons", () => {
   it("keeps a missing icon a miss when the search finds nothing", async () => {
     const project = standardProject();
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           get: async () => project,
@@ -239,7 +239,7 @@ describe("project icons", () => {
     const project = standardProject();
     let hostReady = false;
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           get: async () => project,
@@ -291,7 +291,7 @@ describe("project icons", () => {
       resolveOldRead = resolve;
     });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           get: async () => project,

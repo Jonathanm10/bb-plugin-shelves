@@ -76,7 +76,7 @@ describe("BB Sidebar registration", () => {
   it("registers exactly one thread list", () => {
     expect(app.threadLists).toHaveLength(1);
     expect(inbox.id).toBe("inbox");
-    expect(inbox.title).toBe("BB Sidebar");
+    expect(inbox.title).toBe("BB Sidebar Clean");
   });
 
   it("registers one custom settings page", () => {

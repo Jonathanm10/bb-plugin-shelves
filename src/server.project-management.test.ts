@@ -6,7 +6,7 @@ describe("project management", () => {
   it("renames standard projects and rejects personal projects or empty names", async () => {
     let project = standardProject();
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: { projects: { get: async () => project, update: async ({ name }) => ({ ...project, name: name! }) } },
     });
     await plugin(bb);
@@ -39,7 +39,7 @@ describe("project management", () => {
       maxPermissionMode: "auto" as const,
     };
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         hosts: {
           list: async () => [
@@ -72,7 +72,7 @@ describe("project management", () => {
   it("requires the project name before removing a standard project", async () => {
     const project = standardProject();
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           delete: async () => ({ ok: true as const }),

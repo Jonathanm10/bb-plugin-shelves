@@ -30,7 +30,13 @@ describe("settings cache codec", () => {
     );
   });
   it("fills newer settings in the older accepted shape", () => {
-    expect(decodeSettingsCache(oldSettings)).toEqual({ ...DEFAULT_SIDEBAR_SETTINGS, ...oldSettings });
+    expect(decodeSettingsCache(oldSettings)).toEqual({
+      ...DEFAULT_SIDEBAR_SETTINGS,
+      ...oldSettings,
+      threadDisplay: "full",
+      compactWorkingThreads: false,
+      workingShelf: false,
+    });
   });
   it("rejects missing and wrongly typed required fields", () => {
     for (const input of [null, undefined, {}, [], "settings"]) expect(decodeSettingsCache(input)).toBeNull();
@@ -44,6 +50,9 @@ describe("settings cache codec", () => {
     expect(decodeSettingsCache({ ...oldSettings, inactiveAfterHours: -1, autoSettleAfterDays: Infinity })).toEqual({
       ...DEFAULT_SIDEBAR_SETTINGS,
       ...oldSettings,
+      threadDisplay: "full",
+      compactWorkingThreads: false,
+      workingShelf: false,
       inactiveAfterHours: -1,
       autoSettleAfterDays: Infinity,
     });
@@ -57,12 +66,21 @@ describe("settings cache codec", () => {
         workingShelf: 1,
         projectColorDisplay: "unknown",
       }),
-    ).toEqual({ ...DEFAULT_SIDEBAR_SETTINGS, ...oldSettings });
+    ).toEqual({
+      ...DEFAULT_SIDEBAR_SETTINGS,
+      ...oldSettings,
+      threadDisplay: "full",
+      compactWorkingThreads: false,
+      workingShelf: false,
+    });
   });
   it("retains the icon-only project preference", () => {
     expect(decodeSettingsCache({ ...oldSettings, compactProjectIconOnly: true })).toEqual({
       ...DEFAULT_SIDEBAR_SETTINGS,
       ...oldSettings,
+      threadDisplay: "full",
+      compactWorkingThreads: false,
+      workingShelf: false,
       compactProjectIconOnly: true,
     });
   });

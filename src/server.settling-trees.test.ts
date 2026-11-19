@@ -251,7 +251,7 @@ describe("settling thread trees", () => {
 
   it("a quiet tree can automatically settle again after Undo", async () => {
     const harness = await loadPlugin();
-    const old = Date.now() - 4 * 86400000;
+    const old = Date.now() - 8 * 86400000;
     const quiet = { createdAt: old, updatedAt: old, latestAttentionAt: old };
     harness.inspection.sdk.stub("projects.list", async () =>
       projectsWith([

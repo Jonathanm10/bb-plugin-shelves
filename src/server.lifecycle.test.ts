@@ -99,7 +99,7 @@ describe("lifecycle RPC", () => {
 
   it("releases the agent session and only the terminals nobody used", async () => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: { list: async () => projectsWith([projectThread({ id: "thr_1" })]) },
         threads: {
@@ -135,7 +135,7 @@ describe("lifecycle RPC", () => {
 
   it("settles even when the runtime and terminals cannot be reached", async () => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: { list: async () => projectsWith([projectThread({ id: "thr_1" })]) },
         threads: {
@@ -165,7 +165,7 @@ describe("lifecycle RPC", () => {
 
   it("releases every archived runtime even when one stop fails", async () => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         threads: {
           stop: async ({ threadId }: { threadId: string }) => {
@@ -303,7 +303,7 @@ describe("lifecycle RPC", () => {
 
   it.each(["settle", "snooze", "park"])("does not %s when native unpinning fails", async (method) => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: { list: async () => projectsWith([projectThread({ id: "thr_1", pinnedAt: 1 })]) },
         threads: {

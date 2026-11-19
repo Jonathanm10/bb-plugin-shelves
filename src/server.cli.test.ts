@@ -5,7 +5,7 @@ import { createFakePluginHost, disposers, loadPlugin, projectThread, projectsWit
 
 const HOUR_MS = 60 * 60_000;
 
-describe("bb sidebar CLI", () => {
+describe("bb clean-sidebar CLI", () => {
   it("snoozes the calling thread by default", async () => {
     const harness = await loadPlugin();
     const before = Date.now();
@@ -68,7 +68,7 @@ describe("bb sidebar CLI", () => {
       projectThread({ id, title: id, latestAttentionAt: 100 - index, projectId: index < 4 ? "proj_1" : "proj_2" }),
     );
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: { list: async () => projectsWith(threads) },
         threads: {

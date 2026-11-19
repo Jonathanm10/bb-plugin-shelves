@@ -20,7 +20,9 @@ export async function startScratchServer() {
   const children = new Set();
   let cleaning;
   const toolEnv = Object.fromEntries(
-    Object.entries(process.env).filter(([key]) => key === "PATH" || key === "HOME" || /^npm_/i.test(key)),
+    Object.entries(process.env).filter(
+      ([key]) => key === "PATH" || key === "HOME" || key === "PLAYWRIGHT_BROWSERS_PATH" || /^npm_/i.test(key),
+    ),
   );
   const home = join(scratch, "home");
   const env = {
@@ -249,7 +251,7 @@ trace_exporter = "none"
     });
     symlinkSync(runtimeModules, join(pluginDir, "node_modules"));
     await run(bb, ["plugin", "install", `path:${pluginDir}`, "--yes"]);
-    await run(bb, ["settings", "ui", "set", "sidebar.threadListProvider", "bb-sidebar/inbox"]);
+    await run(bb, ["settings", "ui", "set", "sidebar.threadListProvider", "bb-sidebar-clean/inbox"]);
     await run(bb, ["settings", "general", "onboardingCompletedAt", new Date().toISOString()]);
     const repo = join(scratch, "repo");
     await run("git", ["init", "--initial-branch=main", repo]);

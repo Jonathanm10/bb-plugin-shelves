@@ -175,36 +175,27 @@ export function createServerPolicy(
       const policySettings = {
         afterDays: parseAutoSettleAfterDays(configured.autoSettleInactive, String(configured.autoSettleAfterDays)),
         onMerge: configured.autoSettleOnMerge,
+        keepPullRequests: configured.autoSettleKeepPullRequests,
       };
-      // With both rules off, every known PR outcome leads to the same decision,
-      // so skip GitHub entirely and treat each environment as having no PR.
-      const readsPullRequests = policySettings.onMerge || policySettings.afterDays !== null;
-      // With both rules off, only a policy-settled row can change: every other
-      // thread is kept. Without one, and once a full re-check (which also runs
-      // the one-time backfill) has completed, this pass cannot change anything,
-      // so skip listing every thread.
-      if (!readsPullRequests && !fullRecheck && !readAll().some(isAutoSettled)) return [];
+      // Closed PRs settle independently of the merged-PR and inactivity switches.
       let threads = await loadPolicyThreads(true);
       // Repair older trees before any decision reads their children's rows.
       const backfilled = backfillSettledChildRows(threads);
       const lifecycleByThreadId = new Map(readAll().map((row) => [row.threadId, row]));
-      const environmentIds = readsPullRequests
-        ? [
-            ...new Set(
-              threads.flatMap((thread) => {
-                const row = lifecycleByThreadId.get(thread.id) ?? null;
-                if (
-                  thread.environmentId === null ||
-                  (!rechecks(thread.id) && isAutoSettled(row)) ||
-                  !autoSettleNeedsPullRequest(row, thread)
-                ) {
-                  return [];
-                }
-                return [thread.environmentId];
-              }),
-            ),
-          ]
-        : [];
+      const environmentIds = [
+        ...new Set(
+          threads.flatMap((thread) => {
+            const row = lifecycleByThreadId.get(thread.id) ?? null;
+            if (
+              thread.environmentId === null ||
+              (!rechecks(thread.id) && isAutoSettled(row)) ||
+              !autoSettleNeedsPullRequest(row, thread)
+            )
+              return [];
+            return [thread.environmentId];
+          }),
+        ),
+      ];
       const pullRequests = await loadPullRequests(environmentIds);
       const now = Date.now();
       const decide = (keepThreadIds: ReadonlySet<string>) => {
@@ -222,7 +213,7 @@ export function createServerPolicy(
             return decision === "keep" ? [] : [{ decision, row, threadId: thread.id }];
           }
           const pullRequest: AutoSettlePullRequest =
-            thread.environmentId === null || !readsPullRequests
+            thread.environmentId === null
               ? { outcome: "absent" }
               : (pullRequests.get(thread.environmentId) ?? { outcome: "unknown" });
           const decision = decideAutoSettle({ lifecycle: row, now, pullRequest, settings: policySettings, thread });
@@ -307,6 +298,7 @@ export function createServerPolicy(
                 settings: {
                   afterDays: parseAutoSettleAfterDays(current.autoSettleInactive, String(current.autoSettleAfterDays)),
                   onMerge: current.autoSettleOnMerge,
+                  keepPullRequests: current.autoSettleKeepPullRequests,
                 },
                 thread,
               }) === "settle"

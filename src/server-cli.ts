@@ -111,7 +111,7 @@ export function createServerCli(
   };
 
   return defineCli({
-    name: "sidebar",
+    name: "clean-sidebar",
     summary: "Snooze, settle, park, pin, and re-parent threads in the BB Sidebar",
     commands: {
       list: cliCommand({
@@ -237,7 +237,7 @@ export function createServerCli(
               const { id } = placed.rowThread;
               throw new PluginCliError(`${threadId} is ${placed.shelf} with ${id}, the thread it is nested under`, {
                 code: "action_failed",
-                hint: `Resume the whole tree: bb sidebar resume --thread ${id}`,
+                hint: `Resume the whole tree: bb clean-sidebar resume --thread ${id}`,
               });
             }
             const row = readOne(threadId);
@@ -270,7 +270,7 @@ export function createServerCli(
           if (Boolean(positionals.parent) === options.clear) {
             throw new PluginCliError("Give a parent thread id or --clear, not both", {
               code: "invalid_value",
-              hint: "bb sidebar parent <parent-thread-id> or bb sidebar parent --clear",
+              hint: "bb clean-sidebar parent <parent-thread-id> or bb clean-sidebar parent --clear",
             });
           }
           const parentThreadId = positionals.parent?.trim() || null;

@@ -25,7 +25,7 @@ const extraRpc = {
 };
 
 it.each([false, true])("drains an edit made during a pending save, unmounted=%s", async (unmount) => {
-  let stored = { ...DEFAULT_SIDEBAR_SETTINGS };
+  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false };
   const pending = deferred<void>();
   const writes: Partial<SidebarSettingsValues>[] = [];
   const slot = renderSlot(
@@ -44,7 +44,7 @@ it.each([false, true])("drains an edit made during a pending save, unmounted=%s"
       },
     },
   );
-  await screen.findByRole("switch", { name: "Working shelf" });
+  await openAdvancedSettings();
   vi.useFakeTimers();
   fireEvent.click(screen.getByRole("switch", { name: "Dock shelves to the bottom" }));
   await act(async () => {
@@ -67,7 +67,7 @@ it.each([false, true])("drains an edit made during a pending save, unmounted=%s"
 });
 
 it("saves a reversal of the same field made while its first write is pending", async () => {
-  let stored = { ...DEFAULT_SIDEBAR_SETTINGS };
+  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false };
   const pending = deferred<void>();
   const writes: unknown[] = [];
   const slot = renderSlot(
@@ -86,7 +86,7 @@ it("saves a reversal of the same field made while its first write is pending", a
       },
     },
   );
-  const toggle = await screen.findByRole("switch", { name: "Working shelf" });
+  const toggle = await openAdvancedSettings();
   vi.useFakeTimers();
   fireEvent.click(toggle);
   await act(async () => {
@@ -102,7 +102,7 @@ it("saves a reversal of the same field made while its first write is pending", a
 });
 
 it.each([false, true])("preserves an unrelated remote edit, realtime delivered=%s", async (realtime) => {
-  let stored = { ...DEFAULT_SIDEBAR_SETTINGS };
+  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false };
   const writes: unknown[] = [];
   const slot = renderSlot(
     { component: SidebarSettings },
@@ -119,7 +119,7 @@ it.each([false, true])("preserves an unrelated remote edit, realtime delivered=%
       },
     },
   );
-  const toggle = await screen.findByRole("switch", { name: "Working shelf" });
+  const toggle = await openAdvancedSettings();
   vi.useFakeTimers();
   fireEvent.click(toggle);
   stored = { ...stored, childSortDirection: "descending" };
@@ -133,7 +133,7 @@ it.each([false, true])("preserves an unrelated remote edit, realtime delivered=%
 });
 
 it("flushes a valid edit when leaving before the debounce expires", async () => {
-  let stored = { ...DEFAULT_SIDEBAR_SETTINGS };
+  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false };
   const slot = renderSlot(
     { component: SidebarSettings },
     {},
@@ -148,14 +148,14 @@ it("flushes a valid edit when leaving before the debounce expires", async () => 
       },
     },
   );
-  fireEvent.click(await screen.findByRole("switch", { name: "Working shelf" }));
+  fireEvent.click(await openAdvancedSettings());
   slot.lifecycle.unmount();
   await waitFor(() => expect(stored.workingShelf).toBe(true));
 });
 
 it("removes obsolete archive-preview cache keys before an early save", async () => {
-  let stored = { ...DEFAULT_SIDEBAR_SETTINGS };
-  localStorage.setItem("bb-sidebar:settings-cache:v1", JSON.stringify({ ...stored, archivedShelfEnabled: true }));
+  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false };
+  localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify({ ...stored, archivedShelfEnabled: true }));
   const pending = deferred<SidebarSettingsValues>();
   const writes: unknown[] = [];
   renderSlot(
@@ -174,17 +174,19 @@ it("removes obsolete archive-preview cache keys before an early save", async () 
       },
     },
   );
-  fireEvent.click(await screen.findByRole("switch", { name: "Working shelf" }));
+  fireEvent.click(await openAdvancedSettings());
   await waitFor(() => expect(writes).toEqual([{ workingShelf: true }]));
   await act(async () => {
     pending.resolve(DEFAULT_SIDEBAR_SETTINGS);
   });
   expect(screen.getByRole("switch", { name: "Working shelf" }).getAttribute("aria-checked")).toBe("true");
-  expect(JSON.parse(localStorage.getItem("bb-sidebar:settings-cache:v1")!)).not.toHaveProperty("archivedShelfEnabled");
+  expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:settings-cache:v1")!)).not.toHaveProperty(
+    "archivedShelfEnabled",
+  );
 });
 
 it("keeps the typing debounce when an earlier settings save finishes", async () => {
-  let stored = { ...DEFAULT_SIDEBAR_SETTINGS };
+  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false };
   const pending = deferred<void>();
   const writes: unknown[] = [];
   renderSlot(
@@ -203,13 +205,13 @@ it("keeps the typing debounce when an earlier settings save finishes", async () 
       },
     },
   );
-  const toggle = await screen.findByRole("switch", { name: "Working shelf" });
+  const toggle = await openAdvancedSettings();
   vi.useFakeTimers();
   fireEvent.click(toggle);
   await act(async () => {
     await vi.advanceTimersByTimeAsync(500);
   });
-  const days = screen.getByLabelText("Days before auto-settle");
+  const days = screen.getByLabelText("Days of inactivity before auto-settle");
   fireEvent.change(days, { target: { value: "1" } });
   await act(async () => {
     await vi.advanceTimersByTimeAsync(10);
@@ -228,7 +230,7 @@ it("keeps the typing debounce when an earlier settings save finishes", async () 
 });
 
 it("replaces the compact switch with a thread display choice", async () => {
-  let stored = { ...DEFAULT_SIDEBAR_SETTINGS };
+  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false };
   const writes: Partial<SidebarSettingsValues>[] = [];
   renderSlot(
     { component: SidebarSettings },
@@ -254,7 +256,7 @@ it("replaces the compact switch with a thread display choice", async () => {
     "Compact working threads",
     "Compact all threads",
   ]);
-  expect((picker as HTMLSelectElement).value).toBe("full");
+  expect((picker as HTMLSelectElement).value).toBe("compact-all");
   fireEvent.change(picker, { target: { value: "compact-working" } });
   await waitFor(() => expect(writes).toEqual([{ threadDisplay: "compact-working" }]));
   // The Compact all options appear only with that choice.
@@ -272,3 +274,10 @@ it("replaces the compact switch with a thread display choice", async () => {
     }),
   );
 });
+
+async function openAdvancedSettings() {
+  const summary = await screen.findByText("Advanced settings");
+  const details = summary.closest("details")!;
+  if (!details.open) fireEvent.click(summary);
+  return screen.getByRole("switch", { name: "Working shelf" });
+}

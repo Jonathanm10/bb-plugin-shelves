@@ -39,7 +39,7 @@ const quietThread: AutoSettleThread = {
   updatedAt: 6 * DAY,
 };
 
-const settings = { afterDays: 3, onMerge: true };
+const settings = { afterDays: 3, onMerge: true, keepPullRequests: true };
 
 describe("automatic settle policy", () => {
   it("looks up pull requests only for threads the policy can change", () => {
@@ -167,19 +167,22 @@ describe("automatic settle policy", () => {
     }
   });
 
-  it.each(["merged", "closed"] as const)("settles a %s PR only when finished PRs are enabled", (state) => {
-    const updatedAt = new Date(NOW).toISOString();
-    const decide = (onMerge: boolean) =>
-      decideAutoSettle({
-        lifecycle: null,
-        now: NOW,
-        pullRequest: { outcome: "available", state, updatedAt },
-        settings: { afterDays: null, onMerge },
-        thread: quietThread,
-      });
-    expect(decide(true)).toBe("settle");
-    expect(decide(false)).toBe("keep");
-  });
+  it.each(["merged", "closed"] as const)(
+    "settles a %s PR according to the merge switch and independent close rule",
+    (state) => {
+      const updatedAt = new Date(NOW).toISOString();
+      const decide = (onMerge: boolean) =>
+        decideAutoSettle({
+          lifecycle: null,
+          now: NOW,
+          pullRequest: { outcome: "available", state, updatedAt },
+          settings: { afterDays: null, onMerge },
+          thread: quietThread,
+        });
+      expect(decide(true)).toBe("settle");
+      expect(decide(false)).toBe(state === "closed" ? "settle" : "keep");
+    },
+  );
 
   it("does not re-settle when activity postdates the terminal PR", () => {
     expect(

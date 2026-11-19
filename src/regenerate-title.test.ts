@@ -15,7 +15,7 @@ function stubThread(sdk: ReturnType<typeof createFakePluginHost>["harness"]["ins
 }
 
 async function setup() {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
   const sdk = harness.inspection.sdk;
   stubThread(sdk);
   sdk.stub("threads.experimental_regenerateTitle", async () => makeThreadResponse({ title: "Sidebar title service" }));
@@ -63,7 +63,7 @@ describe("title regeneration", () => {
 
 describe("title regeneration for untitled threads only", () => {
   function setupDirect(changes = {}) {
-    const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar" });
+    const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
     const sdk = harness.inspection.sdk;
     stubThread(sdk, { title: null, ...changes });
     sdk.stub("threads.experimental_regenerateTitle", async () => makeThreadResponse({ title: "Recovered title" }));

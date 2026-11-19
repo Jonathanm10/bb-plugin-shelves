@@ -51,9 +51,9 @@ export async function createWired(
     });
   };
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar",
+    pluginId: "bb-sidebar-clean",
     sdk: {
-      plugins: { getSettings: async () => ({ values: {}, pluginId: "bb-sidebar" }) },
+      plugins: { getSettings: async () => ({ values: {}, pluginId: "bb-sidebar-clean" }) },
       projects: {
         get: async () => standardProject(),
         list: async () =>

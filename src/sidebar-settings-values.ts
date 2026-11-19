@@ -28,6 +28,7 @@ export interface SidebarSettingsValues {
   autoSettleInactive: boolean;
   autoSettleAfterDays: number;
   autoSettleOnMerge: boolean;
+  autoSettleKeepPullRequests: boolean;
   childSortField: ChildThreadSortField;
   childSortDirection: ChildThreadSortDirection;
   childIconStyle: ChildThreadIconStyle;
@@ -55,21 +56,22 @@ export interface SidebarSettingsValues {
 
 export const DEFAULT_SIDEBAR_SETTINGS: SidebarSettingsValues = {
   snoozePresets: DEFAULT_SNOOZE_PRESET_CONFIG,
-  inactiveThreadsEnabled: true,
+  inactiveThreadsEnabled: false,
   inactiveAfterHours: DEFAULT_INACTIVE_AFTER_HOURS,
   showRunningChildrenWhenCollapsed: true,
   autoSettleInactive: true,
-  autoSettleAfterDays: 3,
-  autoSettleOnMerge: false,
+  autoSettleAfterDays: 7,
+  autoSettleOnMerge: true,
+  autoSettleKeepPullRequests: false,
   childSortField: "created",
   childSortDirection: "ascending",
   childIconStyle: "disc",
-  threadDisplay: "full",
+  threadDisplay: "compact-all",
   compactProjectIconOnly: false,
   keepPinnedThreadsFull: false,
   keepWokeThreadsFull: false,
-  compactWorkingThreads: false,
-  workingShelf: false,
+  compactWorkingThreads: true,
+  workingShelf: true,
   dockShelves: false,
   projectColorsEnabled: false,
   projectColorDisplay: "all",

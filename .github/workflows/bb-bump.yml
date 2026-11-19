@@ -6,8 +6,6 @@ name: bb bump
 # tags, or pushes to main. Logic lives in scripts/bb-compat/; see AGENTS.md.
 
 on:
-  schedule:
-    - cron: "47 6 * * *"
   workflow_dispatch:
     inputs:
       dry_run:

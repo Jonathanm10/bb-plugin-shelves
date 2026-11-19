@@ -34,7 +34,7 @@ const manualOnly = {
 
 async function loadWith(threads: () => ProjectThread[]) {
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar",
+    pluginId: "bb-sidebar-clean",
     sdk: {
       plugins: { ...manualOnly, callRpc: pullRequestStatus(() => ({ outcome: "absent" })) },
       projects: { list: async () => projectsWith(threads()) },
@@ -106,7 +106,7 @@ describe("children of older parent-only settles", () => {
       projectThread({ id: "child", title: "Child", parentThreadId: "parent", latestAttentionAt: 90, ...shared }),
     ];
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       experimental_callHostRpc: async ({ method, input }) => {
         if (method === "resolveRoots")
           return {

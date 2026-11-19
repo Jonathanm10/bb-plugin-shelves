@@ -159,7 +159,8 @@ export function createServerHandlers(
       if (
         next.autoSettleInactive !== stored.autoSettleInactive ||
         next.autoSettleAfterDays !== stored.autoSettleAfterDays ||
-        next.autoSettleOnMerge !== stored.autoSettleOnMerge
+        next.autoSettleOnMerge !== stored.autoSettleOnMerge ||
+        next.autoSettleKeepPullRequests !== stored.autoSettleKeepPullRequests
       ) {
         policy.settingsChanged();
         void evaluatePolicies().catch((error) => {

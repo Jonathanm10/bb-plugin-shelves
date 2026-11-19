@@ -47,7 +47,8 @@ describe("ThreadInbox", () => {
     await waitFor(() => expect(loads).toBe(2));
     expect(screen.queryByRole("list", { name: "Child threads" })).toBeNull();
     expect(
-      JSON.parse(window.localStorage.getItem("bb-sidebar:settings-cache:v1") ?? "{}").showRunningChildrenWhenCollapsed,
+      JSON.parse(window.localStorage.getItem("bb-sidebar-clean:settings-cache:v1") ?? "{}")
+        .showRunningChildrenWhenCollapsed,
     ).toBe(false);
   });
 
@@ -129,7 +130,7 @@ describe("ThreadInbox", () => {
   it("shows every child status or an idle age in expanded rows and accessible names", async () => {
     const minute = Math.floor(Date.now() / 60_000) * 60_000;
     window.localStorage.setItem(
-      "bb-sidebar:working-since:v1",
+      "bb-sidebar-clean:working-since:v1",
       JSON.stringify({
         monitoring: minute - 5 * 60_000,
         planning: minute - 5 * 60_000,
@@ -250,7 +251,9 @@ describe("ThreadInbox", () => {
     );
     expect(rendered.linkCalls).toContainEqual({ href: "/projects/proj_1/threads/monitoring", split: false });
     await waitFor(() =>
-      expect(JSON.parse(window.localStorage.getItem("bb-sidebar:child-expansion:v1") ?? "[]")).toEqual(["parent"]),
+      expect(JSON.parse(window.localStorage.getItem("bb-sidebar-clean:child-expansion:v1") ?? "[]")).toEqual([
+        "parent",
+      ]),
     );
   });
 
@@ -314,7 +317,7 @@ describe("ThreadInbox", () => {
   // the status sits beside the disclosure button rather than displacing it.
   it("shows the shared status on grandchild rows and beside a disclosure", () => {
     const minute = Math.floor(Date.now() / 60_000) * 60_000;
-    window.localStorage.setItem("bb-sidebar:working-since:v1", JSON.stringify({ child: minute - 5 * 60_000 }));
+    window.localStorage.setItem("bb-sidebar-clean:working-since:v1", JSON.stringify({ child: minute - 5 * 60_000 }));
     const rendered = render([
       thread({ id: "parent", title: "Parent" }),
       thread({

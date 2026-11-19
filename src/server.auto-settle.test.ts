@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { makeThreadResponse } from "@get-bb/plugin-sdk/testing";
 import plugin from "./server";
 import {
-  createFakePluginHost,
+  createLegacyPolicyHost as createFakePluginHost,
   disposers,
   projectThread,
   projectsWith,
@@ -22,7 +22,7 @@ describe("automatic settle evaluation", () => {
     const old = Date.now() - 4 * 86400000;
     const quiet = { createdAt: old, updatedAt: old, latestAttentionAt: old };
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         plugins: {
           callRpc: pullRequestStatus(() =>
@@ -121,7 +121,7 @@ describe("automatic settle evaluation", () => {
       const entered = deferred<void>();
       const release = deferred<void>();
       const { bb, harness } = createFakePluginHost({
-        pluginId: "bb-sidebar",
+        pluginId: "bb-sidebar-clean",
         sdk: {
           projects: { list: async () => projectsWith(threads) },
           threads: { get: async ({ threadId }) => makeThreadResponse({ id: threadId }) },
@@ -168,7 +168,7 @@ describe("automatic settle evaluation", () => {
     ];
     // A reload keeps only these options, so the thread listing is passed here.
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: { list: async () => projectsWith(threads) },
         threads: { get: async ({ threadId }) => makeThreadResponse({ id: threadId }), list: async () => threads },
@@ -199,7 +199,7 @@ describe("automatic settle evaluation", () => {
     let parentPinned = true;
     let prOpen = false;
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () =>
@@ -241,7 +241,7 @@ describe("automatic settle evaluation", () => {
     const quiet = { createdAt: old, updatedAt: old, latestAttentionAt: old };
     let child = projectThread({ id: "child", parentThreadId: "parent", projectId: "other", updatedAt: Date.now() });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: { projects: { list: async () => projectsWith([projectThread({ id: "parent", ...quiet }), child]) } },
     });
     await plugin(bb);
@@ -263,7 +263,7 @@ describe("automatic settle evaluation", () => {
   it("settles inactive threads and publishes one batched refresh", async () => {
     const old = Date.now() - 4 * 24 * 60 * 60 * 1_000;
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () =>
@@ -306,7 +306,7 @@ describe("automatic settle evaluation", () => {
       activeWorkflowCount: 0,
     };
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () =>
@@ -358,7 +358,7 @@ describe("automatic settle evaluation", () => {
       });
     const scans: Array<{ hostId: string; input: unknown }> = [];
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       experimental_callHostRpc: async ({ method, hostId, input }) => {
         expect(method).toBe("scan");
         scans.push({ hostId, input });
@@ -418,7 +418,7 @@ describe("automatic settle evaluation", () => {
       status: "idle" as const,
     };
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () => projectsWith([projectThread(fields)]),
@@ -444,7 +444,7 @@ describe("automatic settle evaluation", () => {
     const environmentId = "env_shared";
     const batches: string[][] = [];
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () =>
@@ -516,7 +516,7 @@ describe("automatic settle evaluation", () => {
       resolveFirstPullRequest = resolve;
     });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: { list: async () => projectsWith([thread]) },
         plugins: {
@@ -555,11 +555,11 @@ describe("automatic settle evaluation", () => {
     await expect(firstEvaluation).resolves.toEqual({
       changedThreadIds: [],
     });
-    // The queued pass runs with both rules off, so it never asks GitHub.
+    // The queued pass still checks for closed PRs, but a merged PR cannot settle now.
     for (let attempt = 0; attempt < 10; attempt += 1) {
       await Promise.resolve();
     }
-    expect(pullRequestCalls).toBe(1);
+    expect(pullRequestCalls).toBe(2);
     let lifecycle = (await harness.behavior.callRpc("listLifecycle", {})) as LifecycleListResult;
     for (let attempt = 0; attempt < 10 && lifecycle.rows.length > 0; attempt += 1) {
       await Promise.resolve();
@@ -569,11 +569,11 @@ describe("automatic settle evaluation", () => {
     expect(harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
   });
 
-  it("asks GitHub nothing when both settle rules are off", async () => {
+  it("still settles closed PRs when optional rules are off", async () => {
     const batches: string[][] = [];
     const old = Date.now() - 30 * 24 * 60 * 60_000;
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () =>
@@ -601,8 +601,10 @@ describe("automatic settle evaluation", () => {
     await plugin(bb);
     disposers.push(() => harness.lifecycle.dispose());
 
-    await expect(harness.behavior.callRpc("evaluateAutoSettle", {})).resolves.toEqual({ changedThreadIds: [] });
-    expect(batches).toEqual([]);
+    await expect(harness.behavior.callRpc("evaluateAutoSettle", {})).resolves.toEqual({
+      changedThreadIds: ["thr_closed"],
+    });
+    expect(batches).toEqual([["env_closed"]]);
   });
 
   it("returns a policy-settled thread whose PR reopened only once a rule changes", async () => {
@@ -611,7 +613,7 @@ describe("automatic settle evaluation", () => {
     const batches: string[][] = [];
     let held: ReturnType<typeof deferred<void>> | null = null;
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () =>
@@ -658,7 +660,7 @@ describe("automatic settle evaluation", () => {
     const old = Date.now() - 4 * 24 * 60 * 60 * 1_000;
     let pinnedAt: number | null = null;
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () =>

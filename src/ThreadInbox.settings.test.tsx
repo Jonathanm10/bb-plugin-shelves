@@ -19,7 +19,7 @@ await loadInboxApp();
 
 describe("sidebar settings", () => {
   it("keeps project colors opt-in and ignores the removed archive preview settings", async () => {
-    localStorage.setItem("bb-sidebar:shelf-expansion:v1", JSON.stringify({ settled: true, archived: true }));
+    localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ settled: true, archived: true }));
     let settings = { ...defaultSidebarSettings, archivedShelfEnabled: true };
     const rendered = renderSlot(inbox, listProps, {
       sidebarThreads: {
@@ -59,7 +59,7 @@ describe("sidebar settings", () => {
   });
 
   it("uses one continuous stripe for a project group and refreshes its custom color", async () => {
-    localStorage.setItem("bb-sidebar:active-sort:v1", "project");
+    localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
     let colors = { proj_1: "#123456" };
     const rendered = renderSlot(inbox, listProps, {
       sidebarThreads: {
@@ -97,9 +97,9 @@ describe("sidebar settings", () => {
   });
 
   it("limits stripes by display mode while keeping all project names colored", async () => {
-    localStorage.setItem("bb-sidebar:active-sort:v1", "project");
-    localStorage.setItem("bb-sidebar:single-thread-project-grouping:v1", "false");
-    localStorage.setItem("bb-sidebar:shelf-expansion:v1", JSON.stringify({ settled: true, archived: true }));
+    localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+    localStorage.setItem("bb-sidebar-clean:single-thread-project-grouping:v1", "false");
+    localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ settled: true, archived: true }));
     let settings = {
       ...defaultSidebarSettings,
       projectColorsEnabled: true,
@@ -253,7 +253,7 @@ describe("sidebar settings", () => {
     const select = await screen.findByLabelText("Open port links on");
     expect(within(select).getByRole("option", { name: "Local Mac" })).toBeDefined();
     fireEvent.change(select, { target: { value: "host_local" } });
-    expect(localStorage.getItem("bb-sidebar:port-link-host:v1")).toBe("host_local");
+    expect(localStorage.getItem("bb-sidebar-clean:port-link-host:v1")).toBe("host_local");
   });
   it("groups related controls and saves changes without a save button", async () => {
     let saved: typeof defaultSidebarSettings | null = null;
@@ -282,9 +282,9 @@ describe("sidebar settings", () => {
     );
 
     expect((await screen.findAllByRole("heading", { level: 2 })).map((heading) => heading.textContent)).toEqual([
+      "Thread behavior",
       "Sidebar layout",
       "Project appearance",
-      "Thread behavior",
       "Child threads",
       "This device",
       "Project management",
@@ -462,7 +462,7 @@ describe("sidebar settings", () => {
     delete previous.childIconStyle;
     delete previous.projectColorDisplay;
     previous.projectColorsEnabled = true;
-    window.localStorage.setItem("bb-sidebar:settings-cache:v1", JSON.stringify(previous));
+    window.localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(previous));
     renderSlot(
       sidebarSettings,
       {},

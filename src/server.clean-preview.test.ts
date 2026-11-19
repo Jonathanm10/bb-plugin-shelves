@@ -30,7 +30,7 @@ describe("lifecycle RPC", () => {
     const empty = projectThread({ id: "thr_empty" });
     const later = () => projectThread({ id: "thr_later", status: laterActive ? "active" : "idle" });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: { list: async () => projectsWith([settled, active, safe, empty, later()]) },
         threads: {
@@ -118,7 +118,7 @@ describe("lifecycle RPC", () => {
       visibility: "hidden",
     });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       experimental_callHostRpc: async ({ method, input }) => {
         if (method === "resolveRoots")
           return { roots: (input as { roots: Array<{ environmentId: string; path: string }> }).roots };
@@ -206,7 +206,7 @@ describe("lifecycle RPC", () => {
     let terminalLists = 0;
     const closed: string[] = [];
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         projects: {
           list: async () => projectsWith([projectThread({ id: "thr_race", status: working ? "active" : "idle" })]),
@@ -259,7 +259,7 @@ describe("lifecycle RPC", () => {
       status: "active",
     });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       experimental_callHostRpc: async ({ method, input }) => {
         if (method === "resolveRoots")
           return {
@@ -315,7 +315,7 @@ describe("lifecycle RPC", () => {
         queuedWork: queued ? "waiting" : "none",
       });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       experimental_callHostRpc: async ({ method, input }) => {
         if (method === "resolveRoots") return { roots: (input as { roots: unknown[] }).roots };
         if (method === "scan") return { ports: [] };
@@ -370,7 +370,7 @@ describe("lifecycle RPC", () => {
       environmentPath: "/workspace/one",
     });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       experimental_callHostRpc: async ({ method, input }) => {
         if (method === "resolveRoots") return { roots: (input as { roots: unknown[] }).roots };
         if (method === "scan") throw new Error("Port scan unavailable");
@@ -432,7 +432,7 @@ describe("lifecycle RPC", () => {
       status: "active",
     });
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       experimental_callHostRpc: async ({ method, input }) => {
         if (method === "resolveRoots") return { roots: (input as { roots: unknown[] }).roots };
         if (method === "scan") return { ports: [] };

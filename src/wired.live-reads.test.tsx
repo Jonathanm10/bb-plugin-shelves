@@ -27,5 +27,5 @@ it("an inbox reorder whose invalidation reaches the app before its reply keeps t
     }),
   );
   await waitFor(() => expect(first()).toContain("Work b"));
-  expect(JSON.parse(localStorage.getItem("bb-sidebar:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+  expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
 });

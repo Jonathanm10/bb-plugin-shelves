@@ -1,25 +1,25 @@
 {
-  "name": "bb-plugin-bb-sidebar",
-  "version": "0.3.12",
+  "name": "bb-plugin-bb-sidebar-clean",
+  "version": "0.1.0",
   "type": "module",
-  "description": "A bb thread sidebar with manual and automatic sorting, snooze, and settle actions.",
+  "description": "A compact BB sidebar with Working, Active, Settled, and automatic settling.",
   "license": "MIT",
-  "author": "Yusuf Akbulut",
+  "author": "YSS Krishna",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yusuf8834/bb-sidebar.git"
+    "url": "git+https://github.com/ysskrishna/bb-sidebar-clean.git"
   },
-  "homepage": "https://github.com/yusuf8834/bb-sidebar#readme",
+  "homepage": "https://github.com/ysskrishna/bb-sidebar-clean#readme",
   "bugs": {
-    "url": "https://github.com/yusuf8834/bb-sidebar/issues"
+    "url": "https://github.com/ysskrishna/bb-sidebar-clean/issues"
   },
   "engines": {
     "bb": ">=0.49.0",
     "bbPluginSdk": ">=0.6.132"
   },
   "bb": {
-    "name": "BB Sidebar",
-    "description": "Organizes bb threads with manual and automatic sorting, snooze, and settle actions.",
+    "name": "BB Sidebar Clean",
+    "description": "A compact BB sidebar with Working, Active, Settled, and automatic settling.",
     "branding": {
       "icon": "PanelLeft"
     },

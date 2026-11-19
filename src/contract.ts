@@ -149,6 +149,7 @@ export const sidebarSettingsSchema = z
     autoSettleInactive: z.boolean(),
     autoSettleAfterDays: z.number().int().min(MIN_AUTO_SETTLE_AFTER_DAYS).max(MAX_AUTO_SETTLE_AFTER_DAYS),
     autoSettleOnMerge: z.boolean(),
+    autoSettleKeepPullRequests: z.boolean(),
     childSortField: z.enum(CHILD_THREAD_SORT_FIELDS),
     childSortDirection: z.enum(CHILD_THREAD_SORT_DIRECTIONS),
     childIconStyle: z.enum(CHILD_THREAD_ICON_STYLES),

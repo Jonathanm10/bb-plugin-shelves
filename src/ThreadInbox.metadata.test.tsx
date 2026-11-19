@@ -258,7 +258,7 @@ describe("card metadata", () => {
   // stamp per thread and shows how long the current stretch has run.
   it("shows how long a thread has been working", async () => {
     window.localStorage.setItem(
-      "bb-sidebar:working-since:v1",
+      "bb-sidebar-clean:working-since:v1",
       JSON.stringify({ thr_run: Date.now() - 5 * 60_000 - 60_000 }),
     );
     render([thread({ id: "thr_run", indicator: "runtime" })]);
@@ -267,7 +267,7 @@ describe("card metadata", () => {
 
   it("shows monitoring when BB identifies a monitoring runtime", async () => {
     window.localStorage.setItem(
-      "bb-sidebar:working-since:v1",
+      "bb-sidebar-clean:working-since:v1",
       JSON.stringify({ thr_monitor: Date.now() - 5 * 60_000 - 60_000 }),
     );
     render([
@@ -285,7 +285,7 @@ describe("card metadata", () => {
     render([thread({ id: "thr_run", indicator: "runtime" })]);
     expect(await screen.findByText("Working")).toBeDefined();
     await waitFor(() => {
-      const stored = JSON.parse(window.localStorage.getItem("bb-sidebar:working-since:v1") ?? "{}") as Record<
+      const stored = JSON.parse(window.localStorage.getItem("bb-sidebar-clean:working-since:v1") ?? "{}") as Record<
         string,
         number
       >;
@@ -296,7 +296,10 @@ describe("card metadata", () => {
   // A request for input is a verdict, not a stretch of work, and reads oddly
   // with a duration behind it.
   it("leaves the duration off a status that is waiting on the user", async () => {
-    window.localStorage.setItem("bb-sidebar:working-since:v1", JSON.stringify({ thr_ask: Date.now() - 10 * 60_000 }));
+    window.localStorage.setItem(
+      "bb-sidebar-clean:working-since:v1",
+      JSON.stringify({ thr_ask: Date.now() - 10 * 60_000 }),
+    );
     render([
       thread({
         id: "thr_ask",

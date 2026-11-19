@@ -332,9 +332,10 @@ describe("row context menu", () => {
     const storedSettings = {
       ...DEFAULT_SIDEBAR_SETTINGS,
       inactiveThreadsEnabled: false,
+      threadDisplay: "full" as const,
       ...{ snoozePresets: "15m, Lunch break=3h" },
     };
-    localStorage.setItem("bb-sidebar:settings-cache:v1", JSON.stringify(storedSettings));
+    localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(storedSettings));
 
     let snoozed: { threadId: string; snoozedUntil: number } | null = null;
     renderSlot(inbox, listProps, {

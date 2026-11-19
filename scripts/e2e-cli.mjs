@@ -10,15 +10,15 @@ const server = await startScratchServer();
 
 async function sidebar(argv, threadId) {
   const env = threadId ? { ...server.env, BB_THREAD_ID: threadId } : server.env;
-  const result = await server.cli(["sidebar", ...argv], { allowFailure: true, env });
+  const result = await server.cli(["clean-sidebar", ...argv], { allowFailure: true, env });
   transcript.push(
-    `$ ${threadId ? `BB_THREAD_ID=${threadId} ` : ""}bb sidebar ${argv.join(" ")}  [exit ${result.code}]`,
+    `$ ${threadId ? `BB_THREAD_ID=${threadId} ` : ""}bb clean-sidebar ${argv.join(" ")}  [exit ${result.code}]`,
   );
   transcript.push((result.stdout + result.stderr).trimEnd());
   return result;
 }
 async function rows() {
-  const response = await fetch(`${server.url}/api/v1/plugins/bb-sidebar/rpc/listLifecycle`, {
+  const response = await fetch(`${server.url}/api/v1/plugins/bb-sidebar-clean/rpc/listLifecycle`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: "{}",

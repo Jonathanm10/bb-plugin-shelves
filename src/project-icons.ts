@@ -1,4 +1,4 @@
-const PROJECT_ICON_ROUTE = "/api/v1/plugins/bb-sidebar/http/project-icon";
+const PROJECT_ICON_ROUTE = "/api/v1/plugins/bb-sidebar-clean/http/project-icon";
 
 /** Set on the icon route's 404 when the project has no icon, as opposed to a route bb has not loaded yet. */
 export const PROJECT_ICON_MISSING_HEADER = "x-bb-sidebar-icon-missing";

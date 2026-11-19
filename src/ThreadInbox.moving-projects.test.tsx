@@ -17,18 +17,18 @@ vi.mock("sonner", async () => (await import("./test-inbox")).sonnerMock());
 
 await loadInboxApp();
 
-const savedProjectOrder = () => JSON.parse(window.localStorage.getItem("bb-sidebar:project-order:v1") ?? "null");
+const savedProjectOrder = () => JSON.parse(window.localStorage.getItem("bb-sidebar-clean:project-order:v1") ?? "null");
 
 describe("ThreadInbox", () => {
   describe("moving projects as a whole", () => {
     // These cover lone-thread slots, which only exist with the grouping off.
-    beforeEach(() => window.localStorage.setItem("bb-sidebar:single-thread-project-grouping:v1", "false"));
+    beforeEach(() => window.localStorage.setItem("bb-sidebar-clean:single-thread-project-grouping:v1", "false"));
 
     it.each([true, false])(
       "retains scoped active and deep queued attention in a collapsed project: setting=%s",
       async (showAttention) => {
-        window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
-        window.localStorage.setItem("bb-sidebar:project-collapse:v1", JSON.stringify(["web"]));
+        window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+        window.localStorage.setItem("bb-sidebar-clean:project-collapse:v1", JSON.stringify(["web"]));
         const rendered = renderSlot(
           inbox,
           { ...listProps, activeThreadId: "b" },
@@ -76,8 +76,8 @@ describe("ThreadInbox", () => {
     it.each(["keyboard", "pointer"].flatMap((gesture) => [false, true].map((singleton) => ({ gesture, singleton }))))(
       "persists collapsed project attention rows: $gesture/singleton=$singleton",
       async ({ gesture, singleton }) => {
-        window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
-        window.localStorage.setItem("bb-sidebar:shelf-expansion:v1", JSON.stringify({ active: false }));
+        window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+        window.localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ active: false }));
         const childIds = ["a1", "a2", "a3", "b1", ...(singleton ? ["x1"] : [])];
         let storedIds = ["a", "x", "b", "c", ...childIds];
         const rendered = renderSlot(inbox, listProps, {
@@ -176,10 +176,10 @@ describe("ThreadInbox", () => {
     it.each(["shelf", "project"].flatMap((fold) => ["keyboard", "pointer"].map((gesture) => ({ fold, gesture }))))(
       "F1 keeps hidden sibling slot: $fold/$gesture",
       async ({ fold, gesture }) => {
-        window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
+        window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
         if (fold === "shelf")
-          window.localStorage.setItem("bb-sidebar:shelf-expansion:v1", JSON.stringify({ active: false }));
-        else window.localStorage.setItem("bb-sidebar:project-collapse:v1", JSON.stringify(["web"]));
+          window.localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ active: false }));
+        else window.localStorage.setItem("bb-sidebar-clean:project-collapse:v1", JSON.stringify(["web"]));
         const order = ["a", "hidden", "b", "ca", "cb"];
         const rendered = renderSlot(inbox, listProps, {
           sidebarThreads: {
@@ -215,8 +215,8 @@ describe("ThreadInbox", () => {
       },
     );
     it.each(["keyboard", "pointer"])("F1 keeps unrepresented project slot: %s", async (gesture) => {
-      window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
-      window.localStorage.setItem("bb-sidebar:shelf-expansion:v1", JSON.stringify({ active: false }));
+      window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+      window.localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ active: false }));
       const order = ["a", "hidden-project", "x", "b", "ca", "cx"];
       const rendered = renderSlot(inbox, listProps, {
         sidebarThreads: {
@@ -252,7 +252,9 @@ describe("ThreadInbox", () => {
       const active = screen.getByRole("region", { name: "Active" });
       await waitFor(() => expect(rowLinks(active).map((e) => e.getAttribute("aria-label"))).toEqual(["a", "x"]));
       // The rows look the same before the saved order arrives; move only once it has.
-      await waitFor(() => expect(JSON.parse(localStorage.getItem("bb-sidebar:inbox-order-cache:v1")!)).toEqual(order));
+      await waitFor(() =>
+        expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:inbox-order-cache:v1")!)).toEqual(order),
+      );
       const x = within(active).getByRole("link", { name: "x" });
       if (gesture === "keyboard") fireEvent.keyDown(x, { key: "ArrowUp", altKey: true });
       else {
@@ -270,8 +272,8 @@ describe("ThreadInbox", () => {
     });
 
     it("F1 rebases participating siblings onto a pushed order without moving hidden slots", async () => {
-      window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
-      window.localStorage.setItem("bb-sidebar:shelf-expansion:v1", JSON.stringify({ active: false }));
+      window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+      window.localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ active: false }));
       let order = ["a", "hidden", "b", "z", "ca", "cb"];
       const rendered = renderSlot(inbox, listProps, {
         sidebarThreads: {
@@ -313,8 +315,8 @@ describe("ThreadInbox", () => {
     });
 
     it.each(["singleton-grows", "source-joins-target"])("F2 cancels a vanished moving unit key: %s", async (change) => {
-      window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
-      window.localStorage.setItem("bb-sidebar:shelf-expansion:v1", JSON.stringify({ active: false }));
+      window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+      window.localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ active: false }));
       const rows = [
         thread({ id: "a", title: "a", projectId: "web", updatedAt: Date.now() }),
         thread({ id: "x", title: "x", projectId: "api", updatedAt: Date.now() }),
@@ -393,8 +395,8 @@ describe("ThreadInbox", () => {
     });
 
     it("F2 preserves the member-shrinks no-op", async () => {
-      window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
-      window.localStorage.setItem("bb-sidebar:shelf-expansion:v1", JSON.stringify({ active: false }));
+      window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+      window.localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ active: false }));
       const rows = [
         ...["a", "hidden", "b"].map((id) => thread({ id, title: id, projectId: "web", updatedAt: Date.now() })),
         thread({ id: "ca", title: "ca", projectId: "web", parentThreadId: "a", hasPendingInteraction: true }),
@@ -436,7 +438,7 @@ describe("ThreadInbox", () => {
     });
 
     it("keeps each project's slot while its threads settle and come back", async () => {
-      window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
+      window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
       const settledRow = (threadId: string) => ({
         threadId,
         settledAt: Date.now(),
@@ -503,7 +505,7 @@ describe("ThreadInbox", () => {
     });
 
     function renderProjects(onReorder: (ids: string[]) => void) {
-      window.localStorage.setItem("bb-sidebar:active-sort:v1", "project");
+      window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
       const storedIds = ["w1", "x", "w2", "y"];
       return renderSlot(inbox, listProps, {
         sidebarThreads: {
@@ -567,7 +569,7 @@ describe("ThreadInbox", () => {
       let saved: string[] | null = null;
       renderProjects((ids) => (saved = ids));
       const card = await screen.findByRole("link", { name: "Web two" });
-      await waitFor(() => expect(localStorage.getItem("bb-sidebar:inbox-order-cache:v1")).not.toBeNull());
+      await waitFor(() => expect(localStorage.getItem("bb-sidebar-clean:inbox-order-cache:v1")).not.toBeNull());
       fireEvent.keyDown(card, { key: "ArrowUp", altKey: true });
       // The project's threads swap within the slots they already held.
       await waitFor(() => expect(saved).toEqual(["w2", "x", "w1", "y"]));

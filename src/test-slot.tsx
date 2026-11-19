@@ -8,6 +8,7 @@ import {
   renderSlot as sdkRenderSlot,
   type RenderSlotOptions,
 } from "@get-bb/plugin-sdk/testing/app";
+import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings-values";
 import { makeThreadResponse } from "@get-bb/plugin-sdk/testing";
 
 const SplitSources = createContext<Array<{ threadId: string }> | null>(null);
@@ -140,6 +141,15 @@ export function renderSlot<Props extends object>(
   const rendered = sdkRenderSlot({ ...slot, component: Wrapped }, props, {
     ...options,
     sdk,
+    rpc: {
+      getSidebarSettings: () => ({
+        ...DEFAULT_SIDEBAR_SETTINGS,
+        threadDisplay: "full",
+        workingShelf: false,
+        inactiveThreadsEnabled: false,
+      }),
+      ...options.rpc,
+    },
     threadActions: options.threadActions ?? threadActions,
   });
   const sdkRerender = rendered.lifecycle.rerender;

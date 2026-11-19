@@ -9,7 +9,7 @@ vi.mock("sonner", async () => (await import("./test-inbox")).sonnerMock());
 await loadInboxApp();
 
 it("shows port details in the thread hover card", async () => {
-  localStorage.setItem("bb-sidebar:port-link-host:v1", "host_local");
+  localStorage.setItem("bb-sidebar-clean:port-link-host:v1", "host_local");
   const openUrl = vi.fn(() => true);
   renderSlot(inbox, listProps, {
     openUrl,

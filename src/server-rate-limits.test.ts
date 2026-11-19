@@ -200,7 +200,7 @@ describe("scheduled Continue RPC", () => {
         return { timeZone };
       });
       const { bb, harness } = createFakePluginHost({
-        pluginId: "bb-sidebar",
+        pluginId: "bb-sidebar-clean",
         experimental_callHostRpc: hostCall,
         sdk: {
           threads: {
@@ -267,7 +267,7 @@ describe("scheduled Continue RPC", () => {
       input: [{ type: "text", text: "Continue", mentions: [] }],
       mode: "queue-if-active",
       sendAt: resetsAt + 30_000,
-      originPluginId: "bb-sidebar",
+      originPluginId: "bb-sidebar-clean",
     });
     expect(
       ((await call("getThreadLimits", { keys: ["thr_1"] })) as Record<string, ThreadLimitState>).thr_1?.scheduled,
@@ -318,7 +318,7 @@ describe("scheduled Continue RPC", () => {
       makeQueueEntry({
         id: "already_scheduled",
         sendAt: resetsAt,
-        originPluginId: "bb-sidebar",
+        originPluginId: "bb-sidebar-clean",
         content: [{ type: "text", text: "Continue", mentions: [] }],
         state: "scheduled",
       }),

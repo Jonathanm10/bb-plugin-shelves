@@ -195,14 +195,15 @@ it.each(databaseSnapshots)(
 );
 
 function assertSettingsControls(container: HTMLElement, settings: (typeof snapshots)[number]["settings"]) {
+  for (const details of container.querySelectorAll("details")) details.open = true;
   const ui = within(container);
   for (const [label, field] of [
     ["Working shelf", "workingShelf"],
     ["Inactive shelf", "inactiveThreadsEnabled"],
     ["Dock shelves to the bottom", "dockShelves"],
     ["Project colors", "projectColorsEnabled"],
-    ["Settle quiet threads", "autoSettleInactive"],
-    ["Settle finished pull requests", "autoSettleOnMerge"],
+    ["Auto-settle inactive threads", "autoSettleInactive"],
+    ["Auto-settle merged threads", "autoSettleOnMerge"],
     ["Show children that need attention", "showRunningChildrenWhenCollapsed"],
   ] as const) {
     expect(ui.getByRole("switch", { name: label }).getAttribute("aria-checked")).toBe(String(settings[field]));
@@ -220,7 +221,7 @@ function assertSettingsControls(container: HTMLElement, settings: (typeof snapsh
   // check its cached value, then restore the original switch state.
   for (const [toggle, label, field] of [
     ["Inactive shelf", "Hours before inactive", "inactiveAfterHours"],
-    ["Settle quiet threads", "Days before auto-settle", "autoSettleAfterDays"],
+    ["Auto-settle inactive threads", "Days of inactivity before auto-settle", "autoSettleAfterDays"],
   ] as const) {
     const control = ui.getByRole("switch", { name: toggle });
     fireEvent.click(control);
@@ -273,7 +274,8 @@ it.each(snapshots)(
     vi.useFakeTimers();
     vi.setSystemTime(1_800_000_000_000);
     const fixture: Record<string, string> = JSON.parse(readFileSync(storage, "utf8"));
-    for (const [key, value] of Object.entries(fixture)) localStorage.setItem(key, value);
+    for (const [key, value] of Object.entries(fixture))
+      localStorage.setItem(key.replace("bb-sidebar:", "bb-sidebar-clean:"), value);
     const gate = deferred<void>();
     const threads = [
       "first",
@@ -320,7 +322,11 @@ it.each(snapshots)(
     assertSettingsControls(settingsSlot.container, settings);
     expect(screen.getByText("Working · 5m")).toBeDefined();
     expect(screen.getByRole("combobox", { name: "Open port links on" })).toHaveProperty("value", "host_1");
-    expect(Object.keys(fixture).sort()).toEqual(
+    expect(
+      Object.keys(fixture)
+        .map((key) => key.replace("bb-sidebar:", "bb-sidebar-clean:"))
+        .sort(),
+    ).toEqual(
       [
         "active-grouping",
         "active-sort",
@@ -333,7 +339,7 @@ it.each(snapshots)(
         "shelf-expansion",
         "working-since",
       ]
-        .map((key) => `bb-sidebar:${key}:v1`)
+        .map((key) => `bb-sidebar-clean:${key}:v1`)
         .sort(),
     );
     expect(inboxSlot.inspection.rpcCalls.length).toBeGreaterThan(0);
@@ -361,8 +367,8 @@ it.each(snapshots)("reads $version legacy grouping when active-sort is absent", 
     readFileSync(fixturePath(`local-storage-${version}.json`), "utf8"),
   );
   // active-grouping is a legacy fallback; active-sort takes priority in the full dump.
-  localStorage.setItem("bb-sidebar:active-grouping:v1", fixture["bb-sidebar:active-grouping:v1"]!);
-  expect(localStorage.getItem("bb-sidebar:active-sort:v1")).toBeNull();
+  localStorage.setItem("bb-sidebar-clean:active-grouping:v1", fixture["bb-sidebar:active-grouping:v1"]!);
+  expect(localStorage.getItem("bb-sidebar-clean:active-sort:v1")).toBeNull();
   const wired = await createWired([thread({ id: "first" }), thread({ id: "second" })], {
     rpcGate: deferred<void>().promise,
   });

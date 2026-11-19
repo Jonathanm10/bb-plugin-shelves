@@ -247,8 +247,8 @@ export function ThreadCard({
   return (
     <RowContextMenu
       thread={thread}
-      onPark={canShelve ? onPark : undefined}
-      canSnooze={canShelve}
+      onPark={canShelve && !compact ? onPark : undefined}
+      canSnooze={canShelve && !compact}
       canArchive={canPark}
       snoozePresets={snoozePresets}
       onSnooze={onSnooze}

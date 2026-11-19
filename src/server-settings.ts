@@ -85,6 +85,7 @@ export async function createServerSettings(ctx: ServerContext) {
         "autoSettleInactive",
         "autoSettleAfterDays",
         "autoSettleOnMerge",
+        "autoSettleKeepPullRequests",
       ].some((key) => key in values);
       const migrated = sidebarSettingsSchema.safeParse({
         ...defaults,
@@ -110,6 +111,10 @@ export async function createServerSettings(ctx: ServerContext) {
           typeof values.autoSettleAfterDays === "string"
             ? Number(values.autoSettleAfterDays)
             : DEFAULT_SIDEBAR_SETTINGS.autoSettleAfterDays,
+        autoSettleKeepPullRequests:
+          typeof values.autoSettleKeepPullRequests === "boolean"
+            ? values.autoSettleKeepPullRequests
+            : defaults.autoSettleKeepPullRequests,
         autoSettleOnMerge:
           typeof values.autoSettleOnMerge === "boolean" ? values.autoSettleOnMerge : defaults.autoSettleOnMerge,
       });

@@ -7,24 +7,7 @@ describe("lifecycle RPC", () => {
   it("stores the grouped sidebar settings through RPC", async () => {
     const harness = await loadPlugin();
     expect(harness.inspection.registrations.settingsDescriptors).toEqual({});
-    await expect(harness.behavior.callRpc("getSidebarSettings", {})).resolves.toEqual({
-      ...DEFAULT_SIDEBAR_SETTINGS,
-      snoozePresets: "1h, Wait refresh (5 hours)=5h, evening@18:00, tomorrow@09:00, next-week@09:00",
-      inactiveThreadsEnabled: true,
-      inactiveAfterHours: 6,
-      showRunningChildrenWhenCollapsed: true,
-      autoSettleInactive: true,
-      autoSettleAfterDays: 3,
-      autoSettleOnMerge: false,
-      childSortField: "created",
-      childSortDirection: "ascending",
-      childIconStyle: "disc",
-      compactWorkingThreads: false,
-      workingShelf: false,
-      dockShelves: false,
-      projectColorsEnabled: false,
-      projectColorDisplay: "all",
-    });
+    await expect(harness.behavior.callRpc("getSidebarSettings", {})).resolves.toEqual(DEFAULT_SIDEBAR_SETTINGS);
     await expect(
       harness.behavior.callRpc("updateSidebarSettings", {
         snoozePresets: "10m, 4h",
@@ -146,7 +129,7 @@ describe("lifecycle RPC", () => {
 
   it("migrates values from the previous flat settings form", async () => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar",
+      pluginId: "bb-sidebar-clean",
       sdk: {
         plugins: {
           getSettings: async () => ({
@@ -180,8 +163,8 @@ describe("lifecycle RPC", () => {
       childSortField: "created",
       childSortDirection: "ascending",
       childIconStyle: "disc",
-      compactWorkingThreads: false,
-      workingShelf: false,
+      compactWorkingThreads: true,
+      workingShelf: true,
       dockShelves: false,
       projectColorsEnabled: false,
       projectColorDisplay: "all",
@@ -190,8 +173,8 @@ describe("lifecycle RPC", () => {
 });
 
 it("writes only JSON and keeps historical columns unchanged across reloads", async () => {
-  const getSettings = vi.fn(async () => ({ values: {}, pluginId: "bb-sidebar" }));
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar", sdk: { plugins: { getSettings } } });
+  const getSettings = vi.fn(async () => ({ values: {}, pluginId: "bb-sidebar-clean" }));
+  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean", sdk: { plugins: { getSettings } } });
   await plugin(bb);
   disposers.push(() => harness.lifecycle.dispose());
   const db = bb.storage.database();
@@ -221,7 +204,7 @@ it("writes only JSON and keeps historical columns unchanged across reloads", asy
 });
 
 it("defaults missing and invalid JSON fields without losing valid settings", async () => {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
   await plugin(bb);
   disposers.push(() => harness.lifecycle.dispose());
   const db = bb.storage.database();
@@ -240,6 +223,8 @@ it("defaults missing and invalid JSON fields without losing valid settings", asy
   );
   await expect(harness.behavior.callRpc("getSidebarSettings", {})).resolves.toEqual({
     ...DEFAULT_SIDEBAR_SETTINGS,
+    threadDisplay: "full",
+    compactWorkingThreads: false,
     snoozePresets: "20m, 6h",
     inactiveAfterHours: 18,
     autoSettleInactive: false,
@@ -247,7 +232,7 @@ it("defaults missing and invalid JSON fields without losing valid settings", asy
 });
 
 it.each(["", "{broken", "null", "[]", "42", '"settings"'])("defaults malformed JSON %s", async (stored) => {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
   await plugin(bb);
   disposers.push(() => harness.lifecycle.dispose());
   bb.storage.database().prepare("UPDATE sidebar_settings SET settings_json = ? WHERE id = 1").run(stored);
@@ -267,7 +252,7 @@ it.each([
   [{ threadDisplay: "dense-future", compactWorkingThreads: true }, "compact-working"],
   [{ threadDisplay: "dense-future", compactWorkingThreads: false }, "full"],
 ])("reads thread display %j from settings saved without a known value", async (stored, threadDisplay) => {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
   await plugin(bb);
   disposers.push(() => harness.lifecycle.dispose());
   bb.storage
@@ -296,7 +281,7 @@ it("keeps the legacy switch in step when thread display changes", async () => {
 });
 
 it("keeps settling finished pull requests on for installs that already had sidebar data", async () => {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
   // The shape the first release created, with one stored shelf choice.
   bb.storage.database().exec(
     `CREATE TABLE thread_lifecycle (thread_id TEXT PRIMARY KEY, settled_at INTEGER, snoozed_until INTEGER, snoozed_at INTEGER);

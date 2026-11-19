@@ -145,7 +145,7 @@ describe("sidebar rate-limit recovery", () => {
         const entry = makeQueueEntry({
           id: "continue_1",
           sendAt: args.sendAt!,
-          originPluginId: "bb-sidebar",
+          originPluginId: "bb-sidebar-clean",
           content: args.input,
           state: "scheduled",
         });

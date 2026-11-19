@@ -1,0 +1,74 @@
+// @vitest-environment jsdom
+import { expect, it, vi } from "vitest";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { createWired } from "./test-wired";
+import { loadInboxApp, thread } from "./test-inbox";
+import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings-values";
+
+vi.mock("sonner", async () => (await import("./test-inbox")).sonnerMock());
+await loadInboxApp();
+
+it("settles quiet work and wakes it on activity without changing the selected thread", async () => {
+  localStorage.clear();
+  const now = Date.now();
+  const old = now - 8 * 86_400_000;
+  const wired = await createWired([
+    thread({ id: "busy", title: "Running task", indicator: "runtime", updatedAt: now }),
+    thread({ id: "recent", title: "Recent result", updatedAt: now }),
+    thread({ id: "quiet", title: "Quiet task", createdAt: old, updatedAt: old, latestAttentionAt: old }),
+  ]);
+  const slot = wired.mount();
+  const working = await screen.findByRole("region", { name: "Working" });
+  await within(working).findByRole("link", { name: "Running task" });
+  const active = screen.getByRole("region", { name: "Active" });
+  await within(active).findByRole("link", { name: "Recent result" });
+  expect(screen.queryByRole("region", { name: "Inactive" })).toBeNull();
+  expect(screen.queryByRole("region", { name: "Parked" })).toBeNull();
+  expect(screen.queryByRole("region", { name: "Snoozed" })).toBeNull();
+  expect(screen.getByRole("link", { name: "Recent result" }).closest("[data-parent-card]")!.classList).toContain("h-8");
+  fireEvent.contextMenu(screen.getByRole("link", { name: "Recent result" }));
+  const menu = await screen.findByRole("menu", { name: "Thread actions" });
+  expect(within(menu).queryByRole("menuitem", { name: "Park thread" })).toBeNull();
+  expect(within(menu).queryByText("Snooze")).toBeNull();
+  expect(within(menu).getByRole("menuitem", { name: "Settle" })).toBeDefined();
+  fireEvent.keyDown(menu, { key: "Escape" });
+
+  // The mounted sidebar evaluates immediately; no manual filing or tab change.
+
+  const settled = await screen.findByRole("region", { name: "Settled" });
+  expect(within(active).queryByRole("link", { name: "Quiet task" })).toBeNull();
+  fireEvent.click(within(settled).getByRole("button", { expanded: false }));
+  expect(within(settled).getByRole("link", { name: /Quiet task$/ })).toBeDefined();
+
+  await wired.event("thread.active", "quiet");
+  await within(screen.getByRole("region", { name: "Active" })).findByRole("link", { name: "Quiet task" });
+  await waitFor(() => expect(screen.queryByRole("region", { name: "Settled" })).toBeNull());
+  expect(slot.inspection.navigateCalls).toEqual([]);
+  expect(wired.harness.inspection.sdk.callsTo("threads.archive")).toHaveLength(0);
+});
+
+it("shows auto-settle controls first and persists the PR protection switch", async () => {
+  localStorage.clear();
+  const wired = await createWired([]);
+  const slot = wired.mount("settings");
+  const keep = await screen.findByRole("switch", { name: "Keep threads with a PR" });
+  expect(keep.getAttribute("aria-checked")).toBe("false");
+  expect(screen.getByRole("spinbutton", { name: "Days of inactivity before auto-settle" })).toHaveProperty(
+    "value",
+    "7",
+  );
+  expect(screen.getByRole("switch", { name: "Inactive shelf" }).closest("details")!.open).toBe(false);
+  expect(screen.getByText("Advanced settings").closest("details")!.open).toBe(false);
+  fireEvent.click(keep);
+  await waitFor(async () => {
+    expect(await wired.call("getSidebarSettings")).toEqual({
+      ...DEFAULT_SIDEBAR_SETTINGS,
+      autoSettleKeepPullRequests: true,
+    });
+  });
+  wired.unmount(slot);
+  wired.mount("settings");
+  expect((await screen.findByRole("switch", { name: "Keep threads with a PR" })).getAttribute("aria-checked")).toBe(
+    "true",
+  );
+});

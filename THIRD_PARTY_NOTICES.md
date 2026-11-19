@@ -1,5 +1,9 @@
 # Third-party notices
 
+## BB Sidebar
+
+BB Sidebar Clean is an independent derivative of [BB Sidebar v0.3.12](https://github.com/yusuf8834/bb-sidebar/tree/a2f65687517cc5e3513d71017cea5a3306c11313), by Yusuf Akbulut. The source snapshot, MIT license, original copyright holders, and inherited notices are preserved.
+
 ## bb-plugin-t3sidebar
 
 BB Sidebar includes code adapted from [bb-plugin-t3sidebar](https://github.com/SawyerHood/bb-plugin-t3sidebar), created by Sawyer Hood and released under the MIT License.

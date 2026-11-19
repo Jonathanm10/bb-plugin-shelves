@@ -59,7 +59,7 @@ try {
   // The tag and this repo pin the same SDK; reuse installed dependencies only.
   symlinkSync(resolve("node_modules"), join(checkout, "node_modules"), "dir");
   const { default: plugin } = await import(pathToFileURL(join(checkout, "src/server.ts")).href);
-  const host = createFakePluginHost({ pluginId: "bb-sidebar" });
+  const host = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
   harness = host.harness;
   Date.now = () => 1_800_000_000_000;
   await plugin(host.bb);

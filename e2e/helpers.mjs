@@ -49,7 +49,7 @@ export async function cli(args) {
 }
 
 export async function rpc(request, method, input = {}) {
-  const response = await request.post(`${fixture.url}/api/v1/plugins/bb-sidebar/rpc/${method}`, { data: input });
+  const response = await request.post(`${fixture.url}/api/v1/plugins/bb-sidebar-clean/rpc/${method}`, { data: input });
   expect(response.ok(), `RPC ${method}: ${await response.text()}`).toBe(true);
   const payload = await response.json();
   expect(payload.ok, `RPC ${method} failed`).toBe(true);

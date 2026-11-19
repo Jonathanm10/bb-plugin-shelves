@@ -29,7 +29,7 @@ describe("ThreadInbox", () => {
         inactiveAfterHours: 6,
       },
     };
-    localStorage.setItem("bb-sidebar:settings-cache:v1", JSON.stringify(storedSettings));
+    localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(storedSettings));
 
     const now = Date.now();
     let storedIds = ["a", "b", "z"];
@@ -226,7 +226,7 @@ describe("ThreadInbox", () => {
     fireEvent.keyDown(await screen.findByRole("link", { name: "Inbox B" }), { key: "ArrowUp", altKey: true });
     await waitFor(() => expect(reorderInput).toEqual({ inboxThreadIds: ["b", "a"] }));
     expect(screen.getAllByRole("listitem")[0]!.textContent).toContain("Inbox B");
-    expect(JSON.parse(localStorage.getItem("bb-sidebar:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+    expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
   });
 
   it("does not let a stale order refresh overwrite a successful reorder", async () => {
@@ -256,7 +256,7 @@ describe("ThreadInbox", () => {
     await waitFor(() => expect(screen.getAllByRole("listitem")[0]!.textContent).toContain("Inbox B"));
 
     await act(async () => staleRead.resolve({ inboxThreadIds: ["a", "b"] }));
-    expect(JSON.parse(localStorage.getItem("bb-sidebar:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+    expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
     expect(screen.getAllByRole("listitem")[0]!.textContent).toContain("Inbox B");
   });
 
@@ -298,7 +298,7 @@ describe("ThreadInbox", () => {
     preWrite.resolve({ inboxThreadIds: ["a", "b"] });
     await invalidated;
     await waitFor(() => expect(first()).toContain("Inbox B"));
-    expect(JSON.parse(localStorage.getItem("bb-sidebar:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+    expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
   });
 
   it("rolls inbox order back when persistence fails", async () => {

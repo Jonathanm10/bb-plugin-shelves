@@ -33,6 +33,7 @@ export type AutoSettlePullRequest =
 interface AutoSettleSettings {
   afterDays: number | null;
   onMerge: boolean;
+  keepPullRequests?: boolean;
 }
 
 type AutoSettleDecision = "keep" | "settle" | "unsettle";
@@ -116,8 +117,7 @@ export function decideAutoSettle({
   let shouldSettle = false;
 
   if (pullRequest.outcome === "available") {
-    // Merged and closed both count as finished, and only when the user opted in.
-    const terminal = settings.onMerge && (pullRequest.state === "merged" || pullRequest.state === "closed");
+    const terminal = pullRequest.state === "closed" || (settings.onMerge && pullRequest.state === "merged");
     if (terminal) {
       const pullRequestUpdatedAt = Date.parse(pullRequest.updatedAt);
       // A malformed terminal timestamp is not evidence that the PR finished
@@ -126,18 +126,11 @@ export function decideAutoSettle({
       if (Number.isNaN(pullRequestUpdatedAt)) return "keep";
       shouldSettle = pullRequestUpdatedAt >= activityAt;
     }
-
-    // Draft PRs are open work too. Neither state may fall through to the
-    // inactivity rule.
-    if (pullRequest.state === "open" || pullRequest.state === "draft") {
-      shouldSettle = false;
-    }
   }
 
   if (!shouldSettle && settings.afterDays !== null) {
-    const hasOpenPullRequest =
-      pullRequest.outcome === "available" && (pullRequest.state === "open" || pullRequest.state === "draft");
-    shouldSettle = !hasOpenPullRequest && activityAt < now - settings.afterDays * DAY_MS;
+    const keepPullRequest = settings.keepPullRequests === true && pullRequest.outcome === "available";
+    shouldSettle = !keepPullRequest && activityAt < now - settings.afterDays * DAY_MS;
   }
 
   if (shouldSettle === isAutomaticallySettled) return "keep";

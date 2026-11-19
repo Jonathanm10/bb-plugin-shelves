@@ -1,4 +1,4 @@
-# Working in bb-sidebar
+# Working in BB Sidebar Clean
 
 Behavior-preserving refactors only unless the task says otherwise. Keep test
 meaning intact.
@@ -38,8 +38,7 @@ live again). Snoozed, Parked and Inactive-shelf threads stay live.
   `cannotAutoSettle` in `src/auto-settle.ts` can return them to Active. A
   full re-check is pending from server start and from each auto-settle
   settings change until a pass completes; unanswered lookups retry each pass.
-  With both rules off, no re-check pending and no policy-settled row, a pass
-  returns before listing threads.
+  Closed PR checks stay enabled when the optional merge and inactivity rules are off.
   New server jobs decide "settled" with `resolveRowShelf` or `resolveShelf`
   from shared `src/lifecycle.ts`.
 
@@ -277,3 +276,13 @@ runner's scratch server; never the live host. macOS snapshots:
 `npm run e2e -- --update-snapshots` with the same clean environment; review
 `e2e/__snapshots__/` diffs. Before releases on macOS: `npm run e2e`; CI:
 `gh workflow run "Browser e2e"`.
+
+## Clean defaults
+
+The normal layout uses compact rows, Working, Active, and Settled. Inactive is
+off. Compact menus omit Park and Snooze. Full-card behavior remains available
+under Advanced settings. Keep the clean defaults covered in
+`clean-defaults.test.ts`, `ThreadInbox.clean.test.tsx`, and `e2e/clean.spec.mjs`.
+Existing full-card tests use explicit appearance fixtures in `test-inbox.tsx`
+and `test-slot.tsx`; historical policy cases use `createLegacyPolicyHost`.
+The new-behavior tests exercise the actual shipped defaults.

@@ -17,8 +17,8 @@ export default definePluginApp((app) => {
 
   app.slots.experimental_threadList({
     id: "inbox",
-    title: "BB Sidebar",
-    description: "Shelves, project filtering, manual ordering, and optional sorted views.",
+    title: "BB Sidebar Clean",
+    description: "Working, Active, and Settled with automatic cleanup.",
     component: ThreadInbox,
   });
 
