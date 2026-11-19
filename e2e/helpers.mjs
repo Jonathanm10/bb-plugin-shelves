@@ -85,14 +85,22 @@ export async function reset(request) {
   await rpc(request, "reorderInbox", { inboxThreadIds: fixture.threads.map(({ id }) => id) });
 }
 
-export async function open(page, { theme = "light", width = 320, empty = false } = {}) {
+export async function open(page, { theme = "light", width = 320, empty = false, core = false } = {}) {
   await page.addInitScript(
-    ({ theme, width }) => {
+    ({ theme, width, core }) => {
       localStorage.setItem("bb.theme", theme);
+      // Historical drag/grouping flows explicitly exercise saved manual order.
+      // Core acceptance leaves preferences absent to exercise shipped defaults.
+      if (!core) {
+        localStorage.getItem("bb-sidebar-clean:active-sort:v1") ??
+          localStorage.setItem("bb-sidebar-clean:active-sort:v1", "manual");
+        localStorage.getItem("bb-sidebar-clean:shelf-expansion:v1") ??
+          localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ working: true }));
+      }
       // bb 0.47.0 reserves 49 px for its navigation rail and border.
       localStorage.setItem("bb.sidebar.width", String(width + 49));
     },
-    { theme, width },
+    { theme, width, core },
   );
   await page.goto(fixture.url);
   if (empty) {

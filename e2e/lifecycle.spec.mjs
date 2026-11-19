@@ -6,9 +6,9 @@ test.beforeEach(async ({ request, page }) => {
   await open(page);
 });
 
-test("park and resume persist across reload", async ({ page, request }) => {
+test("legacy Parked rows resume and persist across reload", async ({ page, request }) => {
   const thread = fixture.threads[0];
-  await (await menu(page, thread.title)).getByRole("menuitem", { name: "Park thread", exact: true }).click();
+  await rpc(request, "park", { threadId: thread.id });
   await expect(shelf(page, "Parked")).toBeVisible();
   await expand(page, "Parked");
   await expect(link(page, thread.title, "Parked")).toBeVisible();

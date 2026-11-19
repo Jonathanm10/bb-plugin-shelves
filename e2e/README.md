@@ -170,3 +170,12 @@ generating and reviewing them on the chosen runner.
 
 Inspect failures with `npx --no-install playwright show-report` or
 `npx --no-install playwright show-trace test-results/<test>/trace.zip`.
+
+## Core workflow acceptance
+
+`npm run e2e -- --grep 'core sidebar'` runs the current default workflow:
+light/dark screenshots at 280/320px, all-density filing with keyboard and Undo,
+Wake/Un-settle, persisted auto-settle preferences, native search of filed work,
+and touch actions without hover. It uses fresh preferences. Historical
+manual-reorder flows explicitly seed manual order and an expanded Working
+section, without changing the shipped defaults.
