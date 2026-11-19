@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Make the Settle action easier to click with a larger button showing a check icon and Settle label in every row density.
 - Use readable two-line rows in Active and Working, with metadata in hover details.
 - Start new devices with Recent returns ordering, collapsed Working, bottom docking, and folded child rows. Preserve saved ordering and expansion choices.
 - Keep Snooze/Settle and Wake/Un-settle available in every density, including keyboard and touch access.

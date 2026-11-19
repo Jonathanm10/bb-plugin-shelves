@@ -15,7 +15,7 @@ function SettleButton({ label, settling, onActivate }: { label: string; settling
         onActivate();
       }}
       className={cn(
-        "bb-sidebar-settle relative flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground",
+        "bb-sidebar-settle relative flex h-6 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md px-1.5 text-xs text-muted-foreground",
         "transition-colors duration-200 ease-out hover:text-[color:var(--bb-sidebar-settle-active)]",
         "focus-visible:text-[color:var(--bb-sidebar-settle-active)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
         "motion-reduce:transition-none",
@@ -25,7 +25,7 @@ function SettleButton({ label, settling, onActivate }: { label: string; settling
       {/* Move only the artwork so hovering an edge cannot move the hit area. */}
       <span
         aria-hidden="true"
-        className="bb-sidebar-settle-art pointer-events-none relative flex size-full items-center justify-center rounded-[inherit]"
+        className="bb-sidebar-settle-art pointer-events-none relative flex size-5 shrink-0 items-center justify-center rounded-[inherit]"
       >
         <Icon name="Check" aria-hidden className="bb-sidebar-settle-check size-3.5" />
         <span className="bb-sidebar-settle-stars">
@@ -34,6 +34,7 @@ function SettleButton({ label, settling, onActivate }: { label: string; settling
           ))}
         </span>
       </span>
+      <span>Settle</span>
     </button>
   );
 }

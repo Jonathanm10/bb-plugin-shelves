@@ -436,14 +436,15 @@ export function ThreadCard({
                     className={cn(
                       STATUS_SLOT_CLASS,
                       "group/status-slot pointer-events-auto relative h-5",
+                      showParkActions && "min-w-24",
                       showParkActions && "[@media(hover:none)]:w-auto [@media(hover:none)]:gap-1.5",
                       (limit || !showParkActions) && "w-auto min-w-20",
                       limit && limitSlotClass("slot", showParkActions, holdParkActions),
                       !showProject && "w-auto min-w-0",
                       !showProject &&
                         showParkActions &&
-                        "[@media(hover:hover)]:group-hover/card:min-w-11 has-[:focus-visible]:min-w-11",
-                      !showProject && holdParkActions && "min-w-11",
+                        "[@media(hover:hover)]:group-hover/card:min-w-24 has-[:focus-visible]:min-w-24",
+                      !showProject && holdParkActions && "min-w-24",
                     )}
                   >
                     <span
