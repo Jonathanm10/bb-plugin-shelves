@@ -14,7 +14,7 @@ test("established TCP peers must be loopback, for IPv4 and IPv6", () => {
 });
 
 test("HOME must resolve inside scratch, including symlinks and prefix collisions", () => {
-  const root = mkdtempSync("/tmp/bb-sidebar-guard-test-");
+  const root = mkdtempSync("/tmp/bb-thread-inbox-guard-test-");
   const scratch = join(root, "scratch");
   const home = join(scratch, "home");
   const outside = join(root, "scratch-other");

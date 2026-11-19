@@ -1,4 +1,4 @@
-// Drives `bb sidebar` against the scratch server from scripts/e2e/server.mjs.
+// Drives `bb thread-inbox` against the scratch server from scripts/e2e/server.mjs.
 // The transcript of every command is kept in e2e-artifacts/cli-transcript.log.
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -10,15 +10,15 @@ const server = await startScratchServer();
 
 async function sidebar(argv, threadId) {
   const env = threadId ? { ...server.env, BB_THREAD_ID: threadId } : server.env;
-  const result = await server.cli(["clean-sidebar", ...argv], { allowFailure: true, env });
+  const result = await server.cli(["thread-inbox", ...argv], { allowFailure: true, env });
   transcript.push(
-    `$ ${threadId ? `BB_THREAD_ID=${threadId} ` : ""}bb clean-sidebar ${argv.join(" ")}  [exit ${result.code}]`,
+    `$ ${threadId ? `BB_THREAD_ID=${threadId} ` : ""}bb thread-inbox ${argv.join(" ")}  [exit ${result.code}]`,
   );
   transcript.push((result.stdout + result.stderr).trimEnd());
   return result;
 }
 async function rows() {
-  const response = await fetch(`${server.url}/api/v1/plugins/bb-sidebar-clean/rpc/listLifecycle`, {
+  const response = await fetch(`${server.url}/api/v1/plugins/bb-thread-inbox/rpc/listLifecycle`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: "{}",

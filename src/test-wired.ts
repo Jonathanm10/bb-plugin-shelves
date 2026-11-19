@@ -6,7 +6,7 @@ import type { PluginSidebarThread } from "@get-bb/plugin-sdk";
 import { afterEach, vi } from "vitest";
 import { toast } from "sonner";
 import plugin from "./server";
-import { bbSidebarRpcContract } from "./contract";
+import { threadInboxRpcContract } from "./contract";
 import { createFakePluginHost, projectThread, projectsWith, standardProject } from "./test-server";
 import { inbox, sidebarSettings, listProps, defaultProviders } from "./test-inbox";
 import { deferred } from "./test-fixtures";
@@ -51,9 +51,9 @@ export async function createWired(
     });
   };
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar-clean",
+    pluginId: "bb-thread-inbox",
     sdk: {
-      plugins: { getSettings: async () => ({ values: {}, pluginId: "bb-sidebar-clean" }) },
+      plugins: { getSettings: async () => ({ values: {}, pluginId: "bb-thread-inbox" }) },
       projects: {
         get: async () => standardProject(),
         list: async () =>
@@ -213,7 +213,7 @@ export async function createWired(
   }
   function rpcHandlers(replies: Array<{ method: string; result: unknown }>) {
     return Object.fromEntries(
-      Object.keys(bbSidebarRpcContract).map((method) => [
+      Object.keys(threadInboxRpcContract).map((method) => [
         method,
         async (input: unknown) => {
           await options.rpcGate;

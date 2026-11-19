@@ -176,7 +176,7 @@ export function threadsWithAskingDescendants(threads: readonly PluginSidebarThre
 
 /**
  * The same walk over any thread shape, given what counts as asking. The
- * server's thread lists have no row indicator, so `bb sidebar list` asks with
+ * server's thread lists have no row indicator, so `bb thread-inbox list` asks with
  * `hasPendingInteraction` alone.
  */
 export function ancestorsOfAskingThreads<

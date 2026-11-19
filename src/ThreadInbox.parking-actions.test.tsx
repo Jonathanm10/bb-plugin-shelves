@@ -134,7 +134,7 @@ describe("parking threads", () => {
   // share the slot with — but it must still show its status on touch.
   it("keeps the status on rows that offer no park actions", async () => {
     const now = Math.floor(Date.now() / 60_000) * 60_000;
-    window.localStorage.setItem("bb-sidebar-clean:working-since:v1", JSON.stringify({ thr_working: now - 5 * 60_000 }));
+    window.localStorage.setItem("bb-thread-inbox:working-since:v1", JSON.stringify({ thr_working: now - 5 * 60_000 }));
     renderSlot(inbox, listProps, {
       sidebarThreads: {
         status: "ready",
@@ -229,7 +229,7 @@ describe("parking threads", () => {
         expect(card.hasAttribute("data-settling")).toBe(false);
       } else {
         expect(card.hasAttribute("data-settling")).toBe(true);
-        expect(card.querySelector(".bb-sidebar-settle-sweep")).not.toBeNull();
+        expect(card.querySelector(".bb-thread-inbox-settle-sweep")).not.toBeNull();
         // A second click while the sweep plays is not a second settle.
         fireEvent.click(button);
         expect(settled).toBeNull();
@@ -243,7 +243,7 @@ describe("parking threads", () => {
   // outranks any stored shelf: the row stays on Active with no park controls.
   it("prefers a pending question to a running indicator on a parent card", async () => {
     const now = Math.floor(Date.now() / 60_000) * 60_000;
-    window.localStorage.setItem("bb-sidebar-clean:working-since:v1", JSON.stringify({ thr_ask: now - 5 * 60_000 }));
+    window.localStorage.setItem("bb-thread-inbox:working-since:v1", JSON.stringify({ thr_ask: now - 5 * 60_000 }));
     renderSlot(inbox, listProps, {
       sidebarThreads: {
         status: "ready",
@@ -320,7 +320,7 @@ describe("parking threads", () => {
     const shelf = await screen.findByRole("region", { name: "Settled" });
     fireEvent.click(within(shelf).getByRole("button", { expanded: false }));
     const row = within(shelf).getByText("Settled failure").closest("li")!;
-    expect(within(row).getByText("Failed").className).toContain("text-[color:var(--bb-sidebar-tone-error)]");
+    expect(within(row).getByText("Failed").className).toContain("text-[color:var(--bb-thread-inbox-tone-error)]");
     expect(within(row).queryByText("3h")).toBeNull();
     expect(within(row).getByRole("button", { name: "Un-settle thread" })).toBeDefined();
   });

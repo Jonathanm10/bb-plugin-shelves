@@ -6,7 +6,7 @@ import { scratchHome } from "./isolation.mjs";
 
 export async function createScratchKeychain(env) {
   if (process.platform !== "darwin") return null;
-  if (!env.BB_DATA_DIR?.startsWith("/tmp/bb-sidebar-smoke-")) {
+  if (!env.BB_DATA_DIR?.startsWith("/tmp/bb-thread-inbox-smoke-")) {
     throw new Error("Keychain setup requires a scratch data directory");
   }
   scratchHome(env.HOME, env.BB_DATA_DIR);
@@ -15,12 +15,12 @@ export async function createScratchKeychain(env) {
   mkdirSync(join(env.HOME, "Library/Preferences"), { recursive: true });
   // Creating directly as login.keychain-db can fail to unlock on macOS.
   // Create a named keychain and keep the login alias inside the scratch home.
-  const keychain = join(keychains, "bb-sidebar.keychain-db");
+  const keychain = join(keychains, "bb-thread-inbox.keychain-db");
   const security = async (args) => promisify(execFile)("/usr/bin/security", args, { env, timeout: 10_000 });
   await security(["create-keychain", "-p", "", keychain]);
   await security(["unlock-keychain", "-p", "", keychain]);
   await security(["set-keychain-settings", keychain]);
-  symlinkSync("bb-sidebar.keychain-db", join(keychains, "login.keychain-db"));
+  symlinkSync("bb-thread-inbox.keychain-db", join(keychains, "login.keychain-db"));
   await security(["list-keychains", "-d", "user", "-s", keychain]);
   await security(["default-keychain", "-d", "user", "-s", keychain]);
   // macOS disables the login-keychain setter. Login lookup uses this filename.

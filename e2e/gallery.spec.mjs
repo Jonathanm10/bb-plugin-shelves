@@ -8,7 +8,7 @@ test("README gallery captures real filing and search states", async ({ page, req
   const first = fixture.threads[0];
   await rpc(request, "settle", { threadId: fixture.threads[3].id });
   await open(page, { core: true, theme: "dark" });
-  const sidebar = page.locator("[data-bb-sidebar-root]");
+  const sidebar = page.locator("[data-bb-thread-inbox-root]");
   mkdirSync("e2e-artifacts/demo", { recursive: true });
   async function frame(number, screenshot) {
     await page.mouse.move(1000, 750);

@@ -47,7 +47,7 @@ describe("ThreadInbox", () => {
     await waitFor(() => expect(loads).toBe(2));
     expect(screen.queryByRole("list", { name: "Child threads" })).toBeNull();
     expect(
-      JSON.parse(window.localStorage.getItem("bb-sidebar-clean:settings-cache:v1") ?? "{}")
+      JSON.parse(window.localStorage.getItem("bb-thread-inbox:settings-cache:v1") ?? "{}")
         .showRunningChildrenWhenCollapsed,
     ).toBe(false);
   });
@@ -130,7 +130,7 @@ describe("ThreadInbox", () => {
   it("shows every child status or an idle age in expanded rows and accessible names", async () => {
     const minute = Math.floor(Date.now() / 60_000) * 60_000;
     window.localStorage.setItem(
-      "bb-sidebar-clean:working-since:v1",
+      "bb-thread-inbox:working-since:v1",
       JSON.stringify({
         monitoring: minute - 5 * 60_000,
         planning: minute - 5 * 60_000,
@@ -223,14 +223,14 @@ describe("ThreadInbox", () => {
     const needsYouRow = within(childList).getByRole("link", {
       name: "Open child thread: Pending runtime child, Needs you",
     }).parentElement!;
-    expect(needsYouRow.className).toContain("bg-[color:var(--bb-sidebar-needs-you-tint)]");
-    expect(needsYouRow.className).toContain("shadow-[inset_2px_0_0_0_var(--bb-sidebar-needs-you-accent)]");
+    expect(needsYouRow.className).toContain("bg-[color:var(--bb-thread-inbox-needs-you-tint)]");
+    expect(needsYouRow.className).toContain("shadow-[inset_2px_0_0_0_var(--bb-thread-inbox-needs-you-accent)]");
     // and only that row: the rule is the tint's partner, not a row border.
     expect(
       within(childList).getByRole("link", {
         name: "Open child thread: Failed child, Failed",
       }).parentElement?.className,
-    ).not.toContain("--bb-sidebar-needs-you-accent");
+    ).not.toContain("--bb-thread-inbox-needs-you-accent");
 
     // The slot takes exactly the width its label needs, up to the 112px the
     // longest status wants, so a short status or age hands the rest back to a
@@ -251,9 +251,7 @@ describe("ThreadInbox", () => {
     );
     expect(rendered.linkCalls).toContainEqual({ href: "/projects/proj_1/threads/monitoring", split: false });
     await waitFor(() =>
-      expect(JSON.parse(window.localStorage.getItem("bb-sidebar-clean:child-expansion:v1") ?? "[]")).toEqual([
-        "parent",
-      ]),
+      expect(JSON.parse(window.localStorage.getItem("bb-thread-inbox:child-expansion:v1") ?? "[]")).toEqual(["parent"]),
     );
   });
 
@@ -317,7 +315,7 @@ describe("ThreadInbox", () => {
   // the status sits beside the disclosure button rather than displacing it.
   it("shows the shared status on grandchild rows and beside a disclosure", () => {
     const minute = Math.floor(Date.now() / 60_000) * 60_000;
-    window.localStorage.setItem("bb-sidebar-clean:working-since:v1", JSON.stringify({ child: minute - 5 * 60_000 }));
+    window.localStorage.setItem("bb-thread-inbox:working-since:v1", JSON.stringify({ child: minute - 5 * 60_000 }));
     const rendered = render([
       thread({ id: "parent", title: "Parent" }),
       thread({

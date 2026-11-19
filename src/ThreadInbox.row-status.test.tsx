@@ -141,6 +141,6 @@ describe("indicators bb adds after this build", () => {
     await screen.findByRole("link", { name: /Future work/ });
     const status = within(row("Future work")).getByRole("img", { name: "Thread is doing something new" });
     expect(status.querySelector('[data-thread-status-glyph="future-kind"]')).not.toBeNull();
-    expect(status.querySelector(".bb-sidebar-still")).not.toBeNull();
+    expect(status.querySelector(".bb-thread-inbox-still")).not.toBeNull();
   });
 });

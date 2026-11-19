@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import { useRpc, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
 import { errorDetail, toast } from "./lib/toast";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import { Icon } from "./components/Icon";
 import { threadDisplayTitle } from "./inbox";
 import { usePortalScopeProps } from "./lib/portal-scope";
@@ -11,7 +11,7 @@ import { parentCandidates } from "./parent-threads";
 
 export function ParentThreadMenu({ thread }: { thread: PluginSidebarThread }) {
   const { projects, threads } = useSidebarThreads();
-  const rpc = useRpc<typeof bbSidebarRpcContract>();
+  const rpc = useRpc<typeof threadInboxRpcContract>();
   const portalScope = usePortalScopeProps();
   const [open, setOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);

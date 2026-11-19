@@ -34,8 +34,8 @@ function setup({
   enabled?: boolean;
   activeThreadId?: string | null;
 } = {}) {
-  localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
-  if (enabled) localStorage.setItem("bb-sidebar-clean:environment-grouping:v1", "true");
+  localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
+  if (enabled) localStorage.setItem("bb-thread-inbox:environment-grouping:v1", "true");
   let order = rows.filter((row) => !row.parentThreadId).map((row) => row.id);
   const save = vi.fn((input: unknown) => {
     order = (input as { inboxThreadIds: string[] }).inboxThreadIds;
@@ -80,7 +80,7 @@ it("shows environment grouping only inside the Project sort picker and remembers
   expect(screen.queryByRole("region", { name: "search worktree" })).toBeNull();
   fireEvent.click(toggle);
   expect(screen.getByRole("region", { name: "search worktree" })).toBeDefined();
-  expect(localStorage.getItem("bb-sidebar-clean:environment-grouping:v1")).toBe("true");
+  expect(localStorage.getItem("bb-thread-inbox:environment-grouping:v1")).toBe("true");
   fireEvent.click(within(picker).getByRole("radio", { name: "Manual order" }), { detail: 1 });
   expect(screen.queryByRole("checkbox", { name: "Group by worktree" })).toBeNull();
   expect(screen.queryByRole("region", { name: "search worktree" })).toBeNull();
@@ -309,10 +309,7 @@ it("targets the containing project when dragging a project over a nested environ
   });
   startDrag(screen.getByRole("button", { name: "Sidebar (2)" }), screen.getByRole("link", { name: "C" }), 40).drop();
   await waitFor(() =>
-    expect(JSON.parse(localStorage.getItem("bb-sidebar-clean:project-order:v1") ?? "null")).toEqual([
-      "other",
-      "proj_1",
-    ]),
+    expect(JSON.parse(localStorage.getItem("bb-thread-inbox:project-order:v1") ?? "null")).toEqual(["other", "proj_1"]),
   );
   expect(rendered.save).not.toHaveBeenCalled();
 });

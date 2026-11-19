@@ -247,7 +247,7 @@ describe("row context menu", () => {
 
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith("Could not check which threads would be deleted", {
-        className: "bb-sidebar-toast",
+        className: "bb-thread-inbox-toast",
         description: "offline",
       }),
     );
@@ -273,7 +273,7 @@ describe("row context menu", () => {
       threadDisplay: "full" as const,
       ...{ snoozePresets: "15m, Lunch break=3h" },
     };
-    localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(storedSettings));
+    localStorage.setItem("bb-thread-inbox:settings-cache:v1", JSON.stringify(storedSettings));
 
     let snoozed: { threadId: string; snoozedUntil: number } | null = null;
     renderSlot(inbox, listProps, {

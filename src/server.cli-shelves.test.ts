@@ -17,7 +17,7 @@ type Queue = ReturnType<typeof makeQueueEntry>[];
 
 async function loadWith(threads: ProjectThread[], rows: Record<string, Row>, queues: Record<string, Queue> = {}) {
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar-clean",
+    pluginId: "bb-thread-inbox",
     sdk: {
       projects: { list: async () => projectsWith(threads) },
       threads: {
@@ -76,7 +76,7 @@ const legacySettledTree = () => ({
   } satisfies Record<string, Row>,
 });
 
-describe("bb clean-sidebar list places children on their parent's shelf", () => {
+describe("bb thread-inbox list places children on their parent's shelf", () => {
   it("files the children of a settled parent under Settled, like the sidebar", async () => {
     const { threads, rows } = legacySettledTree();
     const { harness, shelves, ids } = await loadWith(threads, rows);
@@ -126,7 +126,7 @@ describe("bb clean-sidebar list places children on their parent's shelf", () => 
 
   it("keeps queued work Active even for a formerly scheduled Continue", async () => {
     const wake = Date.now() + HOUR_MS;
-    const continueAt = (sendAt: number, originPluginId = "bb-sidebar-clean") =>
+    const continueAt = (sendAt: number, originPluginId = "bb-thread-inbox") =>
       makeQueueEntry({ sendAt, originPluginId, content: [{ type: "text", text: "Continue", mentions: [] }] });
     const threads = ["scheduled", "other-time", "someone-else"].map((id) =>
       projectThread({ id, status: "error", queuedWork: "waiting", latestAttentionAt: 50 }),
@@ -185,7 +185,7 @@ describe("bb clean-sidebar list places children on their parent's shelf", () => 
   });
 });
 
-describe("bb clean-sidebar resume reads the shelf the sidebar shows", () => {
+describe("bb thread-inbox resume reads the shelf the sidebar shows", () => {
   it("leaves a thread that woke on its own alone", async () => {
     const threads = [projectThread({ id: "woke", latestAttentionAt: 50 })];
     const { harness } = await loadWith(threads, { woke: { snoozedUntil: Date.now() - HOUR_MS, snoozedAt: 60 } });

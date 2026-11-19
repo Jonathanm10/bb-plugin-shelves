@@ -3,7 +3,7 @@ import { MONOGRAM_COLOR_COUNT, projectMonogramColor, projectMonogramLetter } fro
 
 describe("projectMonogramLetter", () => {
   it.each([
-    ["bb-sidebar", "S"],
+    ["bb-thread-inbox", "T"],
     ["bb-plugin-tasks", "T"],
     ["the-app", "A"],
     ["@acme/widgets", "W"],
@@ -22,7 +22,7 @@ describe("projectMonogramLetter", () => {
 
 describe("projectMonogramColor", () => {
   it("is stable for a name, ignoring case and outer spaces", () => {
-    expect(projectMonogramColor("bb-sidebar")).toBe(projectMonogramColor(" BB-Sidebar "));
+    expect(projectMonogramColor("bb-thread-inbox")).toBe(projectMonogramColor(" BB-THREAD-INBOX "));
   });
 
   it("stays inside the palette and spreads similar names", () => {

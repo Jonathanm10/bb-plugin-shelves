@@ -4,7 +4,7 @@ import { createFakePluginHost, disposers } from "./test-server";
 
 describe("lifecycle RPC", () => {
   it("loads archive-preview storage without resetting shelves or project appearance", async () => {
-    const { bb, harness } = createFakePluginHost({ pluginId: "bb-sidebar-clean" });
+    const { bb, harness } = createFakePluginHost({ pluginId: "bb-thread-inbox" });
     await plugin(bb);
     disposers.push(() => harness.lifecycle.dispose());
     const settings = (await harness.behavior.callRpc("getSidebarSettings", {})) as Record<string, unknown>;

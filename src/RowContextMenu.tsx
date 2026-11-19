@@ -3,7 +3,7 @@ import { useRef, useState, type ReactNode } from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import { useBbNavigate, useRpc, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
 import { errorDetail, toast } from "./lib/toast";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import { ParentThreadMenu } from "./ParentThreadMenu";
 import { notifiesParent, ParentNotificationsMenu } from "./ParentNotificationsMenu";
 import { DeleteThreadDialog } from "./DeleteThreadDialog";
@@ -77,7 +77,7 @@ function RowMenuContents({
   const { projects, threads } = useSidebarThreads();
   const project = projects.find((project) => project.id === thread.projectId);
   const portalScope = usePortalScopeProps();
-  const rpc = useRpc<typeof bbSidebarRpcContract>();
+  const rpc = useRpc<typeof threadInboxRpcContract>();
   const renameAfterClose = useRef(false);
   const leavingForSettings = useRef(false);
   // Outlives the portaled submenu, which unmounts when a choice closes the menu.

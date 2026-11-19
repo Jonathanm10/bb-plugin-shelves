@@ -1,7 +1,7 @@
 import { STORAGE_KEYS } from "./lib/storage-keys";
 import { useEffect, useMemo, useState } from "react";
 import { useRpc } from "@get-bb/plugin-sdk/app";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import { useSidebarRead } from "./bb-sdk";
 import type { ThreadLifecycleRow } from "./lifecycle";
 import { createCachedRpcState } from "./lib/cached-rpc-state";
@@ -33,7 +33,7 @@ const UNLOADED_RETRY_MS = 30_000;
  * and after a reconnect. The saved copy stands in until the first answer.
  */
 export function useLifecycleRows(): LifecycleRows {
-  const rpc = useRpc<typeof bbSidebarRpcContract>();
+  const rpc = useRpc<typeof threadInboxRpcContract>();
   const [saved] = useState(() => lifecycleCache.read(rpc));
   const { data, refresh } = useSidebarRead("listLifecycle");
   const fresh = useMemo(() => (data ? new Map(data.rows.map((row) => [row.threadId, row] as const)) : null), [data]);

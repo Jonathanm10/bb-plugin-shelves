@@ -34,7 +34,7 @@ for (const [name, theme, width] of [
     );
     await expect(shelf(page, "Pinned").getByRole("region")).toHaveCount(0);
     mkdirSync("e2e-artifacts", { recursive: true });
-    const sidebar = page.locator("[data-bb-sidebar-root]");
+    const sidebar = page.locator("[data-bb-thread-inbox-root]");
     await page.addStyleTag({ path: "e2e/snapshot.css" });
     await page.mouse.move(1000, 750);
     await sidebar.screenshot({ path: `e2e-artifacts/environment-picker-${name}.png`, animations: "disabled" });

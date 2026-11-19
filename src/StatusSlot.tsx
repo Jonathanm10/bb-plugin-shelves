@@ -262,25 +262,25 @@ function isMonitoringLabel(label: string | null): boolean {
 export function statusToneClass(indicator: PluginSidebarThreadIndicator): string {
   switch (indicator) {
     case "unread-error":
-      return "text-[color:var(--bb-sidebar-tone-error)]";
+      return "text-[color:var(--bb-thread-inbox-tone-error)]";
     case "waiting-for-input":
-      return "text-[color:var(--bb-sidebar-tone-pending)]";
+      return "text-[color:var(--bb-thread-inbox-tone-pending)]";
     case "unread-success":
-      return "text-[color:var(--bb-sidebar-tone-success)]";
+      return "text-[color:var(--bb-thread-inbox-tone-success)]";
     case "runtime":
     case "workflow":
     case "background-agent":
     case "plan-mode":
-      return "text-[color:var(--bb-sidebar-tone-working)]";
+      return "text-[color:var(--bb-thread-inbox-tone-working)]";
     case "background-command":
       // Only a process the agent started is running, not the agent itself.
-      return "text-[color:var(--bb-sidebar-tone-command)]";
+      return "text-[color:var(--bb-thread-inbox-tone-command)]";
     case "draft":
     case "working-draft":
     case "queued-waiting":
-      return "text-[color:var(--bb-sidebar-tone-draft)]";
+      return "text-[color:var(--bb-thread-inbox-tone-draft)]";
     case "queued-failed":
-      return "text-[color:var(--bb-sidebar-tone-error)]";
+      return "text-[color:var(--bb-thread-inbox-tone-error)]";
     case "none":
       return "text-muted-foreground";
     default:

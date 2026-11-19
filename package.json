@@ -1,6 +1,6 @@
 {
-  "name": "bb-plugin-bb-sidebar-clean",
-  "version": "0.1.0",
+  "name": "bb-thread-inbox",
+  "version": "0.1.1",
   "type": "module",
   "description": "A community BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
   "license": "MIT",

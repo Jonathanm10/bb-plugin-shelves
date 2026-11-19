@@ -131,7 +131,7 @@ export function ThreadCard({
     return () => {
       const focused = document.activeElement;
       if (!(focused instanceof HTMLElement) || !rowRef.current?.contains(focused)) return;
-      const sidebar = rowRef.current.closest<HTMLElement>("[data-bb-sidebar-root]");
+      const sidebar = rowRef.current.closest<HTMLElement>("[data-bb-thread-inbox-root]");
       const childId = focused.getAttribute("data-child-thread-id");
       const control = focused.getAttribute("data-thread-control");
       // Moving a row between shelf trees unmounts its focused control.
@@ -296,7 +296,7 @@ export function ThreadCard({
                   reorder && !reorder.disabled ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
                 ),
               }}
-              beforeContent={isSettling ? <span aria-hidden="true" className="bb-sidebar-settle-sweep" /> : null}
+              beforeContent={isSettling ? <span aria-hidden="true" className="bb-thread-inbox-settle-sweep" /> : null}
               fadeContent
               trailing={
                 <span className="pointer-events-none relative flex shrink-0 items-center gap-1.5">
@@ -352,7 +352,7 @@ export function ThreadCard({
                 reorder?.isDragging && DRAG_LIFT_CLASS,
               )}
             >
-              {isSettling ? <span aria-hidden="true" className="bb-sidebar-settle-sweep" /> : null}
+              {isSettling ? <span aria-hidden="true" className="bb-thread-inbox-settle-sweep" /> : null}
               {showProject && projectName ? <ProjectStripe projectId={thread.projectId} view={stripeView} /> : null}
               <ThreadDetailsTooltip thread={thread} disabled={isRenaming || !!reorder?.isDragging}>
                 <a
@@ -406,7 +406,7 @@ export function ThreadCard({
                     ) : null}
                     <span
                       style={projectColor}
-                      className={cn("min-w-0 truncate", projectColor && "bb-sidebar-project-name")}
+                      className={cn("min-w-0 truncate", projectColor && "bb-thread-inbox-project-name")}
                     >
                       {projectName ?? " "}
                     </span>

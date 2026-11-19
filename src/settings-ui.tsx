@@ -78,7 +78,7 @@ function SaveIndicator({ status }: { status: SaveStatus | undefined }) {
         </>
       ) : shown === "saved" ? (
         <>
-          <Icon name="Check" aria-hidden className="size-3.5 text-[color:var(--bb-sidebar-tone-success)]" />
+          <Icon name="Check" aria-hidden className="size-3.5 text-[color:var(--bb-thread-inbox-tone-success)]" />
           Saved
         </>
       ) : shown === "error" ? (

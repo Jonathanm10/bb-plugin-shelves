@@ -4,7 +4,7 @@
 // "goes up and down" without moving breaks it on that first frame.
 // Self-contained so it can also be pasted into a live bb page by hand.
 export async function probeShelfToggle(label) {
-  const root = document.querySelector("[data-bb-sidebar-root]");
+  const root = document.querySelector("[data-bb-thread-inbox-root]");
   const scroller = root.querySelector("[data-list-motion-scroller]");
   const section = [...root.querySelectorAll("section[aria-label]")].find(
     (node) => node.getAttribute("aria-label") === label,
