@@ -8,6 +8,8 @@ A compact BB sidebar with three everyday sections:
 
 Threads use one line by default. Reading a conversation does not file it. You do not need to settle every completed thread manually.
 
+The proposed [product specification](SPEC.md) covers the complete sidebar behavior, defaults, BB integration boundaries, advanced capabilities, and acceptance scenarios.
+
 ## Automatic settling
 
 | Rule | Default |
