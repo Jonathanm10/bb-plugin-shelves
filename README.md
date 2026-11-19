@@ -39,6 +39,8 @@ Running work, queued messages, pending questions, pinned threads, and live desce
 - Use BB's **New thread** action and **Project picker > New project**.
 - Use **Push notifications** for completion, question, and error alerts. Clicking a thread notification opens that thread. Enable completion delivery with `bb plugin config push-notifications set defaultLevel all`; per-thread and child overrides still apply. Each browser needs notification permission.
 
+For missing desktop banners, open **Settings > Push notifications** in the main BB desktop window and check its device permission as well as the Desktop notifications switch. BB suppresses system alerts for a thread already focused on that client. On macOS, also allow BB notifications and desktop banners in **System Settings > Notifications > BB**, and check Focus. Test a completion while viewing another thread or app. A successful CLI broadcast does not confirm that macOS displayed a banner.
+
 The plugin adds no second search index, project backend, or notification delivery service. Appearance, grouping, and compatibility preferences remain under Advanced settings or their existing menus. Inactive is off by default. Saved manual ordering and section expansion choices survive upgrades; choose **Recent returns** in Active's sort menu to adopt the new order on an existing device.
 
 ## Install the review branch
