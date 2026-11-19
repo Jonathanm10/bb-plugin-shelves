@@ -67,3 +67,23 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 - Preserve licenses and copyright notices for retained inherited code in
   `LICENSE`. Keep machine configuration, credentials, private audit notes, and
   live conversation screenshots out of this public repository.
+
+## Tag-based releases
+
+- A package version is manifest metadata, not proof of publication. Keep unreleased
+  work on a development version and the README release badge tied to GitHub Releases.
+- Prepare a release on a branch: `npm version X.Y.Z --no-git-tag-version`, move
+  the shipped notes under a nonempty `## [X.Y.Z]` section in `CHANGELOG.md`, and
+  leave a new `## [Unreleased]` section for future work. Review through a PR.
+- Run `npm run check` and the isolated browser suite before release. Verify both
+  lockfile version fields match the manifest. Do not publish from an unmerged branch.
+- Only after the release preparation is merged and publication is authorized,
+  tag that commit with `git tag -a vX.Y.Z -m 'Release vX.Y.Z'` and push that tag.
+- `.github/workflows/release.yml` accepts stable `vX.Y.Z` tags included in `main`,
+  checks the manifest versions and plugin, then uses the pinned
+  `ysskrishna/changelog-release-action` to publish matching changelog notes.
+  Missing/empty notes fail. Re-running skips an existing release. No tag is
+  created by CI and no release is created by a normal branch push or PR.
+- Release automation does not publish npm packages or submit marketplace entries.
+  Follow `docs/marketplace.md` for BB Community listing. Security reports follow
+  `SECURITY.md`. Never retag an existing release to repair it.

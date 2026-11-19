@@ -1,6 +1,6 @@
 {
   "name": "bb-plugin-bb-sidebar-clean",
-  "version": "0.1.0",
+  "version": "0.1.0-dev.0",
   "type": "module",
   "description": "A community BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
   "license": "MIT",
@@ -43,7 +43,7 @@
     "build": "bb plugin build",
     "check": "npm run lint && npm run format:check && npm run knip && npm run typecheck && npm test && npm run test:scripts && npm run build && node scripts/check-app-bundle.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "test:scripts": "node --test scripts/bb-compat/*.test.mjs",
+    "test:scripts": "node --test scripts/bb-compat/*.test.mjs scripts/release/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint . && node scripts/check-import-boundaries.mjs && node scripts/check-file-sizes.mjs",
     "format": "biome format --write .",
