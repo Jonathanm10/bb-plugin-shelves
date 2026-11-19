@@ -59,7 +59,7 @@ See [browser test setup](e2e/README.md) for Chromium, fixture-provider requireme
 
 ## Inspiration
 
-Based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar), with inspiration from [Sidebar Pro](https://github.com/kr3t3n/bb-plugin-sidebar-pro) and [T3 Code](https://github.com/pingdotgg/t3code). Inherited port parsing comes from [bb-plugin-worktree-ports](https://github.com/xlightxyearx/bb-plugin-worktree-ports). Copyright and license notices are retained in [LICENSE](LICENSE).
+Based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar), with inspiration from [Sidebar Pro](https://github.com/kr3t3n/bb-plugin-sidebar-pro) and [T3 Code](https://github.com/pingdotgg/t3code). Inherited port parsing comes from [bb-plugin-worktree-ports](https://github.com/xlightxyearx/bb-plugin-worktree-ports).
 
 ## Built and maintained by
 
@@ -79,7 +79,7 @@ See [CHANGELOG](CHANGELOG.md) for this project's release notes.
 
 ## License
 
-[MIT](LICENSE). Includes the original copyright notices for inherited code.
+[MIT](LICENSE).
 
 ---
 
