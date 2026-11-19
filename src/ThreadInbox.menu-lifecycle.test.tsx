@@ -143,9 +143,7 @@ describe("row context menu", () => {
   });
 
   it("files work without a port cleanup prompt", async () => {
-    const ports = [{ port: 3000, pid: 123 }];
-    const close = vi.fn(() => ({ signalled: [3000], skipped: [], failed: [] }));
-    renderSlot(inbox, listProps, {
+    const slot = renderSlot(inbox, listProps, {
       sidebarThreads: {
         status: "ready",
         threads: [thread({ id: "thr_ports", title: "Port owner" })],
@@ -154,14 +152,14 @@ describe("row context menu", () => {
       rpc: {
         listLifecycle: () => ({ rows: [] }),
         settle: () => ({ ok: true, reclaim: SETTLED_NOTHING }),
-        getThreadPorts: () => ({ ports }),
-        closeThreadPorts: close,
       },
     });
     fireEvent.click(await screen.findByLabelText("Settle thread"));
     await waitFor(() => expect(toastMocks.success).toHaveBeenCalledWith("Thread settled", expect.anything()));
     expect(toastMocks.message).not.toHaveBeenCalled();
-    expect(close).not.toHaveBeenCalled();
+    expect(slot.rpcCalls.some((call) => /cleanSettled|closeThreadPorts|stopWorkspacePort/.test(call.method))).toBe(
+      false,
+    );
   });
 
   it("ends snapshot Undo without offering an unrestricted tree redo", async () => {

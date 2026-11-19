@@ -70,7 +70,6 @@ describe("host port scan", () => {
         processName: "node",
         source: "process",
         ownerThreadId: "thr_owner",
-        processStartedAt: "Sat Oct  3 12:29:38 2026",
         container: "app-web-1",
         service: "web",
       },

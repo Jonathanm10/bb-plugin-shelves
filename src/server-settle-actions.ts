@@ -1,6 +1,5 @@
 import type { ServerContext, ServerHandlers } from "./server-context";
 import type { createServerLifecycle, StoredLifecycleRow, CleanupThread } from "./server-lifecycle";
-import type { createServerSettleCleanup } from "./server-settle-cleanup";
 import { randomUUID } from "node:crypto";
 import { threadTreeIds } from "./thread-tree";
 import { canPark } from "./lifecycle";
@@ -8,11 +7,7 @@ import { threadStoredTitle } from "./inbox";
 import { sortPinnedThreads } from "./pinned-order";
 import { EMPTY_RECLAIM } from "./reclaim";
 
-export function createServerSettleActions(
-  ctx: ServerContext,
-  lifecycle: ReturnType<typeof createServerLifecycle>,
-  cleanup: ReturnType<typeof createServerSettleCleanup>,
-) {
+export function createServerSettleActions(ctx: ServerContext, lifecycle: ReturnType<typeof createServerLifecycle>) {
   const {
     loadPolicyThreads,
     threadSignals,
@@ -26,7 +21,7 @@ export function createServerSettleActions(
     settleTree,
     wakeAncestors,
   } = lifecycle;
-  const { cleanupError } = cleanup;
+  const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
   // Undo belongs to one completed action, not to a later Return to Active.
   // Toasts are short-lived; bound snapshots and expire them after five minutes.
   const settleUndos = new Map<
@@ -128,7 +123,7 @@ export function createServerSettleActions(
             }
           }
           if (failed.length)
-            throw new Error(`${cleanupError(error)}. Could not restore pins for: ${failed.join(", ")}`);
+            throw new Error(`${errorMessage(error)}. Could not restore pins for: ${failed.join(", ")}`);
           throw error;
         }
       });

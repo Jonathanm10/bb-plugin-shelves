@@ -46,7 +46,7 @@ describe("ThreadInbox", () => {
     });
   });
 
-  it("releases the agent sessions archive leaves loaded", async () => {
+  it("uses native archive without a second runtime-release action", async () => {
     const rendered = render([
       thread({ id: "parent", title: "Parent" }),
       thread({ id: "idle-child", title: "Idle child", parentThreadId: "parent" }),
@@ -66,12 +66,7 @@ describe("ThreadInbox", () => {
       key: "bb--core/archive",
       threadId: "parent",
     });
-    await waitFor(() =>
-      expect(rendered.rpcCalls).toContainEqual({
-        method: "releaseRuntimes",
-        input: { threadIds: ["parent", "idle-child"] },
-      }),
-    );
+    expect(rendered.rpcCalls.some((call) => call.method === "releaseRuntimes")).toBe(false);
   });
 
   for (const busyChild of [

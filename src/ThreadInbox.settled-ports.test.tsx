@@ -62,14 +62,6 @@ function mount({
         ],
       })),
   }));
-  const stopWorkspacePort = vi.fn(() => {
-    open.delete("env_settled");
-    return { signalled: [3000], skipped: [], failed: [] };
-  });
-  const closeThreadPorts = vi.fn(() => {
-    open.clear();
-    return { signalled: [3000], skipped: [], failed: [] };
-  });
   const slot = renderSlot(inbox, listProps, {
     sidebarThreads: {
       status: "ready",
@@ -85,27 +77,9 @@ function mount({
       listLifecycle: () => ({ rows }),
       getThreadExecutionDetails: () => null,
       getOpenPorts,
-      stopWorkspacePort,
       settle: (input: unknown) => {
         rows = [...rows, { ...settledRow, threadId: (input as { threadId: string }).threadId }];
         return { ok: true, reclaim: SETTLED_NOTHING };
-      },
-      getThreadPorts: () => ({ ports: [{ port: 3000, pid: 1234 }] }),
-      closeThreadPorts,
-      previewSettledCleanup: () => ({
-        token: "98bb67b5-b58b-4fc4-9a55-34e557dc8f55",
-        threads: [{ threadId: "settled", title: "Settled work", terminalCount: 0, ports: [3000] }],
-        skipped: [],
-      }),
-      cleanSettled: () => {
-        open.delete("env_settled");
-        return {
-          closedTerminals: 0,
-          signalledPorts: [{ threadId: "settled", port: 3000 }],
-          remainingPorts: [],
-          skipped: [],
-          failed: [],
-        };
       },
     },
   });
@@ -114,15 +88,12 @@ function mount({
     slot,
     scans,
     scansOf: (environmentId: string) => scans().filter((ids) => ids.includes(environmentId)).length,
-    stopWorkspacePort,
-    closeThreadPorts,
     unsettle: () => {
       rows = [];
     },
   };
 }
 
-// The Clean dialog is modal, so the rows behind it are aria-hidden while it is open.
 const plugOf = (shelf: HTMLElement, title: string) =>
   within(within(shelf).getByRole("link", { name: title, hidden: true }).closest("li")!).queryByRole("img", {
     name: PLUG,
@@ -151,23 +122,6 @@ describe("open ports of settled threads", () => {
     expect(scans()).toHaveLength(2);
   });
 
-  it("looks a settled workspace up again after stopping one of its ports", async () => {
-    const { scans, stopWorkspacePort } = mount();
-    const { settled, row } = await settledRowLink();
-    fireEvent.pointerMove(row, { pointerType: "mouse" });
-    const details = await screen.findByRole("dialog", { name: "Thread details" });
-    fireEvent.click(await within(details).findByRole("button", { name: /Workspace ports \(1\)/ }));
-    fireEvent.click(within(details).getByRole("button", { name: "Stop process on port 3000" }));
-    fireEvent.click(within(details).getByRole("button", { name: "Confirm stopping PID 1234 on port 3000" }));
-    await waitFor(() =>
-      expect(stopWorkspacePort).toHaveBeenCalledWith({ threadId: "settled", port: { port: 3000, pid: 1234 } }),
-    );
-    await waitFor(() => expect(scans().filter((ids) => ids[0] === "env_settled")).toHaveLength(2));
-    await waitFor(() => expect(details.textContent).not.toContain("Workspace ports"));
-    expect(within(settled).queryByRole("img", { name: PLUG })).toBeNull();
-    expect(scans().every((ids) => !ids.includes("env_live") || !ids.includes("env_settled"))).toBe(true);
-  });
-
   it("adds a workspace to the poll when its thread returns to Active", async () => {
     const { slot, scans, unsettle } = mount();
     await settledRowLink();
@@ -177,32 +131,9 @@ describe("open ports of settled threads", () => {
     const active = await screen.findByRole("region", { name: "Active" });
     expect(await within(active).findByRole("img", { name: PLUG })).toBeDefined();
   });
-  it("drops the plug Clean closed without a hover, and checks only that workspace once more", async () => {
-    const { scansOf } = mount({
-      open: ["env_settled", "env_idle"],
-      rows: [settledRow, { ...settledRow, threadId: "idle" }],
-      extra: [thread({ id: "idle", title: "Idle work", environment: environment("env_idle") })],
-    });
-    const { settled, row } = await settledRowLink();
-    fireEvent.pointerMove(row, { pointerType: "mouse" });
-    await waitFor(() => expect(plugOf(settled, "Settled work")).not.toBeNull());
-    fireEvent.pointerMove(within(settled).getByRole("link", { name: "Idle work" }), { pointerType: "mouse" });
-    await waitFor(() => expect(plugOf(settled, "Idle work")).not.toBeNull());
-    fireEvent.click(within(settled).getByRole("button", { name: "Close terminals and ports of settled threads" }));
-    const dialog = await screen.findByRole("dialog", { name: "Clean settled resources?" });
-    fireEvent.click(await within(dialog).findByRole("button", { name: "Clean resources" }));
-    await waitFor(() => expect(plugOf(settled, "Settled work")).toBeNull());
-    expect(scansOf("env_settled")).toBe(1);
-    await waitFor(() => expect(scansOf("env_settled")).toBe(2));
-    await pause(1_500);
-    expect(scansOf("env_settled")).toBe(2);
-    expect(scansOf("env_idle")).toBe(1);
-    expect(plugOf(settled, "Settled work")).toBeNull();
-    expect(plugOf(settled, "Idle work")).not.toBeNull();
-  });
 
   it("settles a port-owning thread without prompting to stop its ports", async () => {
-    const { slot, closeThreadPorts } = mount({
+    const { slot } = mount({
       rows: [],
       extra: [thread({ id: "fresh", title: "Fresh work", environment: environment("env_fresh") })],
     });
@@ -212,6 +143,8 @@ describe("open ports of settled threads", () => {
     await slot.behavior.experimental_invalidateRpc([LIFECYCLE_TAG]);
     expect(await screen.findByRole("region", { name: "Settled" })).toBeDefined();
     expect(toastMocks.message).not.toHaveBeenCalled();
-    expect(closeThreadPorts).not.toHaveBeenCalled();
+    expect(
+      slot.inspection.rpcCalls.some((call) => /cleanSettled|closeThreadPorts|stopWorkspacePort/.test(call.method)),
+    ).toBe(false);
   });
 });

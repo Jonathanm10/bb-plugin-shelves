@@ -4,7 +4,6 @@ import type { BbPluginApi } from "@get-bb/plugin-sdk";
 import {
   projectThread,
   projectsWith,
-  terminalSession,
   loadPlugin,
   deferred,
   type LifecycleListResult,
@@ -66,26 +65,6 @@ describe("release lifecycle safety", () => {
     const reclaimReads = reads.filter(([args]) => args?.threadIds);
     expect(reclaimReads).toHaveLength(0);
     expect(reclaimReads.every(([args]) => args.threadIds?.join() === "root")).toBe(true);
-  });
-
-  it("keeps the legacy reclaim activity check after terminal lookup before closing anything", async () => {
-    const threads = [projectThread({ id: "root" })];
-    const h = await host(threads);
-    const gate = deferred<void>();
-    const started = deferred<void>();
-    h.inspection.sdk.stub("terminals.list", async () => {
-      started.resolve();
-      await gate.promise;
-      return { sessions: [{ ...terminalSession({ id: "terminal" }), threadId: "root" }] };
-    });
-    h.inspection.sdk.stub("terminals.close", async () => ({ ok: true }));
-    const settling = h.behavior.callRpc("park", { threadId: "root" });
-    await started.promise;
-    threads[0]!.status = "active";
-    await h.behavior.emitThreadEvent("thread.active", { thread: makeThreadResponse(threads[0]!) });
-    gate.resolve();
-    await settling;
-    expect(h.inspection.sdk.callsTo("terminals.close")).toEqual([]);
   });
 
   it("automatically settles finished descendants after a returned parent runs again", async () => {

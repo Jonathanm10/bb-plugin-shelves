@@ -26,7 +26,6 @@ export const openPortSchema = z.object({
   container: z.string().optional(),
   service: z.string().optional(),
   ownerThreadId: z.string().optional(),
-  processStartedAt: z.string().min(1).optional(),
 });
 export type OpenPort = z.infer<typeof openPortSchema>;
 
@@ -50,22 +49,6 @@ export const threadPullRequestSchema = z
   })
   .strict();
 export type ThreadPullRequest = z.infer<typeof threadPullRequestSchema>;
-
-export const ownedPortTargetSchema = z.object({
-  port: z.number().int().min(1).max(65535),
-  pid: z.number().int().min(2),
-  processStartedAt: z.string().min(1).optional(),
-});
-export const closePortsResultSchema = z.object({
-  signalled: z.array(z.number()),
-  skipped: z.array(z.number()),
-  failed: z.array(z.number()),
-});
-export const portCloseScopeSchema = z.enum(["thread", "workspace"]);
-export type OwnedPortTarget = z.infer<typeof ownedPortTargetSchema>;
-export type PortCloseScope = z.infer<typeof portCloseScopeSchema>;
-
-export type ClosePortsResult = z.infer<typeof closePortsResultSchema>;
 
 const threadIdSchema = z.object({ threadId: z.string().trim().min(1) });
 const threadLimitStateSchema = z.object({
@@ -98,32 +81,6 @@ const orderedThreadIdsSchema = z
     }
   });
 const threadIdsSchema = orderedThreadIdsSchema.min(1);
-export const cleanupIssueSchema = z.object({
-  threadId: z.string(),
-  resource: z.enum(["thread", "terminal", "port"]),
-  message: z.string(),
-});
-export const cleanupPreviewSchema = z.object({
-  token: z.string(),
-  threads: z.array(
-    z.object({
-      threadId: z.string(),
-      title: z.string(),
-      terminalCount: z.number().int().nonnegative(),
-      ports: z.array(z.number().int()),
-    }),
-  ),
-  skipped: z.array(cleanupIssueSchema),
-});
-export const cleanupResultSchema = z.object({
-  closedTerminals: z.number().int().nonnegative(),
-  signalledPorts: z.array(z.object({ threadId: z.string(), port: z.number().int() })),
-  remainingPorts: z.array(z.object({ threadId: z.string(), port: z.number().int() })),
-  skipped: z.array(cleanupIssueSchema),
-  failed: z.array(cleanupIssueSchema),
-});
-export type SettledCleanupPreview = z.infer<typeof cleanupPreviewSchema>;
-export type SettledCleanupResult = z.infer<typeof cleanupResultSchema>;
 const projectIdSchema = z.string().trim().min(1);
 const projectIconPathSchema = z
   .string()
@@ -190,26 +147,6 @@ export const bbSidebarRpcContract = defineRpcContract({
   cancelLimitContinue: {
     input: threadIdSchema.extend({ queuedMessageId: z.string().trim().min(1) }).strict(),
     output: z.object({ ok: z.literal(true) }),
-  },
-  getThreadPorts: {
-    input: threadIdSchema,
-    output: z.object({ ports: z.array(ownedPortTargetSchema) }),
-  },
-  closeThreadPorts: {
-    input: threadIdSchema.extend({ ports: z.array(ownedPortTargetSchema).min(1).max(1000) }),
-    output: closePortsResultSchema,
-  },
-  previewSettledCleanup: {
-    input: z.object({ threadIds: threadIdsSchema }).strict(),
-    output: cleanupPreviewSchema,
-  },
-  cleanSettled: {
-    input: z.object({ token: z.string().uuid() }).strict(),
-    output: cleanupResultSchema,
-  },
-  stopWorkspacePort: {
-    input: threadIdSchema.extend({ port: ownedPortTargetSchema }).strict(),
-    output: closePortsResultSchema,
   },
   // The app names the workspaces to scan: those of live threads on its poll,
   // or one settled thread's when the user looks at it, 500 per call (the app
@@ -312,10 +249,6 @@ export const bbSidebarRpcContract = defineRpcContract({
       snoozedUntil: z.number().int().positive(),
     }),
     output: z.object({ ok: z.boolean(), reclaim: reclaimSchema }),
-  },
-  releaseRuntimes: {
-    input: z.object({ threadIds: threadIdsSchema }).strict(),
-    output: z.object({ ok: z.boolean() }),
   },
   unsnooze: { input: threadIdSchema, output: z.object({ ok: z.boolean() }) },
   acknowledgeWake: {

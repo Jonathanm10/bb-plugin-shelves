@@ -12,12 +12,7 @@ import { Icon, type IconName } from "./components/Icon";
 import { cn } from "./lib/utils";
 import { usePortalScopeProps } from "./lib/portal-scope";
 import { ProjectActions } from "./ProjectContextMenu";
-import {
-  canParkThread,
-  formatSnoozeWakeTime,
-  resolveConfiguredSnoozePreset,
-  type ConfiguredSnoozePreset,
-} from "./lifecycle";
+import { formatSnoozeWakeTime, resolveConfiguredSnoozePreset, type ConfiguredSnoozePreset } from "./lifecycle";
 import { beginTitleGeneration, finishTitleGeneration, useTitleGenerating } from "./title-generation-state";
 
 type RowContextMenuProps = {
@@ -91,19 +86,6 @@ function RowMenuContents({
   const pendingNotificationSave = useRef<Promise<void> | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [pickingSnooze, setPickingSnooze] = useState(false);
-  // Archive takes the children with it, and bb leaves every idle one's agent
-  // session loaded. Release them alongside the archive. Working children are
-  // skipped, so this never interrupts a turn archive itself would not.
-  const archive = () => {
-    void run("archive");
-    const threadIds = [
-      thread.id,
-      ...threads.filter((child) => child.parentThreadId === thread.id && canParkThread(child)).map((child) => child.id),
-    ];
-    void rpc.call("releaseRuntimes", { threadIds }).catch(() => {
-      void 0; // A missed release costs memory, not correctness.
-    });
-  };
   const regenerate = async () => {
     if (!beginTitleGeneration(thread.id)) return;
     try {
@@ -229,7 +211,7 @@ function RowMenuContents({
               <Separator />
               <CopySubmenu thread={thread} onCopyLink={() => void run("copyLink")} />
               <Separator />
-              <Item disabled={!canArchive} onSelect={archive}>
+              <Item disabled={!canArchive} onSelect={() => void run("archive")}>
                 Archive
               </Item>
               <Item destructive onSelect={() => setConfirmingDelete(true)}>

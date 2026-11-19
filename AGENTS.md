@@ -104,7 +104,7 @@ still call `onNavigate`; only clicks that are not links use `useBbNavigate`.
 Title saves use the optimistic SDK client.
 Root pinning keeps the lifecycle RPC's parent lock and atomic shelf clearing.
 Delete keeps `deleteThread` RPC after confirming the named tree. Parent, snooze,
-park, settle, project, and clean stay plugin-owned. Title generation is bb's
+legacy park, settle, and project actions stay plugin-owned. Title generation is bb's
 (`threads.experimental_regenerateTitle`); the sidebar owns only the menu item and
 automatic recovery of untitled threads. Do not add a sidebar title generator.
 Do not adopt the SDK's thread menu components for this sidebar.
@@ -136,7 +136,6 @@ Wired tests deliver invalidations through `flush()`; app tests use
 - `server-project-icons`: icon resolution, caches, overrides, and uploads.
 - `server-project-colors`: project color reads and writes.
 - `server-project-management`: project names, paths, and removal.
-- `server-settle-cleanup`: cleanup previews, cleanup, and runtime reclaim.
 - `server-settle-actions`: tree settle, return to Active, and Undo snapshots.
 - `server-policy`: automatic settle passes and settings revisions.
 - `server-rate-limits`: provider-limit reads and scheduled Continue queue actions.

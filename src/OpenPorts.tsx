@@ -1,21 +1,8 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import { UrlLink, useRpc, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
-import { errorDetail, toast } from "./lib/toast";
-import { BROWSER_EVENTS } from "./lib/browser-events";
 import type { bbSidebarRpcContract, OpenPort, PortSnapshot } from "./contract";
 import { portsByEnvironment } from "./open-ports";
 import { Icon } from "./components/Icon";
-import { cn } from "./lib/utils";
 import { portBrowserUrl } from "./port-links";
 import { usePortLinkHost } from "./PortLinkSettings";
 import { useOnDemandLookups } from "./useOnDemandLookups";
@@ -24,29 +11,14 @@ const OpenPortsContext = createContext<ReadonlyMap<string, readonly OpenPort[]>>
 // Separate from the ports, so a consumer that only asks for a rescan or a
 // lookup never rerenders when the list changes.
 const OpenPortsActionsContext = createContext<{
-  /** Rescans now; a settled-only workspace is looked up again instead. */
-  refresh: (environmentId?: string) => void;
   /** Looks up a workspace only settled threads use, which the poll skips. */
   lookUp: (environmentId: string | undefined) => void;
-}>({ refresh: () => {}, lookUp: () => {} });
+}>({ lookUp: () => {} });
 // getOpenPorts answers from a 30s server cache, so polling faster only
 // fetches the same snapshot again.
 const PORT_POLL_INTERVAL_MS = 30_000;
 // Mirrors the contract's cap on environment ids per call.
 const ENVIRONMENTS_PER_CALL = 500;
-// Closing ports only signals their processes, so the workspaces are scanned
-// once more after this, longer than the 750 ms the server's Clean waits.
-const PORTS_CLOSED_RECHECK_MS = 1_000;
-
-/**
- * Tells the ports provider that ports in these workspaces were just asked to
- * close. Callers outside the provider (the settle prompt) reach it this way.
- */
-export function announcePortsClosed(environmentIds: readonly string[]) {
-  if (environmentIds.length > 0)
-    window.dispatchEvent(new CustomEvent(BROWSER_EVENTS.portsClosed, { detail: environmentIds }));
-}
-
 /** The workspaces the poll covers, and those only settled threads use; null until the shelves are known. */
 export type PortScanScope = { live: readonly string[]; settledOnly: ReadonlySet<string> } | null;
 
@@ -77,7 +49,6 @@ const NO_SETTLED_WORKSPACES: ReadonlySet<string> = new Set();
 export function OpenPortsProvider({ scope, children }: { scope: PortScanScope; children: ReactNode }) {
   const rpc = useRpc<typeof bbSidebarRpcContract>();
   const [ports, setPorts] = useState<ReadonlyMap<string, readonly OpenPort[]>>(new Map());
-  const refreshRef = useRef<() => void>(() => {});
   const liveKey = scope === null ? null : scope.live.join("\n");
   const fetchOne = useCallback(
     async (environmentId: string) =>
@@ -85,45 +56,15 @@ export function OpenPortsProvider({ scope, children }: { scope: PortScanScope; c
     [rpc],
   );
   const onDemand = useOnDemandLookups<readonly OpenPort[]>(fetchOne, scope?.settledOnly ?? NO_SETTLED_WORKSPACES);
-  const { lookUp: lookUpOne, forget } = onDemand;
-  const latestScope = useRef(scope);
-  latestScope.current = scope;
+  const { lookUp: lookUpOne } = onDemand;
   const actions = useMemo(
     () => ({
-      refresh: (environmentId?: string) => {
-        if (environmentId && latestScope.current?.settledOnly.has(environmentId)) lookUpOne(environmentId, true);
-        else refreshRef.current();
-      },
       lookUp: (environmentId: string | undefined) => {
         if (environmentId) lookUpOne(environmentId);
       },
     }),
     [lookUpOne],
   );
-
-  // After ports close, a settled-only workspace's answer is dropped at once;
-  // then the touched workspaces are checked one more time, never again.
-  useEffect(() => {
-    const timers = new Set<ReturnType<typeof setTimeout>>();
-    function portsClosed(event: Event) {
-      const environmentIds = (event as CustomEvent<readonly string[]>).detail;
-      const current = latestScope.current;
-      const dropped = forget(environmentIds.filter((id) => current?.settledOnly.has(id)));
-      const live = environmentIds.some((id) => current?.live.includes(id));
-      if (dropped.length === 0 && !live) return;
-      const timer = setTimeout(() => {
-        timers.delete(timer);
-        for (const environmentId of dropped) lookUpOne(environmentId, true);
-        if (live) refreshRef.current();
-      }, PORTS_CLOSED_RECHECK_MS);
-      timers.add(timer);
-    }
-    window.addEventListener(BROWSER_EVENTS.portsClosed, portsClosed);
-    return () => {
-      window.removeEventListener(BROWSER_EVENTS.portsClosed, portsClosed);
-      for (const timer of timers) clearTimeout(timer);
-    };
-  }, [forget, lookUpOne]);
 
   useEffect(() => {
     if (liveKey === null) return;
@@ -162,14 +103,9 @@ export function OpenPortsProvider({ scope, children }: { scope: PortScanScope; c
       if (!isHidden()) void refresh();
     }
     document.addEventListener("visibilitychange", visibilityChanged);
-    refreshRef.current = () => {
-      clearTimeout(timer);
-      void refresh();
-    };
     void refresh();
     return () => {
       disposed = true;
-      refreshRef.current = () => {};
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", visibilityChanged);
     };
@@ -264,96 +200,12 @@ export function OpenPortDetails({ thread }: { thread: PluginSidebarThread }) {
                         : "TCP"}
                   </div>
                 </div>
-                {port.source === "process" && port.pid && port.pid > 1 ? (
-                  <StopPortButton
-                    threadId={thread.id}
-                    environmentId={thread.environment?.id ?? undefined}
-                    port={port.port}
-                    pid={port.pid}
-                  />
-                ) : null}
               </div>
             );
           })}
         </div>
       ) : null}
     </div>
-  );
-}
-
-const CONFIRM_WINDOW_MS = 4_000;
-
-/**
- * Stopping a process is not undoable, so the first press only arms the button
- * and a second press within a few seconds sends the shutdown request.
- */
-function StopPortButton({
-  threadId,
-  environmentId,
-  port,
-  pid,
-}: {
-  threadId: string;
-  environmentId: string | undefined;
-  port: number;
-  pid: number;
-}) {
-  const rpc = useRpc<typeof bbSidebarRpcContract>();
-  const { refresh: refreshPorts } = useContext(OpenPortsActionsContext);
-  const [state, setState] = useState<"idle" | "confirm" | "stopping">("idle");
-  useEffect(() => {
-    if (state !== "confirm") return;
-    const timer = setTimeout(() => setState("idle"), CONFIRM_WINDOW_MS);
-    return () => clearTimeout(timer);
-  }, [state]);
-
-  async function stop() {
-    setState("stopping");
-    try {
-      const result = await rpc.call("stopWorkspacePort", { threadId, port: { port, pid } });
-      if (result.failed.length) {
-        toast.error(`Could not stop the process on :${port}`, {
-          description: `PID ${pid} refused the shutdown request.`,
-        });
-      } else if (result.signalled.length) {
-        toast.success(`Stop requested for :${port}`, {
-          description: `PID ${pid} received a graceful shutdown request. Any other ports it serves close too.`,
-        });
-      } else {
-        toast.message(`Nothing is listening on :${port} as PID ${pid} anymore`);
-      }
-    } catch (error) {
-      toast.error(`Could not stop the process on :${port}`, { description: errorDetail(error) ?? String(error) });
-    } finally {
-      setState("idle");
-      refreshPorts(environmentId);
-    }
-  }
-
-  const confirming = state === "confirm";
-  return (
-    <button
-      type="button"
-      aria-label={confirming ? `Confirm stopping PID ${pid} on port ${port}` : `Stop process on port ${port}`}
-      title={confirming ? "Click again to stop" : `Stop PID ${pid}`}
-      disabled={state === "stopping"}
-      onClick={(event) => {
-        event.stopPropagation();
-        if (state === "idle") setState("confirm");
-        else if (confirming) void stop();
-      }}
-      className={cn(
-        "pointer-events-auto flex h-4 shrink-0 items-center gap-1 rounded-sm px-0.5 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-60",
-        confirming ? "text-destructive" : "text-muted-foreground/70 hover:text-destructive",
-      )}
-    >
-      <Icon
-        name={state === "stopping" ? "Loading" : "StopCircle"}
-        className={cn("size-3", state === "stopping" && "animate-spin motion-reduce:animate-none")}
-        aria-hidden
-      />
-      {confirming ? "Stop" : null}
-    </button>
   );
 }
 

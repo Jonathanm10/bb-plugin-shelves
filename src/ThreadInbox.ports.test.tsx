@@ -60,8 +60,7 @@ it("shows port details in the thread hover card", async () => {
   expect(details.textContent).toContain("127.0.0.1 · PID 1234");
   expect(details.textContent).toContain(":5432 postgres");
   expect(details.textContent).toContain("Docker · app-db-1");
-  expect(within(details).getByRole("button", { name: "Stop process on port 3000" })).toBeDefined();
-  // Docker containers are stopped with Docker, not by signalling a PID.
+  expect(within(details).queryByRole("button", { name: "Stop process on port 3000" })).toBeNull();
   expect(within(details).queryByRole("button", { name: "Stop process on port 5432" })).toBeNull();
   expect(screen.queryByRole("img", { name: "Open ports started by this thread" })).toBeNull();
   const portLink = screen.getAllByRole("link", { name: "Open port 3000" })[0]!;
@@ -109,53 +108,6 @@ it("keeps a long workspace port list accessible even without local links", async
   fireEvent.click(await screen.findByRole("button", { name: /Workspace ports \(20\)/ }));
   const list = await screen.findByRole("region", { name: "Workspace port list" });
   expect(within(list).getByText(":8019")).toBeDefined();
-});
-it("stops a workspace port process only after a second press", async () => {
-  const stopWorkspacePort = vi.fn(() => ({ signalled: [3000], skipped: [], failed: [] }));
-  let groups = [
-    { environmentId: "env_ports", ports: [{ port: 3000, processName: "node", pid: 1234, source: "process" as const }] },
-  ];
-  const getOpenPorts = vi.fn(() => ({ groups }));
-  renderSlot(inbox, listProps, {
-    sidebarThreads: {
-      status: "ready",
-      projects: [],
-      threads: [
-        thread({
-          id: "thr_ports",
-          title: "Stoppable",
-          environment: {
-            id: "env_ports",
-            name: null,
-            branchName: "main",
-            workspaceDisplayKind: "other",
-            path: null,
-            isWorktree: null,
-            providerId: null,
-          },
-        }),
-      ],
-    },
-    rpc: {
-      listLifecycle: () => ({ rows: [] }),
-      getThreadExecutionDetails: () => null,
-      getOpenPorts,
-      stopWorkspacePort,
-    },
-  });
-  fireEvent.pointerMove(screen.getByRole("link", { name: "Stoppable" }), { pointerType: "mouse" });
-  const details = await screen.findByRole("dialog", { name: "Thread details" });
-  fireEvent.click(await within(details).findByRole("button", { name: /Workspace ports \(1\)/ }));
-  fireEvent.click(within(details).getByRole("button", { name: "Stop process on port 3000" }));
-  expect(stopWorkspacePort).not.toHaveBeenCalled();
-  groups = [];
-  const scans = getOpenPorts.mock.calls.length;
-  fireEvent.click(within(details).getByRole("button", { name: "Confirm stopping PID 1234 on port 3000" }));
-  await waitFor(() =>
-    expect(stopWorkspacePort).toHaveBeenCalledWith({ threadId: "thr_ports", port: { port: 3000, pid: 1234 } }),
-  );
-  await waitFor(() => expect(getOpenPorts.mock.calls.length).toBeGreaterThan(scans));
-  await waitFor(() => expect(details.textContent).not.toContain("Workspace ports"));
 });
 it("marks only the owning thread without a count and clears its icon when the port closes", async () => {
   const environment = {

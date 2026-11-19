@@ -40,6 +40,7 @@ it("settles quiet work and wakes it on activity without changing the selected th
   // The mounted sidebar evaluates immediately; no manual filing or tab change.
 
   const settled = await screen.findByRole("region", { name: "Settled" });
+  expect(within(settled).queryByRole("button", { name: "Close terminals and ports of settled threads" })).toBeNull();
   expect(within(active).queryByRole("link", { name: "Quiet task" })).toBeNull();
   fireEvent.click(within(settled).getByRole("button", { expanded: false }));
   expect(within(settled).getByRole("link", { name: /Quiet task$/ })).toBeDefined();

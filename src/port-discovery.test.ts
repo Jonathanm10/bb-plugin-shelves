@@ -65,9 +65,6 @@ describe("sidebar port discovery", () => {
       expect(scan).toHaveBeenCalledTimes(2);
       await discover();
       expect(scan).toHaveBeenCalledTimes(2);
-      discover.invalidate();
-      await discover();
-      expect(scan).toHaveBeenCalledTimes(4);
       scan.mockClear();
       offline = true;
       clock.mockReturnValue(131_000);
@@ -241,43 +238,11 @@ describe("sidebar port discovery", () => {
       clock.mockReturnValue(30_000);
       await discover({ environmentIds: ["env_a"] });
       expect(roots().at(-1)).toEqual(["env_a"]);
-      discover.invalidate();
+      clock.mockReturnValue(60_000);
       await discover({ environmentIds: ["env_a"] });
       expect(roots()).toHaveLength(4);
     } finally {
       clock.mockRestore();
-      await harness.lifecycle.dispose();
-    }
-  });
-
-  it("answers a scan that an invalidation overtook, but does not reuse it", async () => {
-    let release!: () => void;
-    const scan = vi.fn(
-      () =>
-        new Promise<{ ports: { environmentId: string; port: number }[] }>((resolve) => {
-          release = () => resolve({ ports: [{ environmentId: "env_a", port: 3000 }] });
-        }),
-    );
-    const { bb, harness } = createFakePluginHost({
-      experimental_callHostRpc: scan,
-      sdk: {
-        environments: {
-          list: async () => [{ id: "env_a", status: "ready", path: "/workspace/a", hostId: "host_1" }] as Environment[],
-        },
-      },
-    });
-    try {
-      const discover = createPortDiscovery(bb);
-      const first = discover({ environmentIds: ["env_a"] });
-      await vi.waitFor(() => expect(scan).toHaveBeenCalledTimes(1));
-      discover.invalidate();
-      release();
-      expect((await first).groups).toHaveLength(1);
-      const second = discover({ environmentIds: ["env_a"] });
-      await vi.waitFor(() => expect(scan).toHaveBeenCalledTimes(2));
-      release();
-      await second;
-    } finally {
       await harness.lifecycle.dispose();
     }
   });
@@ -361,6 +326,7 @@ describe("sidebar port discovery", () => {
             [
               { id: "env_a", status: "ready", path: "/workspace/a", hostId: "host_a" },
               { id: "env_b", status: "ready", path: "/workspace/b", hostId: "host_b" },
+              { id: "env_c", status: "ready", path: "/workspace/c", hostId: "host_a" },
             ] as Environment[],
         },
       },
@@ -372,8 +338,7 @@ describe("sidebar port discovery", () => {
       clock.mockReturnValue(1_000);
       await discover({ environmentIds: ["env_b"] });
       clock.mockReturnValue(2_000);
-      discover.invalidate();
-      await discover({ environmentIds: ["env_a"] });
+      await discover({ environmentIds: ["env_c"] });
       expect(scan.mock.calls.map(([call]) => call.hostId)).toEqual(["host_a", "host_b"]);
     } finally {
       clock.mockRestore();

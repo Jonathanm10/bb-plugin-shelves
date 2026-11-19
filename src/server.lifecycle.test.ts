@@ -97,7 +97,7 @@ describe("lifecycle RPC", () => {
     await expect(harness.behavior.callRpc("listLifecycle", {})).resolves.toEqual(before);
   });
 
-  it("legacy Park releases the agent session and only the terminals nobody used", async () => {
+  it("legacy Park files work without releasing runtimes or terminals", async () => {
     const { bb, harness } = createFakePluginHost({
       pluginId: "bb-sidebar-clean",
       sdk: {
@@ -124,12 +124,10 @@ describe("lifecycle RPC", () => {
 
     await expect(harness.behavior.callRpc("park", { threadId: "thr_1" })).resolves.toEqual({
       ok: true,
-      reclaim: { closedTerminals: 1, keptTerminals: 1, stoppedRuntime: true },
+      reclaim: { closedTerminals: 0, keptTerminals: 0, stoppedRuntime: false },
     });
-    expect(harness.inspection.sdk.callsTo("threads.stop")).toEqual([[{ threadId: "thr_1" }]]);
-    expect(harness.inspection.sdk.callsTo("terminals.close")).toEqual([
-      [{ terminalId: "term_idle", mode: "if-clean" }],
-    ]);
+    expect(harness.inspection.sdk.callsTo("threads.stop")).toEqual([]);
+    expect(harness.inspection.sdk.callsTo("terminals.close")).toEqual([]);
   });
 
   it("settles even when the runtime and terminals cannot be reached", async () => {
@@ -160,32 +158,6 @@ describe("lifecycle RPC", () => {
     });
     const settled = (await harness.behavior.callRpc("listLifecycle", {})) as LifecycleListResult;
     expect(settled.rows).toEqual([expect.objectContaining({ threadId: "thr_1", settledOverride: "settled" })]);
-  });
-
-  it("releases every archived runtime even when one stop fails", async () => {
-    const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar-clean",
-      sdk: {
-        threads: {
-          stop: async ({ threadId }: { threadId: string }) => {
-            if (threadId === "thr_offline") throw new Error("host offline");
-            return { ok: true as const };
-          },
-        },
-      },
-    });
-    await plugin(bb);
-    disposers.push(() => harness.lifecycle.dispose());
-
-    await expect(
-      harness.behavior.callRpc("releaseRuntimes", {
-        threadIds: ["thr_offline", "thr_1"],
-      }),
-    ).resolves.toEqual({ ok: true });
-    expect(harness.inspection.sdk.callsTo("threads.stop")).toEqual([
-      [{ threadId: "thr_offline" }],
-      [{ threadId: "thr_1" }],
-    ]);
   });
 
   it("keeps settle and snooze mutually exclusive", async () => {

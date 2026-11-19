@@ -7,7 +7,6 @@ import { ProjectFavicon, ProjectStripe } from "./ProjectFavicon";
 import { useProjectColor } from "./ProjectColors";
 import type { ThreadReorderControls } from "./ThreadCard";
 import { SlimRow } from "./SlimRow";
-import { CleanSettledDialog } from "./CleanSettledDialog";
 import { TRAILING_GLYPH_BOX_CLASS } from "./StatusSlot";
 import { projectIconUrl } from "./project-icons";
 import type { GroupAlert, ProjectViewUnit } from "./inbox-layout";
@@ -48,7 +47,6 @@ export function CompactShelf({
 }) {
   const { lifecycle } = useInboxEnvironment();
   const { activeThreadId, now: clockNow } = useInboxActivity();
-  const { onNavigate } = useInboxActions();
   const attachListMotionRef = useListMotion<HTMLUListElement>();
   const now = useMemo(() => Date.now(), [clockNow, visibleThreads]);
   if (threads.length === 0 && shelf !== "settled") return null;
@@ -62,11 +60,6 @@ export function CompactShelf({
       count={threads.length}
       expanded={expanded}
       onToggle={onToggle}
-      action={
-        shelf === "settled" ? (
-          <CleanSettledDialog threadIds={threads.map((thread) => thread.id)} onNavigate={onNavigate} />
-        ) : undefined
-      }
     >
       <ul ref={attachListMotionRef} className="flex flex-col gap-px">
         {visibleThreads.map((thread) => (

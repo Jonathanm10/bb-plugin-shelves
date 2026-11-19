@@ -191,36 +191,6 @@ it("child activity publishes lifecycle changes that reopen a settled parent", as
   await within(await screen.findByRole("region", { name: "Active" })).findByText("Work a");
 });
 
-it("Clean uses the real preview token and renders the cleanup result shape", async () => {
-  const wired = await createWired([item()], { terminals: true });
-  // Seed only lifecycle: settling would intentionally reclaim the terminal first.
-  wired.db
-    .prepare("INSERT INTO thread_lifecycle (thread_id, settled_at, settled_override) VALUES (?, ?, 'settled')")
-    .run("a", Date.now());
-  const slot = wired.mount();
-  const settled = await shelf("Settled");
-  fireEvent.click(within(settled).getByRole("button", { name: "Close terminals and ports of settled threads" }));
-  const dialog = await screen.findByRole("dialog", { name: "Clean settled resources?" });
-  await within(dialog).findByText("1 terminal to close");
-  fireEvent.click(within(dialog).getByRole("button", { name: "Clean resources" }));
-  await waitFor(() => expect(dialog.textContent).toContain("1 terminal closed"));
-  expect(slot.inspection.rpcCalls.find((call) => call.method === "cleanSettled")?.input).toEqual({
-    token: expect.any(String),
-  });
-  expect(wired.harness.inspection.sdk.callsTo("terminals.close")[0]).toEqual([
-    { terminalId: "terminal_1", mode: "force" },
-  ]);
-  expect(lifecycle(wired)).toMatchObject({ settled_override: "settled" });
-  const preview = (await wired.call("previewSettledCleanup", { threadIds: ["a"] })) as { token: string };
-  expect(await wired.call("cleanSettled", { token: preview.token })).toEqual({
-    closedTerminals: 0,
-    signalledPorts: [],
-    remainingPorts: [],
-    skipped: [],
-    failed: [],
-  });
-});
-
 it("thread.deleted clears lifecycle and order and publishes both channels to the app", async () => {
   const wired = await createWired([item(), item("b")]);
   await wired.call("park", { threadId: "a" });

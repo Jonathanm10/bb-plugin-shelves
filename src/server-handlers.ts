@@ -1,13 +1,11 @@
 import type { ServerContext, ServerHandlers } from "./server-context";
 import type { createServerLifecycle } from "./server-lifecycle";
-import type { createThreadPortActions } from "./thread-ports";
 import type { createServerProjectIcons } from "./server-project-icons";
 import type { createServerProjectColors } from "./server-project-colors";
 import type { createServerProjectManagement } from "./server-project-management";
 import type { createServerSettleActions } from "./server-settle-actions";
 import type { createServerSettings } from "./server-settings";
 import type { createServerPolicy } from "./server-policy";
-import type { createServerSettleCleanup } from "./server-settle-cleanup";
 import type { createPortDiscovery } from "./port-discovery";
 import type { createThreadPullRequests } from "./thread-pull-requests";
 import type { createTitleRegenerator } from "./regenerate-title";
@@ -15,7 +13,6 @@ import { SIDEBAR_SETTINGS_CHANNEL } from "./contract";
 import { INBOX_ORDER_TAG, SIDEBAR_SETTINGS_TAG } from "./rpc-tags";
 import { canSnooze } from "./lifecycle";
 import { EMPTY_RECLAIM } from "./reclaim";
-import { runThreadTasks } from "./thread-tasks";
 
 const CATALOG_TTL_MS = 5 * 60_000;
 
@@ -24,8 +21,6 @@ export function createServerHandlers(
   lifecycle: ReturnType<typeof createServerLifecycle>,
   settings: Awaited<ReturnType<typeof createServerSettings>>,
   policy: ReturnType<typeof createServerPolicy>,
-  cleanup: ReturnType<typeof createServerSettleCleanup>,
-  threadPortActions: ReturnType<typeof createThreadPortActions>,
   getOpenPorts: ReturnType<typeof createPortDiscovery>,
   threadPullRequests: ReturnType<typeof createThreadPullRequests>,
   regenerateTitle: ReturnType<typeof createTitleRegenerator>,
@@ -38,7 +33,6 @@ export function createServerHandlers(
 ) {
   const { readSidebarSettings, writeSidebarSettings } = settings;
   const { evaluatePolicies } = policy;
-  const { reclaimThreadResources } = cleanup;
   const { readOne, readAll, withPinParentChange, write, clear, readInboxOrder, replaceInboxOrder, wakeAncestors } =
     lifecycle;
 
@@ -62,25 +56,7 @@ export function createServerHandlers(
 
   const handlers = {
     getOpenPorts,
-    getThreadPorts: threadPortActions.getThreadPorts,
     getThreadPullRequests: threadPullRequests.getThreadPullRequests,
-    async closeThreadPorts(input) {
-      if (readOne(input.threadId)?.settledOverride !== "settled") {
-        throw new Error("Thread is no longer settled");
-      }
-      try {
-        return await threadPortActions.closeThreadPorts(input);
-      } finally {
-        getOpenPorts.invalidate();
-      }
-    },
-    async stopWorkspacePort({ threadId, port }) {
-      try {
-        return await threadPortActions.closeThreadPorts({ threadId, ports: [port], scope: "workspace" });
-      } finally {
-        getOpenPorts.invalidate();
-      }
-    },
     async getThreadExecutionDetails({ threadId }) {
       const options = await ctx.bb.sdk.threads.defaultExecutionOptions({ threadId });
       if (!options) return null;
@@ -205,7 +181,7 @@ export function createServerHandlers(
         snoozedUntil: null,
         snoozedAt: null,
       });
-      return { ok: true, reclaim: await reclaimThreadResources(threadId) };
+      return { ok: true, reclaim: { ...EMPTY_RECLAIM } };
     },
     async resume({ threadId }) {
       write({
@@ -242,22 +218,6 @@ export function createServerHandlers(
         return { ok: true, reclaim: { ...EMPTY_RECLAIM } };
       });
     },
-
-    async releaseRuntimes({ threadIds }) {
-      // bb's archive force-closes a thread's terminals but only stops its
-      // runtime when a turn is in flight, so an idle thread archived from this
-      // sidebar keeps its agent session loaded. Stopping an idle thread takes
-      // bb's release path instead. Archived threads still accept a stop, so
-      // this can race the archive, and a failure only misses a reclaim.
-      await runThreadTasks(
-        threadIds,
-        async (threadId) => {
-          await ctx.bb.sdk.threads.stop({ threadId });
-        },
-        4,
-      );
-      return { ok: true };
-    },
     async unsnooze({ threadId }) {
       clear(threadId);
       return { ok: true };
@@ -282,10 +242,7 @@ export function createServerHandlers(
   } satisfies Pick<
     ServerHandlers,
     | "getOpenPorts"
-    | "getThreadPorts"
     | "getThreadPullRequests"
-    | "closeThreadPorts"
-    | "stopWorkspacePort"
     | "getThreadExecutionDetails"
     | "setThreadParent"
     | "deleteThread"
@@ -297,7 +254,6 @@ export function createServerHandlers(
     | "park"
     | "resume"
     | "snooze"
-    | "releaseRuntimes"
     | "unsnooze"
     | "acknowledgeWake"
     | "listInboxOrder"
@@ -306,7 +262,6 @@ export function createServerHandlers(
   >;
 
   return {
-    ...cleanup.handlers,
     ...modules.settle.handlers,
     ...modules.colors.handlers,
     ...modules.icons.handlers,

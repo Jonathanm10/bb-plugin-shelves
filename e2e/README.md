@@ -114,7 +114,7 @@ snooze/wake, settle/Undo, the complete right-click menu and its Copy thread link
 change that updates visible snooze options and persists after reload. They also
 cover park/resume across reload, project filtering, custom project name/stripe
 colors through computed styles across reload, child-chip expansion/collapse,
-and the Settled Clean preview. Server assertions check core pin/idle/parent
+and native thread actions. Server assertions check core pin/idle/parent
 state and plugin lifecycle/order/settings/color state. No production test IDs
 were added. The visual capture uses the existing `data-bb-sidebar-root` marker
 because the whole plugin container has no accessible role.
@@ -129,12 +129,6 @@ The family is deleted at teardown; its background turns cannot affect later test
 The color flow clears its override and settings in a `finally` block. These
 seeds and overrides are gone before the four original snapshot captures.
 
-The Clean flow settles all four original seeds, which share a checkout, so an
-Active fixture cannot protect the workspace and hide resources. These seeds
-have no terminals or owned listening ports. The empty dialog offers Cancel,
-with no Clean resources button. The test calls the real cleanup RPC with the
-UI preview's token and verifies zero closed resources and unchanged thread,
-terminal, and lifecycle state. It does not exercise closing a real terminal.
 
 ## Visual baselines
 

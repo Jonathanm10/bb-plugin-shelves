@@ -34,7 +34,6 @@ export function createPortDiscovery(bb: BbPluginApi) {
   bb.onDispose(() => controller.abort());
   const cache = new Map<string, { ports: OpenPort[]; at: number }>();
   const pending = new Map<string, Promise<ReadonlyMap<string, OpenPort[]>>>();
-  let generation = 0;
   const failures = new Map<string, { attempts: number; retryAt: number }>();
 
   async function scan(environmentIds: readonly string[]): Promise<ReadonlyMap<string, OpenPort[]>> {
@@ -95,14 +94,10 @@ export function createPortDiscovery(bb: BbPluginApi) {
     const wanted = [...new Set(environmentIds)];
     const missing = wanted.filter((id) => !cache.has(id) && !pending.has(id));
     if (missing.length) {
-      const scanGeneration = generation;
       const run = scan(missing)
         .then((found) => {
-          // A scan that started before an invalidation answers its callers but is not reused.
-          if (scanGeneration === generation) {
-            const at = Date.now();
-            for (const [id, ports] of found) cache.set(id, { ports, at });
-          }
+          const at = Date.now();
+          for (const [id, ports] of found) cache.set(id, { ports, at });
           return found;
         })
         .finally(() => {
@@ -120,10 +115,5 @@ export function createPortDiscovery(bb: BbPluginApi) {
       ),
     };
   };
-  return Object.assign(discover, {
-    invalidate() {
-      generation++;
-      cache.clear();
-    },
-  });
+  return discover;
 }

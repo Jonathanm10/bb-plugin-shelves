@@ -8,7 +8,6 @@ import {
   projectThread,
   projectsWith,
   pullRequestStatus,
-  terminalSession,
   type LifecycleListResult,
   type ProjectThread,
 } from "./test-server";
@@ -97,71 +96,6 @@ describe("children of older parent-only settles", () => {
     insertRow(bb, "parent");
     await harness.behavior.callRpc("evaluateAutoSettle", {});
     expect((await rowsOf(harness)).map((row) => row.threadId)).toEqual(["parent"]);
-  });
-
-  it("stops protecting the shared workspace once the child has its row", async () => {
-    const shared = { environmentId: "env_shared", environmentHostId: "host_1", environmentPath: "/workspace/shared" };
-    const threads = [
-      projectThread({ id: "parent", title: "Parent", latestAttentionAt: 50, ...shared }),
-      projectThread({ id: "child", title: "Child", parentThreadId: "parent", latestAttentionAt: 90, ...shared }),
-    ];
-    const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar-clean",
-      experimental_callHostRpc: async ({ method, input }) => {
-        if (method === "resolveRoots")
-          return {
-            roots: (input as { roots: Array<{ environmentId: string }> }).roots.map((root) => ({
-              environmentId: root.environmentId,
-              path: "/workspace/shared",
-            })),
-          };
-        if (method === "scan") return { ports: [] };
-        throw new Error(`Unexpected host call: ${method}`);
-      },
-      sdk: {
-        plugins: { ...manualOnly, callRpc: pullRequestStatus(() => ({ outcome: "absent" })) },
-        projects: { list: async () => projectsWith(threads) },
-        threads: { get: async ({ threadId }) => makeThreadResponse({ id: threadId, environmentId: "env_shared" }) },
-        environments: {
-          get: async () =>
-            ({ id: "env_shared", hostId: "host_1", path: "/workspace/shared", status: "ready" }) as Awaited<
-              ReturnType<typeof bb.sdk.environments.get>
-            >,
-        },
-        terminals: {
-          list: async ({ scope }) => ({
-            sessions:
-              scope.threadId === "parent"
-                ? [{ ...terminalSession({ id: "term_dev", environmentId: "env_shared" }), threadId: "parent" }]
-                : [],
-          }),
-        },
-      },
-    });
-    await plugin(bb);
-    disposers.push(() => harness.lifecycle.dispose());
-    insertRow(bb, "parent");
-
-    const before = (await harness.behavior.callRpc("previewSettledCleanup", { threadIds: ["parent"] })) as {
-      threads: unknown[];
-      skipped: unknown[];
-    };
-    expect(before.threads).toEqual([]);
-    expect(before.skipped).toEqual([
-      {
-        threadId: "parent",
-        resource: "terminal",
-        message: 'Kept 1 terminal open: shares a workspace with "Child", which is not settled',
-      },
-    ]);
-
-    await harness.behavior.callRpc("evaluateAutoSettle", {});
-    const after = (await harness.behavior.callRpc("previewSettledCleanup", { threadIds: ["parent"] })) as {
-      threads: unknown[];
-      skipped: unknown[];
-    };
-    expect(after.threads).toEqual([expect.objectContaining({ threadId: "parent", terminalCount: 1 })]);
-    expect(after.skipped).toEqual([]);
   });
 });
 
