@@ -49,7 +49,7 @@ describe("ThreadInbox", () => {
         inactiveAfterHours: 6,
       },
     };
-    localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(storedSettings));
+    localStorage.setItem("bb-thread-inbox:settings-cache:v1", JSON.stringify(storedSettings));
 
     const now = Date.now();
     renderSlot(inbox, listProps, {
@@ -94,7 +94,7 @@ describe("ThreadInbox", () => {
         inactiveAfterHours: 6,
       },
     };
-    localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(storedSettings));
+    localStorage.setItem("bb-thread-inbox:settings-cache:v1", JSON.stringify(storedSettings));
 
     renderSlot(inbox, listProps, {
       sidebarThreads: {
@@ -262,12 +262,12 @@ describe("ThreadInbox", () => {
     expect(
       rowLinks(activeShelf).every((link) => link.getAttribute("aria-keyshortcuts") === "Alt+ArrowUp Alt+ArrowDown"),
     ).toBe(true);
-    await waitFor(() => expect(window.localStorage.getItem("bb-sidebar-clean:active-sort:v1")).toBe("project"));
+    await waitFor(() => expect(window.localStorage.getItem("bb-thread-inbox:active-sort:v1")).toBe("project"));
   });
 
   it("migrates the previous project grouping preference", async () => {
-    localStorage.removeItem("bb-sidebar-clean:active-sort:v1");
-    window.localStorage.setItem("bb-sidebar-clean:active-grouping:v1", "true");
+    localStorage.removeItem("bb-thread-inbox:active-sort:v1");
+    window.localStorage.setItem("bb-thread-inbox:active-grouping:v1", "true");
     render([thread({ id: "saved", title: "Saved grouping" })]);
 
     expect(
@@ -275,14 +275,14 @@ describe("ThreadInbox", () => {
         name: "Sort active threads: Project",
       }),
     ).toBeDefined();
-    await waitFor(() => expect(window.localStorage.getItem("bb-sidebar-clean:active-sort:v1")).toBe("project"));
+    await waitFor(() => expect(window.localStorage.getItem("bb-thread-inbox:active-sort:v1")).toBe("project"));
   });
 
   it("names a project once in a header when it has two or more threads", () => {
-    window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
-    window.localStorage.setItem("bb-sidebar-clean:single-thread-project-grouping:v1", "false");
+    window.localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
+    window.localStorage.setItem("bb-thread-inbox:single-thread-project-grouping:v1", "false");
     window.localStorage.setItem(
-      "bb-sidebar-clean:inbox-order-cache:v1",
+      "bb-thread-inbox:inbox-order-cache:v1",
       JSON.stringify(["web-1", "zed-1", "web-2", "api-1"]),
     );
     render(
@@ -317,7 +317,7 @@ describe("ThreadInbox", () => {
   });
 
   it("hides project headers while Active is collapsed", async () => {
-    window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+    window.localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
     renderSlot(
       inbox,
       { ...listProps, activeThreadId: "web-2" },
@@ -346,7 +346,7 @@ describe("ThreadInbox", () => {
   });
 
   it("gives one-thread projects a collapsible header until the option is turned off", async () => {
-    window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+    window.localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
     render(
       [
         thread({ id: "zed-1", projectId: "zed", title: "Zed thread", createdAt: 2 }),
@@ -370,13 +370,13 @@ describe("ThreadInbox", () => {
     fireEvent.click(option);
     expect(headers()).toEqual([]);
     await waitFor(() =>
-      expect(window.localStorage.getItem("bb-sidebar-clean:single-thread-project-grouping:v1")).toBe("false"),
+      expect(window.localStorage.getItem("bb-thread-inbox:single-thread-project-grouping:v1")).toBe("false"),
     );
   });
 
   it("looks like manual order when no project has a second thread", () => {
-    window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
-    window.localStorage.setItem("bb-sidebar-clean:single-thread-project-grouping:v1", "false");
+    window.localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
+    window.localStorage.setItem("bb-thread-inbox:single-thread-project-grouping:v1", "false");
     render(
       [
         thread({ id: "zed-1", projectId: "zed", title: "Zed thread", createdAt: 2 }),
@@ -396,7 +396,7 @@ describe("ThreadInbox", () => {
   });
 
   it("collapses a project, keeping the open thread and the choice", async () => {
-    window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+    window.localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
     renderSlot(
       inbox,
       { ...listProps, activeThreadId: "web-2" },
@@ -427,13 +427,13 @@ describe("ThreadInbox", () => {
     ).toEqual([expect.stringContaining("Second")]);
     expect(screen.getByText("Third")).toBeDefined();
     await waitFor(() =>
-      expect(window.localStorage.getItem("bb-sidebar-clean:project-collapse:v1")).toBe(JSON.stringify(["web"])),
+      expect(window.localStorage.getItem("bb-thread-inbox:project-collapse:v1")).toBe(JSON.stringify(["web"])),
     );
   });
 
   it("marks a collapsed project with a dot for each kind of news it hides", async () => {
-    window.localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
-    window.localStorage.setItem("bb-sidebar-clean:project-collapse:v1", JSON.stringify(["web"]));
+    window.localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
+    window.localStorage.setItem("bb-thread-inbox:project-collapse:v1", JSON.stringify(["web"]));
     render(
       [
         thread({ id: "web-1", projectId: "web", title: "Done", indicator: "unread-success" }),

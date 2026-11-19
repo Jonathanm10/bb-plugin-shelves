@@ -1,6 +1,6 @@
 import type { BbPluginApi } from "@get-bb/plugin-sdk";
 import type { ServerContext } from "./server-context";
-import { bbSidebarRpcContract } from "./contract";
+import { threadInboxRpcContract } from "./contract";
 import { INBOX_ORDER_TAG } from "./rpc-tags";
 import { createServerSettings, INSTALL_DEFAULTS_MIGRATIONS } from "./server-settings";
 import { createServerLifecycle, LIFECYCLE_BACKFILLS_MIGRATION } from "./server-lifecycle";
@@ -154,7 +154,7 @@ export default async function plugin(bb: BbPluginApi) {
   ctx.bb.background.schedule("auto-settle", "*/5 * * * *", async () => {
     await policy.evaluatePolicies();
   });
-  ctx.bb.rpc.register(bbSidebarRpcContract, handlers);
+  ctx.bb.rpc.register(threadInboxRpcContract, handlers);
   ctx.bb.cli.register(createServerCli(lifecycle, handlers));
   // New or resumed child work reopens the ancestor path, keeping its existing
   // sidebar nesting reachable. Siblings retain their own settled state.

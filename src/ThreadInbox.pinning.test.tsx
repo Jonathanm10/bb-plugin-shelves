@@ -131,7 +131,7 @@ describe("ThreadInbox", () => {
 
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith("Could not pin thread", {
-        className: "bb-sidebar-toast",
+        className: "bb-thread-inbox-toast",
         description: "pin update failed",
       }),
     );

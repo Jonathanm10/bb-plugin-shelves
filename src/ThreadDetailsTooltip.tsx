@@ -1,7 +1,7 @@
 import { useProviders, useSidebarThreadSplit, useSidebarThreads } from "./bb-sdk";
 import { useEffect, useId, useState, type ReactElement } from "react";
 import { useRpc, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import { ThreadHoverCard } from "./components/ThreadHoverCard";
 import { threadDisplayTitle } from "./inbox";
 import { Icon, type IconName } from "./components/Icon";
@@ -29,7 +29,7 @@ export function ThreadDetailsTooltip({
   const { providers } = useProviders();
   const provider = providers.find((entry) => entry.id === thread.providerId);
   const { projects, threads } = useSidebarThreads();
-  const { call } = useRpc<typeof bbSidebarRpcContract>();
+  const { call } = useRpc<typeof threadInboxRpcContract>();
   const [open, setOpen] = useState(false);
   const [subthreadsExpanded, setSubthreadsExpanded] = useState(false);
   const subthreadsId = useId();

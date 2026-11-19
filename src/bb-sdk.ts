@@ -14,7 +14,7 @@ import type {
   StandardSchemaV1,
   experimental_PluginRpcCallError,
 } from "@get-bb/plugin-sdk/app";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import {
   GITHUB_PR_STATUS_PLUGIN_ID,
   type EnvironmentPullRequest,
@@ -81,7 +81,7 @@ function schema<T>(validate: (value: unknown) => value is T): StandardSchemaV1<T
   return {
     "~standard": {
       version: 1,
-      vendor: "bb-sidebar-clean",
+      vendor: "bb-thread-inbox",
       validate: (value) => (validate(value) ? { value } : { issues: [{ message: "Unexpected value" }] }),
     },
   };
@@ -118,7 +118,7 @@ export function useEnvironmentPullRequest(environmentId: string | null): Environ
   return row?.outcome === "available" ? row.pullRequest : null;
 }
 
-type SidebarRpc = typeof bbSidebarRpcContract;
+type SidebarRpc = typeof threadInboxRpcContract;
 type NoInput = Record<string, never>;
 
 /**

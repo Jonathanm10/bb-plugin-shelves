@@ -113,7 +113,7 @@ export function CompactRow({
                   : cn(
                       "max-w-[40%] shrink truncate",
                       projectColor
-                        ? "bb-sidebar-project-name"
+                        ? "bb-thread-inbox-project-name"
                         : !muted || isActive
                           ? "text-muted-foreground/70"
                           : "text-muted-foreground/50 group-hover/slim:text-muted-foreground/70",

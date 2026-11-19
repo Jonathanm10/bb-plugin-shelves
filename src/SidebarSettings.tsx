@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRealtime, useRpc } from "@get-bb/plugin-sdk/app";
 import { errorDetail, toast } from "./lib/toast";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import { SIDEBAR_SETTINGS_CHANNEL } from "./realtime-channels";
 import {
   cachedSidebarSettings,
@@ -54,7 +54,7 @@ const validDraft = (value: SidebarSettingsValues) =>
  * settings do; a value that fails validation shows why and is not sent.
  */
 export function SidebarSettings() {
-  const rpc = useRpc<typeof bbSidebarRpcContract>();
+  const rpc = useRpc<typeof threadInboxRpcContract>();
   const loadRequestSeq = useRef(0);
   const initialSettings = cachedSidebarSettings(rpc);
   const [saved, setSaved] = useState<SidebarSettingsValues>(initialSettings ?? DEFAULT_SIDEBAR_SETTINGS);

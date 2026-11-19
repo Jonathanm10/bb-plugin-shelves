@@ -5,7 +5,7 @@ import { test as base, expect } from "@playwright/test";
 
 if (!process.env.E2E_FIXTURE) throw new Error("Use npm run e2e so the scratch launcher owns the server");
 export const fixture = JSON.parse(readFileSync(process.env.E2E_FIXTURE, "utf8"));
-if (new URL(fixture.url).port === "38886" || !fixture.env.BB_DATA_DIR.startsWith("/tmp/bb-sidebar-smoke-")) {
+if (new URL(fixture.url).port === "38886" || !fixture.env.BB_DATA_DIR.startsWith("/tmp/bb-thread-inbox-smoke-")) {
   throw new Error("E2E fixture must target a scratch server");
 }
 
@@ -30,7 +30,7 @@ export const test = base.extend({
     page.on("console", (message) => {
       if (
         message.type() === "error" &&
-        /\[plugin:bb-sidebar\]|is not a function|ReferenceError|TypeError/.test(message.text())
+        /\[plugin:bb-thread-inbox\]|is not a function|ReferenceError|TypeError/.test(message.text())
       ) {
         errors.push(message.text());
       }
@@ -49,7 +49,7 @@ export async function cli(args) {
 }
 
 export async function rpc(request, method, input = {}) {
-  const response = await request.post(`${fixture.url}/api/v1/plugins/bb-sidebar-clean/rpc/${method}`, { data: input });
+  const response = await request.post(`${fixture.url}/api/v1/plugins/bb-thread-inbox/rpc/${method}`, { data: input });
   expect(response.ok(), `RPC ${method}: ${await response.text()}`).toBe(true);
   const payload = await response.json();
   expect(payload.ok, `RPC ${method} failed`).toBe(true);
@@ -92,10 +92,10 @@ export async function open(page, { theme = "light", width = 320, empty = false, 
       // Historical drag/grouping flows explicitly exercise saved manual order.
       // Core acceptance leaves preferences absent to exercise shipped defaults.
       if (!core) {
-        localStorage.getItem("bb-sidebar-clean:active-sort:v1") ??
-          localStorage.setItem("bb-sidebar-clean:active-sort:v1", "manual");
-        localStorage.getItem("bb-sidebar-clean:shelf-expansion:v1") ??
-          localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ working: true }));
+        localStorage.getItem("bb-thread-inbox:active-sort:v1") ??
+          localStorage.setItem("bb-thread-inbox:active-sort:v1", "manual");
+        localStorage.getItem("bb-thread-inbox:shelf-expansion:v1") ??
+          localStorage.setItem("bb-thread-inbox:shelf-expansion:v1", JSON.stringify({ working: true }));
       }
       // The pinned bb 0.49 host reserves 60 px outside the plugin body.
       localStorage.setItem("bb.sidebar.width", String(width + 60));

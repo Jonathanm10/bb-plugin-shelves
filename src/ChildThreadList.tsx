@@ -366,12 +366,12 @@ function ChildThreadRow({
           needsYou &&
             !isActive &&
             cn(
-              "bg-[color:var(--bb-sidebar-needs-you-tint)]",
-              "hover:bg-[color:var(--bb-sidebar-needs-you-tint-hover)]",
+              "bg-[color:var(--bb-thread-inbox-needs-you-tint)]",
+              "hover:bg-[color:var(--bb-thread-inbox-needs-you-tint-hover)]",
               // In dark the amber fill is only a 1.07:1 step off the sidebar,
               // so a leading rule carries where the fill cannot. It is
               // transparent in light, where the cream band already reads.
-              "shadow-[inset_2px_0_0_0_var(--bb-sidebar-needs-you-accent)]",
+              "shadow-[inset_2px_0_0_0_var(--bb-thread-inbox-needs-you-accent)]",
             ),
           // The open chat gets the same tint as an active parent card, so the
           // eye finds it in a long tree the way it finds a card in the list.

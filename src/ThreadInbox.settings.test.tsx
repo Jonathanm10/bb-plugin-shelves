@@ -10,7 +10,7 @@ await loadInboxApp();
 
 describe("sidebar settings", () => {
   it("keeps project colors opt-in and ignores the removed archive preview settings", async () => {
-    localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ settled: true, archived: true }));
+    localStorage.setItem("bb-thread-inbox:shelf-expansion:v1", JSON.stringify({ settled: true, archived: true }));
     let settings = { ...defaultSidebarSettings, archivedShelfEnabled: true };
     const rendered = renderSlot(inbox, listProps, {
       sidebarThreads: {
@@ -50,7 +50,7 @@ describe("sidebar settings", () => {
   });
 
   it("uses one continuous stripe for a project group and refreshes its custom color", async () => {
-    localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
+    localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
     let colors = { proj_1: "#123456" };
     const rendered = renderSlot(inbox, listProps, {
       sidebarThreads: {
@@ -71,7 +71,9 @@ describe("sidebar settings", () => {
     const group = await screen.findByRole("region", { name: "add_on project" });
     await waitFor(() =>
       expect(
-        (group.querySelector("[data-project-stripe]") as HTMLElement)?.style.getPropertyValue("--bb-sidebar-project"),
+        (group.querySelector("[data-project-stripe]") as HTMLElement)?.style.getPropertyValue(
+          "--bb-thread-inbox-project",
+        ),
       ).toBe("#123456"),
     );
     expect(group.querySelectorAll("[data-project-stripe]")).toHaveLength(1);
@@ -80,7 +82,9 @@ describe("sidebar settings", () => {
     await rendered.experimental_invalidateRpc(["project-colors"]);
     await waitFor(() =>
       expect(
-        (group.querySelector("[data-project-stripe]") as HTMLElement).style.getPropertyValue("--bb-sidebar-project"),
+        (group.querySelector("[data-project-stripe]") as HTMLElement).style.getPropertyValue(
+          "--bb-thread-inbox-project",
+        ),
       ).toBe("#fedcba"),
     );
     fireEvent.click(within(group).getByRole("button", { name: "add_on (2)" }));
@@ -88,9 +92,9 @@ describe("sidebar settings", () => {
   });
 
   it("limits stripes by display mode while keeping all project names colored", async () => {
-    localStorage.setItem("bb-sidebar-clean:active-sort:v1", "project");
-    localStorage.setItem("bb-sidebar-clean:single-thread-project-grouping:v1", "false");
-    localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ settled: true, archived: true }));
+    localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
+    localStorage.setItem("bb-thread-inbox:single-thread-project-grouping:v1", "false");
+    localStorage.setItem("bb-thread-inbox:shelf-expansion:v1", JSON.stringify({ settled: true, archived: true }));
     let settings = {
       ...defaultSidebarSettings,
       projectColorsEnabled: true,
@@ -132,8 +136,8 @@ describe("sidebar settings", () => {
     await screen.findByText("Settled row");
     const assertColor = (element: Element, showStripe: boolean) => {
       expect(element.querySelectorAll("[data-project-stripe]")).toHaveLength(showStripe ? 1 : 0);
-      expect(element.querySelector(".bb-sidebar-project-name")).not.toBeNull();
-      expect(element.querySelector(".bb-sidebar-project-monogram")).not.toBeNull();
+      expect(element.querySelector(".bb-thread-inbox-project-name")).not.toBeNull();
+      expect(element.querySelector(".bb-thread-inbox-project-monogram")).not.toBeNull();
     };
     const row = (title: string) => screen.getByText(title).closest("li")!;
     await waitFor(() => expect(row("Compact card").querySelector(".h-8")).not.toBeNull());
@@ -160,9 +164,9 @@ describe("sidebar settings", () => {
     }
     settings = { ...settings, projectColorsEnabled: false };
     await rendered.experimental_invalidateRpc(["sidebar-settings"]);
-    await waitFor(() => expect(document.querySelector(".bb-sidebar-project-name")).toBeNull());
+    await waitFor(() => expect(document.querySelector(".bb-thread-inbox-project-name")).toBeNull());
     expect(document.querySelector("[data-project-stripe]")).toBeNull();
-    expect(document.querySelector(".bb-sidebar-project-monogram")).toBeNull();
+    expect(document.querySelector(".bb-thread-inbox-project-monogram")).toBeNull();
   });
 
   it("groups related controls and saves changes without a save button", async () => {
@@ -308,7 +312,7 @@ describe("sidebar settings", () => {
     delete previous.childIconStyle;
     delete previous.projectColorDisplay;
     previous.projectColorsEnabled = true;
-    window.localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(previous));
+    window.localStorage.setItem("bb-thread-inbox:settings-cache:v1", JSON.stringify(previous));
     renderSlot(
       sidebarSettings,
       {},

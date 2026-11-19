@@ -4,7 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { destructiveButtonClass, secondaryButtonClass } from "./settings-ui";
 import { useBbContext, useBbNavigate, useRpc, useSdk, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
 import { errorDetail, toast } from "./lib/toast";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import { threadDisplayTitle } from "./inbox";
 import { usePortalScopeProps } from "./lib/portal-scope";
 
@@ -24,7 +24,7 @@ export function DeleteThreadDialog({
 }) {
   const { projects } = useSidebarThreads();
   const sdk = useSdk();
-  const rpc = useRpc<typeof bbSidebarRpcContract>();
+  const rpc = useRpc<typeof threadInboxRpcContract>();
   const navigate = useBbNavigate();
   const context = useBbContext();
   const portalScope = usePortalScopeProps();

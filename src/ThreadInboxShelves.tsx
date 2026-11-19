@@ -244,7 +244,7 @@ function ActiveProjectGroup({
             style={projectColor}
             className={cn(
               "min-w-0 truncate text-2xs font-medium",
-              projectColor ? "bb-sidebar-project-name" : "text-muted-foreground",
+              projectColor ? "bb-thread-inbox-project-name" : "text-muted-foreground",
             )}
           >
             {projectName}

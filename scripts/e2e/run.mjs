@@ -12,7 +12,7 @@ try {
   const threads = [];
   for (const title of titles) threads.push(await server.seed(title, { idle: true }));
   await server.checkIsolation("seeded");
-  const settingsResponse = await fetch(`${server.url}/api/v1/plugins/bb-sidebar-clean/rpc/getSidebarSettings`, {
+  const settingsResponse = await fetch(`${server.url}/api/v1/plugins/bb-thread-inbox/rpc/getSidebarSettings`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: "{}",

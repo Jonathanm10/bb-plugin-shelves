@@ -49,7 +49,7 @@ describe("parking threads", () => {
         inactiveAfterHours: 6,
       },
     };
-    localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(storedSettings));
+    localStorage.setItem("bb-thread-inbox:settings-cache:v1", JSON.stringify(storedSettings));
 
     const now = Date.now();
     const rows = [

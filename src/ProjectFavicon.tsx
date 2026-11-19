@@ -70,8 +70,8 @@ function ProjectMonogram({ name, className, projectId }: { name: string; classNa
       data-letter={projectMonogramLetter(name)}
       style={color}
       className={cn(
-        "bb-sidebar-monogram flex size-3.5 shrink-0 items-center justify-center rounded-[3px] text-[8px] font-semibold leading-none",
-        color ? "bb-sidebar-project-monogram" : `bb-sidebar-monogram-${projectMonogramColor(name)}`,
+        "bb-thread-inbox-monogram flex size-3.5 shrink-0 items-center justify-center rounded-[3px] text-[8px] font-semibold leading-none",
+        color ? "bb-thread-inbox-project-monogram" : `bb-thread-inbox-monogram-${projectMonogramColor(name)}`,
         className,
       )}
     />
@@ -100,7 +100,7 @@ export function ProjectStripe({
       data-project-stripe=""
       style={color}
       className={cn(
-        "bb-sidebar-project-stripe pointer-events-none absolute bottom-1.5 left-0.5 top-1.5 w-0.5 rounded-full",
+        "bb-thread-inbox-project-stripe pointer-events-none absolute bottom-1.5 left-0.5 top-1.5 w-0.5 rounded-full",
         className,
       )}
     />

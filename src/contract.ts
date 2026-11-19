@@ -65,7 +65,7 @@ export const sidebarSettingsSchema = z
     projectColorDisplay: z.enum(PROJECT_COLOR_DISPLAYS),
   })
   .strict();
-export const bbSidebarRpcContract = defineRpcContract({
+export const threadInboxRpcContract = defineRpcContract({
   getThreadExecutionDetails: {
     input: threadIdSchema.strict(),
     output: z

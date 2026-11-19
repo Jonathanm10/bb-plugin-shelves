@@ -1,6 +1,6 @@
 {
-  "name": "bb-plugin-bb-sidebar-clean",
-  "version": "0.1.0",
+  "name": "bb-thread-inbox",
+  "version": "0.1.1",
   "type": "module",
   "description": "A community BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
   "license": "MIT",
@@ -39,6 +39,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "prebuild": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "build": "bb plugin build",
     "check": "npm run lint && npm run format:check && npm run knip && npm run typecheck && npm test && npm run test:scripts && npm run build && node scripts/check-app-bundle.mjs",
     "test": "vitest run --config vitest.config.ts",

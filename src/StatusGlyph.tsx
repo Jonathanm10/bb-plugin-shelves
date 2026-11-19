@@ -46,9 +46,9 @@ import "./working-pulse.css";
  * all change in the same frames.
  */
 export function syncWorkingPulse(event: AnimationEvent<HTMLElement>) {
-  if (event.animationName !== "bb-sidebar-working-pulse") return;
+  if (event.animationName !== "bb-thread-inbox-working-pulse") return;
   for (const animation of event.currentTarget.getAnimations()) {
-    if ("animationName" in animation && animation.animationName === "bb-sidebar-working-pulse") {
+    if ("animationName" in animation && animation.animationName === "bb-thread-inbox-working-pulse") {
       animation.startTime = 0;
     }
   }
@@ -73,7 +73,7 @@ export function StatusGlyph({
       return <Icon name="CircleQuestion" aria-label={aria} className={cn(shared, statusToneClass(indicator))} />;
     case "runtime":
       return (
-        <span className="bb-sidebar-working-pulse inline-flex shrink-0" onAnimationStart={syncWorkingPulse}>
+        <span className="bb-thread-inbox-working-pulse inline-flex shrink-0" onAnimationStart={syncWorkingPulse}>
           <Icon name="Working" aria-label={aria} className={cn(shared, statusToneClass(indicator))} />
         </span>
       );

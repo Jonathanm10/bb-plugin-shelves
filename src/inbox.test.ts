@@ -137,7 +137,7 @@ describe("resolveThreadTitlesIn", () => {
 describe("filterProjectsByName", () => {
   const projects = [
     { id: "all", name: "All projects" },
-    { id: "p1", name: "bb-sidebar-clean" },
+    { id: "p1", name: "bb-thread-inbox" },
     { id: "p2", name: "kanban" },
   ];
 

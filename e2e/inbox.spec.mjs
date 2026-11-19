@@ -17,12 +17,12 @@ for (const theme of ["light", "dark"]) {
       await expect(shelf(page, "Settled")).toBeVisible();
       for (const name of ["Inactive", "Parked", "Snoozed"]) await expect(shelf(page, name)).toHaveCount(0);
       await page
-        .locator("[data-bb-sidebar-root]")
+        .locator("[data-bb-thread-inbox-root]")
         .screenshot({ path: `docs/screenshots/sidebar-${theme}-${width}.png`, animations: "disabled" });
       await row.hover();
       await row.getByRole("button", { name: "Settle thread" }).focus();
       await page
-        .locator("[data-bb-sidebar-root]")
+        .locator("[data-bb-thread-inbox-root]")
         .screenshot({ path: `docs/screenshots/actions-${theme}-${width}.png`, animations: "disabled" });
       expect(page.url()).toBe(selectedUrl);
       await page.reload();

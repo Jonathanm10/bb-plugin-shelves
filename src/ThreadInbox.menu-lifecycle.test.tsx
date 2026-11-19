@@ -136,7 +136,7 @@ describe("row context menu", () => {
     fireEvent.click(await screen.findByLabelText("Settle thread"));
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith("Could not settle thread", {
-        className: "bb-sidebar-toast",
+        className: "bb-thread-inbox-toast",
         description: "Cannot settle while Review Login fix is working or waiting for input",
       }),
     );
@@ -274,7 +274,7 @@ describe("row context menu", () => {
     await parkFromCard((await screen.findByText("Broken settle")).closest("li")!, action);
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith(`Could not ${action} thread`, {
-        className: "bb-sidebar-toast",
+        className: "bb-thread-inbox-toast",
         description: "database offline",
       }),
     );

@@ -23,7 +23,7 @@ async function setup() {
   });
   const batches: string[][] = [];
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar-clean",
+    pluginId: "bb-thread-inbox",
     sdk: {
       projects: { list: async () => projectsWith([thread]) },
       threads: {

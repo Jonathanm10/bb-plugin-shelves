@@ -93,7 +93,7 @@ export function createServerCli(lifecycle: ReturnType<typeof createServerLifecyc
   };
 
   return defineCli({
-    name: "clean-sidebar",
+    name: "thread-inbox",
     summary: "Snooze, settle, park, pin, and re-parent threads in the Thread Inbox",
     commands: {
       list: cliCommand({
@@ -219,7 +219,7 @@ export function createServerCli(lifecycle: ReturnType<typeof createServerLifecyc
               const { id } = placed.rowThread;
               throw new PluginCliError(`${threadId} is ${placed.shelf} with ${id}, the thread it is nested under`, {
                 code: "action_failed",
-                hint: `Resume the whole tree: bb clean-sidebar resume --thread ${id}`,
+                hint: `Resume the whole tree: bb thread-inbox resume --thread ${id}`,
               });
             }
             const row = readOne(threadId);
@@ -252,7 +252,7 @@ export function createServerCli(lifecycle: ReturnType<typeof createServerLifecyc
           if (Boolean(positionals.parent) === options.clear) {
             throw new PluginCliError("Give a parent thread id or --clear, not both", {
               code: "invalid_value",
-              hint: "bb clean-sidebar parent <parent-thread-id> or bb clean-sidebar parent --clear",
+              hint: "bb thread-inbox parent <parent-thread-id> or bb thread-inbox parent --clear",
             });
           }
           const parentThreadId = positionals.parent?.trim() || null;

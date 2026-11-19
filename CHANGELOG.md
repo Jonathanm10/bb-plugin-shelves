@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.1]
+
+### Changed
+
+- Standardized the package, plugin ID, routes, browser storage, and marketplace entry on `bb-thread-inbox`.
+- Renamed the CLI to `bb thread-inbox` and removed the obsolete runtime names.
+- Cleaned generated bundles before builds so retired entry points are not carried into packages.
+- Updated installation and marketplace instructions. Upgrades from 0.1.0 require a one-time filing-data transfer because BB treats the new ID as a separate plugin.
+
 ## [0.1.0]
 
 Initial release of Thread Inbox for BB.

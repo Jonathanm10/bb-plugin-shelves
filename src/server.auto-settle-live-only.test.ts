@@ -26,7 +26,7 @@ async function load(threads: ProjectThread[], row: (environmentId: string) => Ro
   let failList = false;
   const callRpc = pullRequestStatus(row, batches);
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-sidebar-clean",
+    pluginId: "bb-thread-inbox",
     sdk: {
       projects: {
         list: async () => {

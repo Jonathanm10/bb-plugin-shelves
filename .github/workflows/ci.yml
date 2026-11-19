@@ -58,4 +58,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-stress-results
-          path: /tmp/sb11-tests-*
+          path: /tmp/thread-inbox-tests-*

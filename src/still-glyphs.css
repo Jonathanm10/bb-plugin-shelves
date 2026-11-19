@@ -6,8 +6,8 @@
  * colour, no motion and no shine mask. Unlayered and !important, because these
  * rules have to outrank bb's own stylesheet, not just Tailwind's utilities.
  */
-.bb-sidebar-still,
-.bb-sidebar-still * {
+.bb-thread-inbox-still,
+.bb-thread-inbox-still * {
   animation: none !important;
   -webkit-mask-image: none !important;
   mask-image: none !important;

@@ -35,7 +35,7 @@ export function useSnoozeCommands(
       }
       // A child has no shelf of its own while its parent's row carries it, so
       // it goes wherever that row goes and its menu offers no Snooze. Name the
-      // row, as `bb sidebar resume` does.
+      // row, as `bb thread-inbox resume` does.
       const rowId = shelfRowIds(shown).get(thread.id) ?? thread.id;
       const row = shown.find((candidate) => candidate.id === rowId) ?? thread;
       const title = threadDisplayTitle(thread);

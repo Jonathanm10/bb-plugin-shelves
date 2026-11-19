@@ -21,7 +21,7 @@ await loadInboxApp();
 describe("parent thread menu", () => {
   it("orders parent choices by recent activity regardless of pin, shelf, or sidebar sort", async () => {
     const now = Date.now();
-    localStorage.setItem("bb-sidebar-clean:active-sort:v1", "created");
+    localStorage.setItem("bb-thread-inbox:active-sort:v1", "created");
     renderSlot(inbox, listProps, {
       sidebarThreads: {
         status: "ready",
@@ -186,7 +186,7 @@ describe("parent thread menu", () => {
     fireEvent.click(within(menu).getByRole("menuitemradio", { name: "Next parent" }));
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith("Could not update parent", {
-        className: "bb-sidebar-toast",
+        className: "bb-thread-inbox-toast",
         description: "Parent is no longer available",
       }),
     );
@@ -298,7 +298,7 @@ describe("parent thread menu", () => {
       fireEvent.click(within(menu).getByRole("menuitemradio", { name: /^Off/ }));
       await waitFor(() =>
         expect(toastMocks.error).toHaveBeenCalledWith("Could not update parent notifications", {
-          className: "bb-sidebar-toast",
+          className: "bb-thread-inbox-toast",
           description: "offline",
         }),
       );

@@ -10,7 +10,7 @@ test.beforeEach(async ({ request, page }) => {
 
 test("selected sidebar renders all seeded threads in Active", async ({ page }) => {
   const settings = await cli(["settings", "ui", "get", "sidebar.threadListProvider"]);
-  expect(settings.value).toBe("bb-sidebar-clean/inbox");
+  expect(settings.value).toBe("bb-thread-inbox/inbox");
   for (const thread of fixture.threads) {
     await expect(link(page, thread.title)).toBeVisible();
     const state = await cli(["thread", "get", thread.id]);
@@ -48,20 +48,20 @@ test("a row click opens the thread in place and keeps its Full Screen", async ({
   await expect(row).toHaveAttribute("href", new RegExp(`/threads/${atlas.id}$`));
   await page.evaluate((key) => {
     window.localStorage.setItem(key, "true");
-    window.__bbSidebarSamePage = true;
+    window.__bbThreadInboxSamePage = true;
   }, fullScreenKey);
   await row.click();
   await expect(page).toHaveURL(new RegExp(`/threads/${atlas.id}$`));
   await expect(row).toHaveAttribute("aria-current", "page");
   // A full page load would mean the click escaped bb's routing.
-  expect(await page.evaluate(() => window.__bbSidebarSamePage)).toBe(true);
+  expect(await page.evaluate(() => window.__bbThreadInboxSamePage)).toBe(true);
   expect(await page.evaluate((key) => window.localStorage.getItem(key), fullScreenKey)).toBe("true");
 });
 
 // bb owns the hold delay, numbering, and pill; the sidebar draws what it assigns.
 test("holding the shortcut modifier shows bb's jump keys on sidebar rows", async ({ page }) => {
   const modifier = process.platform === "darwin" ? "Meta" : "Control";
-  const sidebar = page.locator("[data-bb-sidebar-root]");
+  const sidebar = page.locator("[data-bb-thread-inbox-root]");
   await expect(link(page, atlas.title)).toBeVisible();
   await page.mouse.move(1000, 750);
   await page.keyboard.down(modifier);

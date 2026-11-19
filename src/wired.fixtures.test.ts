@@ -267,7 +267,7 @@ it.each(snapshots)(
     vi.setSystemTime(1_800_000_000_000);
     const fixture: Record<string, string> = JSON.parse(readFileSync(storage, "utf8"));
     for (const [key, value] of Object.entries(fixture))
-      localStorage.setItem(key.replace("bb-sidebar:", "bb-sidebar-clean:"), value);
+      localStorage.setItem(key.replace("bb-sidebar:", "bb-thread-inbox:"), value);
     const gate = deferred<void>();
     const threads = [
       "first",
@@ -317,7 +317,7 @@ it.each(snapshots)(
     expect(screen.queryByRole("combobox", { name: "Open port links on" })).toBeNull();
     expect(
       Object.keys(fixture)
-        .map((key) => key.replace("bb-sidebar:", "bb-sidebar-clean:"))
+        .map((key) => key.replace("bb-sidebar:", "bb-thread-inbox:"))
         .sort(),
     ).toEqual(
       [
@@ -332,7 +332,7 @@ it.each(snapshots)(
         "shelf-expansion",
         "working-since",
       ]
-        .map((key) => `bb-sidebar-clean:${key}:v1`)
+        .map((key) => `bb-thread-inbox:${key}:v1`)
         .sort(),
     );
     expect(inboxSlot.inspection.rpcCalls.length).toBeGreaterThan(0);
@@ -360,9 +360,9 @@ it.each(snapshots)("reads $version legacy grouping when active-sort is absent", 
     readFileSync(fixturePath(`local-storage-${version}.json`), "utf8"),
   );
   // active-grouping is a legacy fallback; active-sort takes priority in the full dump.
-  localStorage.removeItem("bb-sidebar-clean:active-sort:v1");
-  localStorage.setItem("bb-sidebar-clean:active-grouping:v1", fixture["bb-sidebar:active-grouping:v1"]!);
-  expect(localStorage.getItem("bb-sidebar-clean:active-sort:v1")).toBeNull();
+  localStorage.removeItem("bb-thread-inbox:active-sort:v1");
+  localStorage.setItem("bb-thread-inbox:active-grouping:v1", fixture["bb-sidebar:active-grouping:v1"]!);
+  expect(localStorage.getItem("bb-thread-inbox:active-sort:v1")).toBeNull();
   const wired = await createWired([thread({ id: "first" }), thread({ id: "second" })], {
     rpcGate: deferred<void>().promise,
   });

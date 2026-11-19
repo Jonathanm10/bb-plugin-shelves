@@ -45,7 +45,7 @@ describe("indicators", () => {
   it("draws bb's glyph, held still, for a kind this build does not know", () => {
     const container = glyphFor(futureKind, "Thread is doing something new");
     expect(container.querySelector('[data-thread-status-glyph="future-kind"]')).not.toBeNull();
-    expect(container.querySelector(".bb-sidebar-still")).not.toBeNull();
+    expect(container.querySelector(".bb-thread-inbox-still")).not.toBeNull();
     expect(container.querySelector('[role="img"][aria-label="Thread is doing something new"]')).not.toBeNull();
   });
 
@@ -61,7 +61,7 @@ describe("indicators", () => {
   });
 
   it("tones a background command apart from live agent work and from idle", () => {
-    expect(statusToneClass("background-command")).toBe("text-[color:var(--bb-sidebar-tone-command)]");
+    expect(statusToneClass("background-command")).toBe("text-[color:var(--bb-thread-inbox-tone-command)]");
     expect(statusToneClass("background-command")).not.toBe(statusToneClass("runtime"));
     expect(statusToneClass("background-command")).not.toBe(statusToneClass("none"));
     for (const kind of ["workflow", "background-agent", "plan-mode"] as const) {

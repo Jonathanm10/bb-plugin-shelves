@@ -4,7 +4,7 @@ import type { ExternalToast } from "sonner";
 function themed(options?: ExternalToast): ExternalToast {
   return {
     ...options,
-    className: ["bb-sidebar-toast", options?.className].filter(Boolean).join(" "),
+    className: ["bb-thread-inbox-toast", options?.className].filter(Boolean).join(" "),
   };
 }
 

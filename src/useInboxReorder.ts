@@ -2,7 +2,7 @@ import { STORAGE_KEYS } from "./lib/storage-keys";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type PluginSidebarThread, useRpc } from "@get-bb/plugin-sdk/app";
 import { errorDetail, toast } from "./lib/toast";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import { useSidebarRead } from "./bb-sdk";
 import { orderInboxThreads } from "./pinned-order";
 import { createCachedRpcState } from "./lib/cached-rpc-state";
@@ -25,7 +25,7 @@ function orderKey(ids: readonly string[]): string {
 
 /** Durable, optimistic inbox ordering backed by the plugin database. */
 export function useInboxReorder(inboxThreads: readonly PluginSidebarThread[]): InboxReorderApi {
-  const rpc = useRpc<typeof bbSidebarRpcContract>();
+  const rpc = useRpc<typeof threadInboxRpcContract>();
   const [saved] = useState(() => orderCache.read(rpc));
   const { data, error, refresh } = useSidebarRead("listInboxOrder");
   const serverIds = data?.inboxThreadIds;

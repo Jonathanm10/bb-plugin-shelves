@@ -7,7 +7,7 @@ import {
 } from "@get-bb/plugin-sdk/app";
 import type { PluginSidebarThread } from "@get-bb/plugin-sdk";
 import { errorDetail, toast } from "./lib/toast";
-import type { bbSidebarRpcContract } from "./contract";
+import type { threadInboxRpcContract } from "./contract";
 import { describeReclaim } from "./reclaim";
 import {
   canPark,
@@ -86,7 +86,7 @@ const ERROR_MESSAGE: Record<LifecycleMutation, string> = {
  * Whether another plugin's status on the thread's row runs, such as "Waiting
  * for CI". Rows then offer no Park, Snooze or Settle for it, as for a thread
  * that is working. This guard is the UI's alone: the server, automatic settle
- * and `bb sidebar` never see row statuses, and shelves do not move for it.
+ * and `bb thread-inbox` never see row statuses, and shelves do not move for it.
  */
 export function useRowStatusRuns(threadId: string): boolean {
   return useSidebarThreadRowStatus(threadId)?.tone === "running";
@@ -117,7 +117,7 @@ function runningRowStatusThread(
  * clock during render would make the classification unstable.
  */
 export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleRows: LifecycleRows): LifecycleApi {
-  const rpc = useRpc<typeof bbSidebarRpcContract>();
+  const rpc = useRpc<typeof threadInboxRpcContract>();
   const { rows } = lifecycleRows;
   const [now, setNow] = useState(() => Date.now());
   // Keyed by membership, so the API below keeps its identity across the

@@ -9,7 +9,7 @@ let iconStatus: number | "offline" = 503;
 let markedMissing = true;
 const fetchIcon = vi.fn(async () => {
   if (iconStatus === "offline") throw new TypeError("Failed to fetch");
-  const headers = new Headers(iconStatus === 404 && markedMissing ? { "x-bb-sidebar-icon-missing": "1" } : {});
+  const headers = new Headers(iconStatus === 404 && markedMissing ? { "x-bb-thread-inbox-icon-missing": "1" } : {});
   return { status: iconStatus, headers, body: null };
 });
 
@@ -65,15 +65,15 @@ describe("ProjectFavicon", () => {
   });
 
   it("shows the project's letter tile while the icon loads and after it fails", () => {
-    const view = render(<ProjectFavicon src="/project-icon?projectId=proj_tile&revision=0" name="bb-sidebar-clean" />);
-    const tile = () => view.container.querySelector(".bb-sidebar-monogram");
-    expect(tile()?.getAttribute("data-letter")).toBe("S");
+    const view = render(<ProjectFavicon src="/project-icon?projectId=proj_tile&revision=0" name="bb-thread-inbox" />);
+    const tile = () => view.container.querySelector(".bb-thread-inbox-monogram");
+    expect(tile()?.getAttribute("data-letter")).toBe("T");
     // Drawn by CSS, so the letter never joins the row's text.
     expect(view.container.textContent).toBe("");
 
     fireEvent.error(view.container.querySelector("img")!);
     expect(view.container.querySelector("img")).toBeNull();
-    expect(tile()?.getAttribute("data-letter")).toBe("S");
+    expect(tile()?.getAttribute("data-letter")).toBe("T");
   });
 
   it("asks a project with no icon again only once an hour", async () => {

@@ -52,7 +52,7 @@ describe("theme", () => {
     const used = new Set<string>();
     for (const path of SOURCES) {
       if (path.endsWith(".css")) continue;
-      for (const match of readFileSync(path, "utf8").matchAll(/var\((--bb-sidebar-[\w-]+)\)/g)) {
+      for (const match of readFileSync(path, "utf8").matchAll(/var\((--bb-thread-inbox-[\w-]+)\)/g)) {
         used.add(match[1]!);
       }
     }
@@ -68,8 +68,8 @@ describe("theme", () => {
   it("draws Command in the text colour, lifted toward white in dark", () => {
     const light = cssBlock(THEME_RULES, ":root,\n.light {");
     const dark = cssBlock(THEME_RULES, ".dark {");
-    expect(light).toMatch(/--bb-sidebar-tone-command:\s*var\(--foreground\);/);
-    expect(dark).toMatch(/--bb-sidebar-tone-command:\s*color-mix\(in oklch, var\(--foreground\) \d+%, white\);/);
+    expect(light).toMatch(/--bb-thread-inbox-tone-command:\s*var\(--foreground\);/);
+    expect(dark).toMatch(/--bb-thread-inbox-tone-command:\s*color-mix\(in oklch, var\(--foreground\) \d+%, white\);/);
   });
 
   it("keys the stylesheet off bb's theme class, never the OS", () => {
@@ -80,9 +80,9 @@ describe("theme", () => {
   // A font-size utility and an arbitrary colour both start `text-`; the merge
   // has to keep both, which is why the colour carries an explicit `color:`.
   it("keeps a size utility beside an arbitrary tone utility", () => {
-    const merged = cn("max-w-full truncate text-2xs font-medium", "text-[color:var(--bb-sidebar-tone-error)]");
+    const merged = cn("max-w-full truncate text-2xs font-medium", "text-[color:var(--bb-thread-inbox-tone-error)]");
     expect(merged).toContain("text-2xs");
-    expect(merged).toContain("text-[color:var(--bb-sidebar-tone-error)]");
+    expect(merged).toContain("text-[color:var(--bb-thread-inbox-tone-error)]");
   });
 
   // Only meaningful after `npm run build`; `npm run check` builds afterwards,
