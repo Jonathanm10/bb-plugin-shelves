@@ -402,7 +402,7 @@ function ThreadInboxContent({
     [inactive, inbox, lifecycle, pinned, working],
   );
 
-  const { parkThread, settleThread, snoozeThread } = useShelveActions({
+  const { settleThread, snoozeThread } = useShelveActions({
     threads,
     scope,
     lifecycle,
@@ -422,7 +422,6 @@ function ThreadInboxContent({
     activeThreadId,
     now,
     onNavigate,
-    parkThread,
     settleThread,
     snoozeThread,
     toggleChildExpansion,

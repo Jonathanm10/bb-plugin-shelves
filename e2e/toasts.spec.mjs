@@ -71,9 +71,8 @@ for (const theme of ["dark", "light"]) {
     expect(settled.toast).toEqual(archived.toast);
     expect(settled.action).toEqual(archived.action);
     expect(settledHover).toEqual(archivedHover);
-    // Settling the fixture stops its agent session, so the toast describes it.
-    expect(settled.description).toBe(settled.muted);
-    expect(settled.description).toBe(archived.description);
+    // Filing preserves runtimes, so Settle has no resource-cleanup description.
+    expect(settled.description).toBeNull();
 
     await nativeUndo.click();
     await expect(link(page, thread.title)).toBeVisible();

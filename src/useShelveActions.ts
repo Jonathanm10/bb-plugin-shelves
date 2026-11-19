@@ -36,10 +36,6 @@ export function useShelveActions({
     [navigate, onNavigate],
   );
 
-  const parkThread = useCallback(
-    (thread: PluginSidebarThread) => void parkActiveThread(thread, () => lifecycle.park(thread.id)),
-    [parkActiveThread, lifecycle],
-  );
   const settleThread = useCallback(
     (thread: PluginSidebarThread) => void parkActiveThread(thread, () => lifecycle.settle(thread.id)),
     [parkActiveThread, lifecycle],
@@ -51,5 +47,5 @@ export function useShelveActions({
   );
   useSnoozeCommands(threads, scope, lifecycle, snoozeThread);
 
-  return { parkThread, settleThread, snoozeThread };
+  return { settleThread, snoozeThread };
 }

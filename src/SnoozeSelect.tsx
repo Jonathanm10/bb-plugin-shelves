@@ -12,7 +12,6 @@ export function SnoozeSelect({
   triggerClassName,
   onOpenChange,
   onSnooze,
-  onPark,
 }: {
   label: string;
   snoozePresets: readonly ConfiguredSnoozePreset[];
@@ -20,7 +19,6 @@ export function SnoozeSelect({
   triggerClassName: string;
   onOpenChange?: (open: boolean) => void;
   onSnooze: (snoozedUntil: number) => void;
-  onPark?: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [picking, setPicking] = useState(false);
@@ -33,15 +31,11 @@ export function SnoozeSelect({
     <>
       <Select
         value=""
-        disabled={disabled || (snoozePresets.length === 0 && !onPark)}
+        disabled={disabled || snoozePresets.length === 0}
         onOpenChange={setMenuOpen}
         onValueChange={(presetId) => {
           if (presetId === "pick") {
             setPicking(true);
-            return;
-          }
-          if (presetId === "park") {
-            onPark?.();
             return;
           }
           const preset = snoozePresets.find((item) => item.id === presetId);
@@ -78,17 +72,6 @@ export function SnoozeSelect({
                 <span className="flex items-center gap-2">
                   <Icon name="Calendar" className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                   Pick date & time…
-                </span>
-              </SelectItem>
-            </>
-          ) : null}
-          {onPark ? (
-            <>
-              {snoozePresets.length > 0 ? <SelectSeparator className="my-1 h-px bg-border" /> : null}
-              <SelectItem value="park" className="text-xs">
-                <span className="flex items-center gap-2">
-                  <Icon name="Car" className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-                  Park thread
                 </span>
               </SelectItem>
             </>

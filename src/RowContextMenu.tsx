@@ -27,7 +27,6 @@ type RowContextMenuProps = {
   canArchive?: boolean;
   snoozePresets?: readonly ConfiguredSnoozePreset[];
   onSnooze?: (snoozedUntil: number) => void;
-  onPark?: () => void;
   onResume?: () => void;
   onSettle?: () => void;
   onUnsettle?: () => void;
@@ -56,7 +55,6 @@ function RowMenuContents({
   canArchive = true,
   snoozePresets = [],
   onSnooze,
-  onPark,
   onResume,
   onSettle,
   onUnsettle,
@@ -120,7 +118,6 @@ function RowMenuContents({
   const hasPinLifecycleItems = !!(
     thread.isPinned ||
     thread.parentThreadId == null ||
-    onPark ||
     onResume ||
     onSettle ||
     onUnsettle ||
@@ -198,11 +195,6 @@ function RowMenuContents({
               {onWake ? (
                 <Item icon="Pulse" onSelect={onWake}>
                   Wake now
-                </Item>
-              ) : null}
-              {onPark ? (
-                <Item icon="Car" onSelect={onPark}>
-                  Park thread
                 </Item>
               ) : null}
               {onResume ? (

@@ -12,7 +12,7 @@ describe("parent auto-unpin menu UX", () => {
   const noop = () => {};
   it.each([
     { name: "no actions", actions: {}, item: null },
-    { name: "park", actions: { onPark: noop }, item: "Park thread" },
+    { name: "resume", actions: { onResume: noop }, item: "Resume" },
   ])("keeps real group boundaries without adjacent separators: $name", async ({ actions, item }) => {
     const selected = thread({ parentThreadId: "missing" });
     renderSlot({ component: PolicyMenu }, { selected, actions }, { sidebarThreads: { threads: [selected] } });

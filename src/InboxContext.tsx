@@ -35,7 +35,6 @@ interface InboxContextInputs {
   activeThreadId: string | null;
   now: number;
   onNavigate: () => void;
-  parkThread: (thread: PluginSidebarThread) => void;
   settleThread: (thread: PluginSidebarThread) => void;
   snoozeThread: (thread: PluginSidebarThread, until: number) => void;
   toggleChildExpansion: (threadId: string) => void;
@@ -60,7 +59,6 @@ export function useInboxContextValues({
   activeThreadId,
   now,
   onNavigate,
-  parkThread,
   settleThread,
   snoozeThread,
   toggleChildExpansion,
@@ -96,7 +94,6 @@ export function useInboxContextValues({
   const actions = useMemo(
     () => ({
       onNavigate,
-      parkThread,
       settleThread,
       snoozeThread,
       toggleChildExpansion,
@@ -110,7 +107,6 @@ export function useInboxContextValues({
     }),
     [
       onNavigate,
-      parkThread,
       settleThread,
       snoozeThread,
       toggleChildExpansion,
