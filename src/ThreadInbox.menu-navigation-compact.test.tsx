@@ -13,9 +13,7 @@ describe("row context menu", () => {
     ["Parked", "settle"],
     ["Parked", "snooze"],
     ["Snoozed", "settle"],
-    ["Snoozed", "park"],
     ["Settled", "snooze"],
-    ["Settled", "park"],
   ] as const)("%s compact card: %s", (shelf, action) => {
     it("starts a new thread in the project", async () => {
       const now = Date.now();

@@ -225,8 +225,7 @@ describe("another plugin's running status blocks shelving from the sidebar", () 
       ),
     );
     expect(settle).not.toHaveBeenCalled();
-    // Parking files the parent's own row only, so the child does not stop it.
-    fireEvent.click(within(await menuFor(screen.getByText("Parent work"))).getByText("Park thread"));
-    await waitFor(() => expect(park).toHaveBeenCalledWith({ threadId: "parent" }));
+    expect(within(await menuFor(screen.getByText("Parent work"))).queryByText("Park thread")).toBeNull();
+    expect(park).not.toHaveBeenCalled();
   });
 });

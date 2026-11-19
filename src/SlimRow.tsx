@@ -15,7 +15,6 @@ import { rowKeyshortcuts } from "./lib/keyshortcuts";
 import { useInboxActivity, useInboxEnvironment, useInboxActions } from "./InboxContext";
 import { useRowStatusRuns } from "./useLifecycle";
 import { projectIconUrl as iconUrl } from "./project-icons";
-import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings-values";
 
 /**
  * A parked, snoozed, or settled thread: one line instead of a card, with its
@@ -42,9 +41,8 @@ export const SlimRow = memo(function SlimRow({
   now: number;
   childrenExpanded: boolean;
 }) {
-  const { projectNameById, projectIconRevision, snoozePresets, lifecycle, childrenByParentId, sidebarSettings } =
-    useInboxEnvironment();
-  const { onNavigate, parkThread, settleThread, snoozeThread, toggleChildExpansion } = useInboxActions();
+  const { projectNameById, projectIconRevision, snoozePresets, lifecycle, childrenByParentId } = useInboxEnvironment();
+  const { onNavigate, settleThread, snoozeThread, toggleChildExpansion } = useInboxActions();
   const { activeThreadId } = useInboxActivity();
   const childThreads = childrenByParentId.get(thread.id) ?? [];
   const childListId = useId();
@@ -57,10 +55,8 @@ export const SlimRow = memo(function SlimRow({
       collapsedChildThreads(childThreads, childrenByParentId, activeThreadId, false, isWorking).length > 0);
   // Another plugin's running status keeps the thread where it is.
   const canShelve = !useRowStatusRuns(thread.id);
-  const extraActions = (sidebarSettings ?? DEFAULT_SIDEBAR_SETTINGS).threadDisplay !== "compact-all";
   const projectName = projectNameById.get(thread.projectId) ?? null;
   const projectIconUrl = iconUrl(thread.projectId, projectIconRevision);
-  const onPark = () => parkThread(thread);
   const onSettle = () => settleThread(thread);
   const onSnooze = (until: number) => snoozeThread(thread, until);
   const onRestore = () =>
@@ -79,10 +75,9 @@ export const SlimRow = memo(function SlimRow({
   return (
     <RowContextMenu
       thread={thread}
-      onPark={extraActions && canShelve && shelf !== "parked" ? onPark : undefined}
       onResume={shelf === "parked" ? onRestore : undefined}
       onSettle={canShelve && shelf !== "settled" ? onSettle : undefined}
-      canSnooze={extraActions && canShelve && shelf !== "snoozed"}
+      canSnooze={canShelve && shelf !== "snoozed"}
       snoozePresets={snoozePresets}
       onSnooze={onSnooze}
       onWake={shelf === "snoozed" ? onRestore : undefined}

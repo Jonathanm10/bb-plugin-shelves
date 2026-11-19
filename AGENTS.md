@@ -277,12 +277,12 @@ runner's scratch server; never the live host. macOS snapshots:
 `e2e/__snapshots__/` diffs. Before releases on macOS: `npm run e2e`; CI:
 `gh workflow run "Browser e2e"`.
 
-## Clean defaults
+## Core defaults
 
-The normal layout uses compact rows, Working, Active, and Settled. Inactive is
-off. Compact menus omit Park and Snooze. Full-card behavior remains available
-under Advanced settings. Keep the clean defaults covered in
-`clean-defaults.test.ts`, `ThreadInbox.clean.test.tsx`, and `e2e/clean.spec.mjs`.
-Existing full-card tests use explicit appearance fixtures in `test-inbox.tsx`
-and `test-slot.tsx`; historical policy cases use `createLegacyPolicyHost`.
-The new-behavior tests exercise the actual shipped defaults.
+Normal rows show project/status above the title. Working, Active, and Settled
+are the main sections; Inactive is off. Snooze and Settle stay available in
+all densities and on keyboard/touch. Snoozed appears only while used. Parked
+rows from older installs retain Resume, but normal controls do not create new
+Parked rows. Keep these covered in `clean-defaults.test.ts`,
+`ThreadInbox.clean.test.tsx`, and `e2e/clean.spec.mjs`. Historical policy cases
+use `createLegacyPolicyHost`; core acceptance uses the shipped defaults.

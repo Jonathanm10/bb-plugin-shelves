@@ -52,7 +52,6 @@ interface ThreadInboxViewProps {
     showProject?: boolean,
     compact?: boolean,
     renameShelf?: "active" | "working" | "inactive",
-    showEnvironment?: boolean,
   ) => ReactNode;
   activeSortMode: ActiveSortMode;
   inboxProjectView: readonly ProjectViewUnit[];
@@ -166,7 +165,7 @@ export function ThreadInboxView({
                           reorderControls(unit.key, "inbox", `${name} ${unit.environment ? "environment" : "project"}`)
                         }
                         renderThread={(thread, grouped, environmentGrouped) =>
-                          renderActiveThread(thread, "inbox", true, !grouped, false, "active", !environmentGrouped)
+                          renderActiveThread(thread, "inbox", true, !grouped, false, "active")
                         }
                       />
                     ) : inbox.visibleThreads.length > 0 ? (

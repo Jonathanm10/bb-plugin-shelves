@@ -256,7 +256,7 @@ it("replaces the compact switch with a thread display choice", async () => {
     "Compact working threads",
     "Compact all threads",
   ]);
-  expect((picker as HTMLSelectElement).value).toBe("compact-all");
+  expect((picker as HTMLSelectElement).value).toBe("full");
   fireEvent.change(picker, { target: { value: "compact-working" } });
   await waitFor(() => expect(writes).toEqual([{ threadDisplay: "compact-working" }]));
   // The Compact all options appear only with that choice.

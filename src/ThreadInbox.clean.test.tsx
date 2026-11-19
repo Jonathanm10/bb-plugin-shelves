@@ -25,11 +25,13 @@ it("settles quiet work and wakes it on activity without changing the selected th
   expect(screen.queryByRole("region", { name: "Inactive" })).toBeNull();
   expect(screen.queryByRole("region", { name: "Parked" })).toBeNull();
   expect(screen.queryByRole("region", { name: "Snoozed" })).toBeNull();
-  expect(screen.getByRole("link", { name: "Recent result" }).closest("[data-parent-card]")!.classList).toContain("h-8");
+  expect(screen.getByRole("link", { name: "Recent result" }).closest("[data-parent-card]")!.classList).not.toContain(
+    "h-8",
+  );
   fireEvent.contextMenu(screen.getByRole("link", { name: "Recent result" }));
   const menu = await screen.findByRole("menu", { name: "Thread actions" });
   expect(within(menu).queryByRole("menuitem", { name: "Park thread" })).toBeNull();
-  expect(within(menu).queryByText("Snooze")).toBeNull();
+  expect(within(menu).getByText("Snooze")).toBeDefined();
   expect(within(menu).getByRole("menuitem", { name: "Settle" })).toBeDefined();
   fireEvent.keyDown(menu, { key: "Escape" });
 
@@ -71,4 +73,61 @@ it("shows auto-settle controls first and persists the PR protection switch", asy
   expect((await screen.findByRole("switch", { name: "Keep threads with a PR" })).getAttribute("aria-checked")).toBe(
     "true",
   );
+});
+
+it.each(["full", "compact-all"] as const)("keeps filing actions usable with %s rows", async (threadDisplay) => {
+  localStorage.clear();
+  const wired = await createWired([
+    thread({
+      id: "file",
+      title: "File this result",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      latestAttentionAt: Date.now(),
+    }),
+  ]);
+  await wired.call("updateSidebarSettings", { threadDisplay });
+  wired.mount();
+  const link = await screen.findByRole("link", { name: "File this result" });
+  const row = link.closest("li")!;
+  await waitFor(() =>
+    expect(row.querySelector("[data-parent-card]")!.classList.contains("h-8")).toBe(threadDisplay === "compact-all"),
+  );
+  fireEvent.keyDown(within(row).getByRole("combobox", { name: "Snooze thread" }), { key: "Enter" });
+  fireEvent.click(await screen.findByRole("option", { name: "1 hour" }));
+  await waitFor(() =>
+    expect(
+      wired.db.prepare("SELECT snoozed_until FROM thread_lifecycle WHERE thread_id = ?").get("file"),
+    ).toMatchObject({ snoozed_until: expect.any(Number) }),
+  );
+  await wired.flush();
+  const snoozed = await screen.findByRole("region", { name: "Snoozed" });
+  fireEvent.click(within(snoozed).getByRole("button", { expanded: false }));
+  fireEvent.click(within(snoozed).getByRole("button", { name: "Wake thread now" }));
+  await waitFor(() =>
+    expect(
+      wired.db.prepare("SELECT snoozed_until FROM thread_lifecycle WHERE thread_id = ?").get("file"),
+    ).toBeUndefined(),
+  );
+  await wired.flush();
+  const active = await screen.findByRole("region", { name: "Active" });
+  const restored = await within(active).findByRole("link", { name: "File this result" });
+  fireEvent.contextMenu(restored);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Settle" }));
+  await waitFor(() =>
+    expect(wired.db.prepare("SELECT settled_at FROM thread_lifecycle WHERE thread_id = ?").get("file")).toMatchObject({
+      settled_at: expect.any(Number),
+    }),
+  );
+  await wired.flush();
+  const settled = await screen.findByRole("region", { name: "Settled" });
+  fireEvent.click(within(settled).getByRole("button", { expanded: false }));
+  fireEvent.click(within(settled).getByRole("button", { name: "Un-settle thread" }));
+  await waitFor(() =>
+    expect(
+      wired.db.prepare("SELECT settled_override FROM thread_lifecycle WHERE thread_id = ?").get("file"),
+    ).toMatchObject({ settled_override: "active" }),
+  );
+  await wired.flush();
+  expect(await within(active).findByRole("link", { name: "File this result" })).toBeDefined();
 });

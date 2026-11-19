@@ -53,7 +53,6 @@ describe("row context menu", () => {
       "Project",
       "Pin",
       "Snooze",
-      "Park thread",
       "Settle",
       "Rename",
       "Regenerate title",

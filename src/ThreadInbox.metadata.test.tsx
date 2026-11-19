@@ -74,17 +74,21 @@ describe("card metadata", () => {
 
   // A personal-project thread has a machine but no worktree, so the machine
   // takes the branch's place instead of leaving the line blank.
-  it("shows the machine when the thread has no branch", async () => {
+  it("shows the machine in details when the thread has no branch", async () => {
     render([
       thread({
         id: "thr_m",
         host: { id: "host_1", name: "Dev MacBook" },
       }),
     ]);
-    expect(await screen.findByText("Dev MacBook")).toBeDefined();
+    expect(screen.queryByText("Dev MacBook")).toBeNull();
+    fireEvent.pointerMove(screen.getByRole("link"), { pointerType: "mouse" });
+    expect((await screen.findByRole("dialog", { name: "Thread details" })).textContent).toContain(
+      "Machine: Dev MacBook",
+    );
   });
 
-  it("prefers the branch over the machine when both exist", async () => {
+  it("keeps branch and machine details off the row", async () => {
     render([
       thread({
         id: "thr_b",
@@ -100,10 +104,12 @@ describe("card metadata", () => {
         },
       }),
     ]);
-    expect(await screen.findByText("bb/feature")).toBeDefined();
+    expect(screen.queryByText("bb/feature")).toBeNull();
     expect(screen.queryByText("Dev MacBook")).toBeNull();
-    expect(await screen.findByLabelText("Worktree branch")).toBeDefined();
-    expect(screen.getByLabelText("Machine: Dev MacBook")).toBeDefined();
+    fireEvent.pointerMove(screen.getByRole("link"), { pointerType: "mouse" });
+    const details = await screen.findByRole("dialog", { name: "Thread details" });
+    expect(details.textContent).toContain("Machine: Dev MacBook");
+    expect(details.textContent).toContain("Worktree branch: bb/feature");
   });
 
   it("shows a plain branch cue for non-worktree checkouts", async () => {
@@ -121,7 +127,9 @@ describe("card metadata", () => {
         },
       }),
     ]);
-    expect(await screen.findByLabelText("Branch")).toBeDefined();
+    fireEvent.pointerMove(screen.getByRole("link"), { pointerType: "mouse" });
+    const details = await screen.findByRole("dialog", { name: "Thread details" });
+    expect(details.textContent).toContain("Branch: main");
     expect(screen.queryByLabelText("Worktree branch")).toBeNull();
   });
 
@@ -147,7 +155,7 @@ describe("card metadata", () => {
         }),
       ]);
 
-      expect(screen.getByLabelText(branchLabel).getAttribute("data-icon")).toBe(icon);
+      expect(screen.queryByText("bb/feature")).toBeNull();
       act(() => screen.getByRole("link", { name: "Unnamed worktree thread" }).focus());
       const details = await screen.findByRole("dialog", { name: "Thread details" });
       const label = within(details).getByText(`${branchLabel}:`);

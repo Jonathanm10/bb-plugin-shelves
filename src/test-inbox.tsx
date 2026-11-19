@@ -258,7 +258,7 @@ function cleanupInboxTest() {
 }
 
 type ParkingAction = "settle" | "snooze" | "park";
-export const parkingActions: readonly ParkingAction[] = ["settle", "snooze", "park"];
+export const parkingActions: readonly ParkingAction[] = ["settle", "snooze"];
 
 export async function parkFromCard(row: HTMLElement, action: ParkingAction) {
   if (action === "settle") {

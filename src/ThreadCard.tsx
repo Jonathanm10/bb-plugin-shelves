@@ -1,4 +1,4 @@
-import { ThreadLocation, ThreadPullRequest } from "./ThreadMetadata";
+import { ThreadPullRequest } from "./ThreadMetadata";
 import { CompactRow } from "./CompactRow";
 import { WokeMarker } from "./WokeMarker";
 import { ShortcutHint, useSidebarThreadSplit, useThreadActions } from "./bb-sdk";
@@ -16,7 +16,7 @@ import { ChildThreadBadge, ChildThreadList } from "./ChildThreadList";
 import { Icon } from "./components/Icon";
 import { Tooltip } from "./components/Tooltip";
 import { ThreadDetailsTooltip } from "./ThreadDetailsTooltip";
-import { SnoozeSelect } from "./SnoozeSelect";
+import { ThreadFilingActions } from "./ThreadFilingActions";
 import { cn } from "./lib/utils";
 import { DRAG_LIFT_CLASS } from "./drag-preview";
 import { rowKeyshortcuts } from "./lib/keyshortcuts";
@@ -53,7 +53,7 @@ export interface ThreadReorderControls {
 }
 
 /**
- * Three-line card, or one line in compact mode. Project groups omit the project
+ * Two-line card, or one line in compact mode. Project groups omit the project
  * line. Status follows manual reorders. Controls sit above a full-bleed anchor
  * for valid markup and keyboard access.
  */
@@ -61,7 +61,6 @@ export function ThreadCard({
   thread,
   showProject = true,
   projectIconOnly = false,
-  showEnvironment = true,
   isActive,
   isWoke,
   canPark,
@@ -76,7 +75,6 @@ export function ThreadCard({
   /** False when a group header already names the project. */
   showProject?: boolean;
   projectIconOnly?: boolean;
-  showEnvironment?: boolean;
   isActive: boolean;
   /** A snooze ended and has not yet been acknowledged. */
   isWoke: boolean;
@@ -101,15 +99,13 @@ export function ThreadCard({
     childrenByParentId: childrenByParent,
     sidebarSettings,
   } = useInboxEnvironment();
-  const { onNavigate, parkThread, settleThread, snoozeThread, acknowledgeWake, toggleChildExpansion } =
-    useInboxActions();
+  const { onNavigate, settleThread, snoozeThread, acknowledgeWake, toggleChildExpansion } = useInboxActions();
   const { now } = useInboxActivity();
   const provider = providerById.get(thread.providerId) ?? null;
   const projectName = projectNameById.get(thread.projectId) ?? null;
   const projectIconUrl = iconUrl(thread.projectId, projectIconRevision);
   const showRunningChildrenWhenCollapsed =
     sidebarSettings?.showRunningChildrenWhenCollapsed ?? DEFAULT_SIDEBAR_SETTINGS.showRunningChildrenWhenCollapsed;
-  const onPark = () => parkThread(thread);
   const onSettle = () => settleThread(thread);
   const onSnooze = (until: number) => snoozeThread(thread, until);
   const onAcknowledgeWake = () => acknowledgeWake(thread.id);
@@ -204,7 +200,7 @@ export function ThreadCard({
   const showChildrenWhenCollapsed = showRunningChildrenWhenCollapsed && !compact;
   const emphasis = isWoke ? "woke" : thread.isUnread ? "unread" : thread.indicator === "none" ? "read-idle" : "active";
   const canShelve = !useRowStatusRuns(thread.id) && canPark;
-  const showParkActions = !isWoke && canShelve && (snoozePresets.length > 0 || !!onPark);
+  const showParkActions = !isWoke && canShelve;
 
   const unpinButton = thread.isPinned ? (
     <Tooltip label="Unpin thread">
@@ -233,7 +229,7 @@ export function ThreadCard({
       data-row-emphasis={emphasis}
       data-settle-fade=""
       className={cn(
-        "pointer-events-none relative truncate text-sm",
+        "pointer-events-none relative min-w-0 flex-1 truncate text-sm",
         showProject ? "mt-0.5" : "min-w-0 flex-1",
         isRenaming && "pointer-events-auto",
         emphasis === "read-idle" ? "text-muted-foreground" : "text-foreground",
@@ -247,8 +243,7 @@ export function ThreadCard({
   return (
     <RowContextMenu
       thread={thread}
-      onPark={canShelve && !compact ? onPark : undefined}
-      canSnooze={canShelve && !compact}
+      canSnooze={canShelve}
       canArchive={canPark}
       snoozePresets={snoozePresets}
       onSnooze={onSnooze}
@@ -323,6 +318,17 @@ export function ThreadCard({
                       <CompactStatusOrTime thread={thread} now={now} />
                     </>
                   )}
+                  {showParkActions ? (
+                    <span className="pointer-events-auto flex items-center gap-0.5 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 [@media(hover:none)]:opacity-100">
+                      <ThreadFilingActions
+                        snoozePresets={snoozePresets}
+                        onOpenChange={setIsSnoozeOpen}
+                        onSnooze={onSnooze}
+                        onSettle={startSettle}
+                        settling={isSettling}
+                      />
+                    </span>
+                  ) : null}
                   <ProviderGlyph providerId={thread.providerId} provider={provider} />
                 </span>
               }
@@ -333,8 +339,7 @@ export function ThreadCard({
               data-settling={isSettling ? "" : undefined}
               className={cn(
                 "group/card relative rounded-md px-2.5 transition-colors duration-150 ease-out motion-reduce:transition-none",
-                compact ? "flex h-8 items-center gap-2 text-xs" : "py-2",
-                !compact && !showEnvironment && "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-1.5 py-1.5",
+                "py-1.5",
                 isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/60",
                 // A thread open in another pane gets a weaker tint than the active
                 // row, so the two states stay distinguishable.
@@ -452,57 +457,45 @@ export function ThreadCard({
                         )}
                       >
                         {unpinButton}
-                        <SnoozeSelect
-                          label="Snooze thread"
+                        <ThreadFilingActions
                           snoozePresets={snoozePresets}
-                          triggerClassName="h-5 w-5 border-0 px-0.5 py-0 shadow-none duration-200 ease-out hover:bg-transparent hover:duration-200 hover:text-[color:var(--bb-sidebar-snooze-active)] focus:ring-0 focus-visible:text-[color:var(--bb-sidebar-snooze-active)] data-[state=open]:text-[color:var(--bb-sidebar-snooze-active)] motion-reduce:transition-none [&>svg:last-child]:size-3"
                           onOpenChange={setIsSnoozeOpen}
                           onSnooze={onSnooze}
-                          onPark={onPark}
+                          onSettle={startSettle}
+                          settling={isSettling}
                         />
-                        <ParkButton label="Settle thread" settling={isSettling} onActivate={startSettle} />
                       </span>
                     ) : null}
                   </span>
                 )}
               </div>
-              {showProject ? titleLine : null}
-              <div
-                data-settle-fade=""
-                className={cn(
-                  "pointer-events-none relative flex items-center gap-1.5 text-2xs text-muted-foreground",
-                  showEnvironment ? "mt-0.5 h-4" : "h-5",
-                )}
-              >
-                {/* A thread without a worktree still runs somewhere, so the
-                  machine takes the branch's place rather than leaving the line
-                  blank. */}
-                {showEnvironment ? <ThreadLocation thread={thread} /> : null}
-                <OpenPortsIndicator thread={thread} />
-                {childThreads.length > 0 ? (
-                  <ChildThreadBadge
-                    threads={childThreads}
-                    childrenByParent={childrenByParent}
-                    expanded={childrenExpanded}
-                    controls={childListId}
-                    onToggle={onToggleChildren}
-                  />
-                ) : null}
-                {thread.environment?.branchName && thread.host ? (
-                  <Icon
-                    name="Computer"
-                    aria-label={`Machine: ${thread.host.name}`}
-                    className="size-3 shrink-0 text-muted-foreground/60"
-                  />
-                ) : null}
-                {thread.activity.workflows > 0 ? (
-                  <ActivityCount label="workflows" count={thread.activity.workflows} />
-                ) : null}
-                {thread.activity.backgroundAgents > 0 ? (
-                  <ActivityCount label="background agents" count={thread.activity.backgroundAgents} />
-                ) : null}
-                {isVisible ? <ThreadPullRequest environmentId={thread.environment?.id ?? null} /> : null}
-                <ProviderGlyph providerId={thread.providerId} provider={provider} />
+              <div className="flex min-w-0 items-center gap-1.5">
+                {showProject ? titleLine : null}
+                <div
+                  data-settle-fade=""
+                  className={cn(
+                    "pointer-events-none relative ml-auto flex shrink-0 items-center gap-1.5 text-2xs text-muted-foreground",
+                  )}
+                >
+                  <OpenPortsIndicator thread={thread} />
+                  {childThreads.length > 0 ? (
+                    <ChildThreadBadge
+                      threads={childThreads}
+                      childrenByParent={childrenByParent}
+                      expanded={childrenExpanded}
+                      controls={childListId}
+                      onToggle={onToggleChildren}
+                    />
+                  ) : null}
+                  {thread.activity.workflows > 0 ? (
+                    <ActivityCount label="workflows" count={thread.activity.workflows} />
+                  ) : null}
+                  {thread.activity.backgroundAgents > 0 ? (
+                    <ActivityCount label="background agents" count={thread.activity.backgroundAgents} />
+                  ) : null}
+                  {isVisible ? <ThreadPullRequest environmentId={thread.environment?.id ?? null} /> : null}
+                  <ProviderGlyph providerId={thread.providerId} provider={provider} />
+                </div>
               </div>
             </div>
           )}
@@ -518,41 +511,6 @@ export function ThreadCard({
         </div>
       </li>
     </RowContextMenu>
-  );
-}
-
-function ParkButton({ label, settling, onActivate }: { label: string; settling: boolean; onActivate: () => void }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      data-settling={settling ? "" : undefined}
-      onClick={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        onActivate();
-      }}
-      className={cn(
-        "bb-sidebar-settle relative flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground",
-        "transition-colors duration-200 ease-out hover:text-[color:var(--bb-sidebar-settle-active)]",
-        "focus-visible:text-[color:var(--bb-sidebar-settle-active)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
-        "motion-reduce:transition-none",
-        settling && "text-[color:var(--bb-sidebar-settle-active)]",
-      )}
-    >
-      {/* Move only the artwork so hovering an edge cannot move the hit area. */}
-      <span
-        aria-hidden="true"
-        className="bb-sidebar-settle-art pointer-events-none relative flex size-full items-center justify-center rounded-[inherit]"
-      >
-        <Icon name="Check" aria-hidden className="bb-sidebar-settle-check size-3.5" />
-        <span className="bb-sidebar-settle-stars">
-          {[0, 1, 2].map((star) => (
-            <span key={star} className="bb-sidebar-settle-star" />
-          ))}
-        </span>
-      </span>
-    </button>
   );
 }
 

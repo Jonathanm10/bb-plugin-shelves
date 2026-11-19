@@ -163,7 +163,7 @@ describe("lifecycle RPC", () => {
       childSortField: "created",
       childSortDirection: "ascending",
       childIconStyle: "disc",
-      compactWorkingThreads: true,
+      compactWorkingThreads: false,
       workingShelf: true,
       dockShelves: false,
       projectColorsEnabled: false,

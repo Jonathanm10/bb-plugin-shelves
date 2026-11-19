@@ -2,7 +2,7 @@
 import { expect, it, vi } from "vitest";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { createWired } from "./test-wired";
-import { loadInboxApp, thread, toastMocks, parkFromCard } from "./test-inbox";
+import { loadInboxApp, thread, toastMocks } from "./test-inbox";
 
 vi.mock("sonner", async () => (await import("./test-inbox")).sonnerMock());
 await loadInboxApp();
@@ -46,12 +46,10 @@ it("snoozes through the picker, wakes on the clock, and dismisses the durable Wo
   expect(screen.queryByRole("button", { name: "Dismiss Woke marker" })).toBeNull();
 });
 
-it("parks through the card and resumes from Parked", async () => {
+it("preserves legacy Parked rows and resumes them from the sidebar", async () => {
   const wired = await createWired([item()]);
-  await wired.call("updateSidebarSettings", { threadDisplay: "full" });
+  await wired.call("park", { threadId: "a" });
   wired.mount();
-  await screen.findByText("Work a");
-  await parkFromCard(row(), "park");
   await waitFor(() => expect(lifecycle(wired)).toMatchObject({ parked_at: expect.any(Number) }));
   await wired.flush();
   const parked = await shelf("Parked");
