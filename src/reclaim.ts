@@ -1,14 +1,7 @@
 /**
- * What settling a thread releases, and what it deliberately leaves alone.
- *
- * Settling is bookkeeping — it moves a row to a shelf. The one resource worth
- * releasing alongside it is the agent runtime, which bb keeps warm long after
- * the last turn and which costs hundreds of megabytes per thread. Terminals
- * are the awkward case: they outlive their thread until the daemon restarts,
- * but bb refuses to close one anybody has typed into unless the caller forces
- * it, and forcing would kill a dev server from an action the user reads as
- * tidying up. So settling closes only the terminals nobody touched, and
- * reports the rest instead of deciding for them.
+ * Resource summaries for explicit cleanup and the legacy Park command.
+ * Core Snooze and Settle only file threads and return EMPTY_RECLAIM for
+ * compatibility with older clients. They never release resources implicitly.
  */
 
 export interface ReclaimTerminal {

@@ -7,7 +7,6 @@ import { canPark } from "./lifecycle";
 import { threadStoredTitle } from "./inbox";
 import { sortPinnedThreads } from "./pinned-order";
 import { EMPTY_RECLAIM } from "./reclaim";
-import { runThreadTasks } from "./thread-tasks";
 
 export function createServerSettleActions(
   ctx: ServerContext,
@@ -27,7 +26,7 @@ export function createServerSettleActions(
     settleTree,
     wakeAncestors,
   } = lifecycle;
-  const { reclaimThreadResources, cleanupError } = cleanup;
+  const { cleanupError } = cleanup;
   // Undo belongs to one completed action, not to a later Return to Active.
   // Toasts are short-lived; bound snapshots and expire them after five minutes.
   const settleUndos = new Map<
@@ -55,7 +54,7 @@ export function createServerSettleActions(
       const ids = new Set(threadTreeIds(allThreads, threadId));
       const tree = allThreads.filter((thread) => ids.has(thread.id));
       if (!tree.some((thread) => thread.id === threadId)) throw new Error("Thread is no longer available");
-      const { currentTree, now, previous, cleanupRows, cleanupOwner } = await withThreadChanges([...ids], async () => {
+      const { now, previous } = await withThreadChanges([...ids], async () => {
         const busy = tree.find((thread) => !canPark(threadSignals(thread)));
         if (busy) throw new Error(`Cannot settle while ${threadStoredTitle(busy)} is working or waiting for input`);
         const beforeRows = new Map(tree.map((thread) => [thread.id, readOne(thread.id)]));
@@ -104,10 +103,7 @@ export function createServerSettleActions(
             })),
           );
           publishLifecycleChanges(currentTree.map((thread) => thread.id));
-          // Capture ownership before yielding back to another shelf action.
-          const cleanupRows = new Map(currentTree.map((thread) => [thread.id, readOne(thread.id)]));
-          const cleanupOwner = { threadId, row: readOne(threadId) };
-          return { currentTree, now, previous, cleanupRows, cleanupOwner };
+          return { now, previous };
         } catch (error) {
           const failed: string[] = [];
           for (const original of unpinned.reverse()) {
@@ -136,30 +132,13 @@ export function createServerSettleActions(
           throw error;
         }
       });
-      // The shelf move is durable before anything is released, so a slow or
-      // unreachable host delays the reminder without holding up the settle.
-      const reclaim = { ...EMPTY_RECLAIM };
-      await runThreadTasks(
-        currentTree.map((thread) => thread.id),
-        async (id) => {
-          const released = await reclaimThreadResources(
-            id,
-            currentTree.find((thread) => thread.id === id),
-            cleanupRows.get(id),
-            cleanupOwner,
-          );
-          reclaim.closedTerminals += released.closedTerminals;
-          reclaim.keptTerminals += released.keptTerminals;
-          reclaim.stoppedRuntime ||= released.stoppedRuntime;
-        },
-      );
       const undoToken = randomUUID();
       for (const [token, undo] of settleUndos) {
         if (undo.expiresAt <= Date.now()) settleUndos.delete(token);
       }
       while (settleUndos.size >= 50) settleUndos.delete(settleUndos.keys().next().value!);
       settleUndos.set(undoToken, { threadId, settledAt: now, expiresAt: Date.now() + 5 * 60_000, previous });
-      return { ok: true, reclaim, undoToken };
+      return { ok: true, reclaim: { ...EMPTY_RECLAIM }, undoToken };
     },
     async unsettle({ threadId, undoToken }) {
       if (undoToken !== undefined) {

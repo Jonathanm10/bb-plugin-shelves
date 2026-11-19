@@ -1,9 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import plugin from "./server";
 import {
   availablePullRequest,
   createLegacyPolicyHost as createFakePluginHost,
-  deferred,
   disposers,
   projectThread,
   projectsWith,
@@ -20,8 +19,7 @@ type Row =
   | { outcome: "unavailable"; message: string }
   | ReturnType<typeof availablePullRequest>;
 
-// Ordinary passes re-decide live threads only. The first pass after a start
-// and the pass after a rule change re-check settled threads too.
+// Every pass, including startup and rule changes, looks up live threads only.
 async function load(threads: ProjectThread[], row: (environmentId: string) => Row | Promise<Row>) {
   const batches: string[][] = [];
   let failLookup = false;
@@ -126,112 +124,38 @@ describe("automatic settle leaves settled threads alone", () => {
     expect(policy.batches).toEqual([["env_thr"]]);
   });
 
-  it("re-checks a thread settled before the server started on its first pass", async () => {
-    const threads = [projectThread({ id: "thr", environmentId: "env_thr", ...quiet })];
-    const policy = await load(threads, () => availablePullRequest("open"));
-    const insert = () =>
-      policy.bb.storage
-        .database()
-        .prepare(`INSERT INTO thread_lifecycle (thread_id, settled_at, settled_override) VALUES (?, ?, NULL)`)
-        .run("thr", old + 1_000);
-    insert();
-    await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: ["thr"] });
-    expect(policy.batches).toEqual([["env_thr"]]);
-
-    insert();
+  it("keeps pre-existing policy rows settled on the first pass", async () => {
+    const policy = await load([projectThread({ id: "thr", environmentId: "env_thr", ...quiet })], () =>
+      availablePullRequest("open"),
+    );
+    policy.bb.storage
+      .database()
+      .prepare(`INSERT INTO thread_lifecycle (thread_id, settled_at, settled_override) VALUES (?, ?, NULL)`)
+      .run("thr", old + 1000);
     await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: [] });
-    expect(policy.batches).toEqual([["env_thr"]]);
+    expect(policy.batches).toEqual([]);
+    await policy.changeRules(90);
+    await policy.evaluate();
+    expect(policy.batches).toEqual([]);
     await expect(policy.settledIds()).resolves.toEqual(["thr"]);
   });
 
-  describe("keeps the re-check after a rule change until one completes", () => {
-    const setup = async (row: (environmentId: string) => Row | Promise<Row> = () => ({ outcome: "absent" })) => {
-      const threads = [projectThread({ id: "thr", environmentId: "env_thr", ...quiet })];
-      const policy = await load(threads, row);
-      await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: ["thr"] });
-      await policy.evaluate();
-      expect(policy.batches).toEqual([["env_thr"]]);
-      return policy;
-    };
-    // Each full pass reads the settled thread's workspace; ordinary ones do not.
-    const expectOrdinaryFromNowOn = async (policy: Awaited<ReturnType<typeof setup>>) => {
-      const count = policy.batches.length;
-      await policy.evaluate();
-      await policy.evaluate();
-      expect(policy.batches).toHaveLength(count);
-      await expect(policy.settledIds()).resolves.toEqual(["thr"]);
-    };
+  it("retries failed lookups only while a thread is live", async () => {
+    const policy = await load([projectThread({ id: "thr", environmentId: "env_thr", ...quiet })], () => ({
+      outcome: "absent",
+    }));
+    policy.failNextLookup();
+    await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: [] });
+    await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: ["thr"] });
+    await policy.evaluate();
+    expect(policy.batches).toEqual([["failed"], ["env_thr"]]);
+  });
 
-    it("after a pass that throws", async () => {
-      const policy = await setup();
-      policy.failLists(true);
-      await policy.changeRules(2);
-      await expect(policy.evaluate()).rejects.toThrow("projects unavailable");
-      policy.failLists(false);
-      await policy.evaluate();
-      await vi.waitFor(() => expect(policy.batches).toEqual([["env_thr"], ["env_thr"]]));
-      await expectOrdinaryFromNowOn(policy);
-    });
-
-    it("after a pass whose PR lookup failed", async () => {
-      const policy = await setup();
-      policy.failNextLookup();
-      await policy.changeRules(2);
-      await policy.evaluate();
-      await vi.waitFor(() => expect(policy.batches).toEqual([["env_thr"], ["failed"], ["env_thr"]]));
-      await expectOrdinaryFromNowOn(policy);
-    });
-
-    it("for each thread whose PR row had no answer, and only for those", async () => {
-      let unavailable = false;
-      const threads = [
-        projectThread({ id: "thr_a", environmentId: "env_a", ...quiet }),
-        projectThread({ id: "thr_b", environmentId: "env_b", ...quiet }),
-      ];
-      const policy = await load(threads, (environmentId) =>
-        unavailable && environmentId === "env_a"
-          ? { outcome: "unavailable", message: "host_1 is offline" }
-          : { outcome: "absent" },
-      );
-      await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: ["thr_a", "thr_b"] });
-      unavailable = true;
-      await policy.changeRules(2);
-      await policy.evaluate();
-      await vi.waitFor(() => expect(policy.batches).toEqual([["env_a", "env_b"], ["env_a", "env_b"], ["env_a"]]));
-      // Once env_a answers, nothing is looked up again.
-      unavailable = false;
-      await policy.evaluate();
-      await policy.evaluate();
-      expect(policy.batches.slice(2).every((keys) => keys.length === 1 && keys[0] === "env_a")).toBe(true);
-      const answered = policy.batches.length;
-      await policy.evaluate();
-      await policy.evaluate();
-      expect(policy.batches).toHaveLength(answered);
-      await expect(policy.settledIds()).resolves.toEqual(["thr_a", "thr_b"]);
-    });
-
-    it("after a pass the next rule change superseded", async () => {
-      let gate: ReturnType<typeof deferred<void>> | null = null;
-      const entered = deferred<void>();
-      const policy = await setup(async () => {
-        if (gate) {
-          const held = gate;
-          gate = null;
-          entered.resolve();
-          await held.promise;
-        }
-        return { outcome: "absent" };
-      });
-      const release = deferred<void>();
-      gate = release;
-      await policy.changeRules(2);
-      const superseded = policy.evaluate();
-      await entered.promise;
-      await policy.changeRules(3);
-      release.resolve();
-      await superseded;
-      await vi.waitFor(() => expect(policy.batches).toEqual([["env_thr"], ["env_thr"], ["env_thr"]]));
-      await expectOrdinaryFromNowOn(policy);
-    });
+  it("retries a failed live thread listing", async () => {
+    const policy = await load([projectThread({ id: "thr", ...quiet })], () => ({ outcome: "absent" }));
+    policy.failLists(true);
+    await expect(policy.evaluate()).rejects.toThrow("projects unavailable");
+    policy.failLists(false);
+    await expect(policy.evaluate()).resolves.toEqual({ changedThreadIds: ["thr"] });
   });
 });

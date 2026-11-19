@@ -97,7 +97,7 @@ describe("lifecycle RPC", () => {
     await expect(harness.behavior.callRpc("listLifecycle", {})).resolves.toEqual(before);
   });
 
-  it("releases the agent session and only the terminals nobody used", async () => {
+  it("legacy Park releases the agent session and only the terminals nobody used", async () => {
     const { bb, harness } = createFakePluginHost({
       pluginId: "bb-sidebar-clean",
       sdk: {
@@ -122,10 +122,9 @@ describe("lifecycle RPC", () => {
     await plugin(bb);
     disposers.push(() => harness.lifecycle.dispose());
 
-    await expect(harness.behavior.callRpc("settle", { threadId: "thr_1" })).resolves.toEqual({
+    await expect(harness.behavior.callRpc("park", { threadId: "thr_1" })).resolves.toEqual({
       ok: true,
       reclaim: { closedTerminals: 1, keptTerminals: 1, stoppedRuntime: true },
-      undoToken: expect.any(String),
     });
     expect(harness.inspection.sdk.callsTo("threads.stop")).toEqual([[{ threadId: "thr_1" }]]);
     expect(harness.inspection.sdk.callsTo("terminals.close")).toEqual([

@@ -128,7 +128,7 @@ describe("automatic settle policy", () => {
     expect(parseAutoSettleAfterDays(true, "91")).toBeNull();
   });
 
-  it("settles an inactive thread and reverses it after fresh activity", () => {
+  it("settles an inactive thread and reverses it after fresh attention", () => {
     expect(
       decideAutoSettle({
         lifecycle: null,
@@ -144,7 +144,7 @@ describe("automatic settle policy", () => {
         now: NOW,
         pullRequest: { outcome: "absent" },
         settings,
-        thread: { ...quietThread, updatedAt: NOW },
+        thread: { ...quietThread, updatedAt: NOW, latestAttentionAt: NOW },
       }),
     ).toBe("unsettle");
   });

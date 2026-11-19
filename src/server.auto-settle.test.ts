@@ -78,7 +78,6 @@ describe("automatic settle evaluation", () => {
       snoozedUntil: null,
       snoozedAt: null,
     };
-    const after = shelf === "settled" ? { rows: [...before.rows, inherited] } : before;
     const settings = (await harness.behavior.callRpc("getSidebarSettings", {})) as Record<string, unknown>;
     await harness.behavior.callRpc("updateSidebarSettings", { ...settings, [setting]: true });
     await harness.behavior.callRpc("evaluateAutoSettle", {});
@@ -89,6 +88,8 @@ describe("automatic settle evaluation", () => {
           : expect.objectContaining({ threadId: "child", settledAt: expect.any(Number), settledOverride: null }),
       ]),
     );
+    const after = await harness.behavior.callRpc("listLifecycle", {});
+    expect((after as LifecycleListResult).rows).toEqual(expect.arrayContaining(before.rows));
     await harness.behavior.callRpc("updateSidebarSettings", settings);
     await harness.behavior.callRpc("evaluateAutoSettle", {});
     await expect(harness.behavior.callRpc("listLifecycle", {})).resolves.toEqual(after);
@@ -157,7 +158,7 @@ describe("automatic settle evaluation", () => {
     },
   );
 
-  it("reopens an already settled parent when its child's PR reopens, on the first pass after a restart", async () => {
+  it("keeps a settled tree filed when its PR reopens across restart", async () => {
     const old = Date.now() - 4 * 86400000;
     const quiet = { createdAt: old, updatedAt: old, latestAttentionAt: old };
     let prOpen = false;
@@ -184,16 +185,15 @@ describe("automatic settle evaluation", () => {
     // A settled tree is done: an ordinary pass does not look its PR up again.
     await expect(harness.behavior.callRpc("evaluateAutoSettle", {})).resolves.toEqual({ changedThreadIds: [] });
     expect(batches).toEqual([["env_child"]]);
+    const before = await harness.behavior.callRpc("listLifecycle", {});
     const reloaded = (await harness.lifecycle.reload(plugin)).harness;
     disposers.push(() => reloaded.lifecycle.dispose());
-    await expect(reloaded.behavior.callRpc("evaluateAutoSettle", {})).resolves.toEqual({
-      changedThreadIds: ["child", "parent"],
-    });
     await expect(reloaded.behavior.callRpc("evaluateAutoSettle", {})).resolves.toEqual({ changedThreadIds: [] });
-    await expect(reloaded.behavior.callRpc("listLifecycle", {})).resolves.toEqual({ rows: [] });
+    await expect(reloaded.behavior.callRpc("listLifecycle", {})).resolves.toEqual(before);
+    expect(batches).toEqual([["env_child"]]);
   });
 
-  it("does not settle a parent while a child's PR is reopening after a settings change", async () => {
+  it("settles an eligible parent over an already settled child after a settings change", async () => {
     const old = Date.now() - 4 * 86400000;
     const quiet = { createdAt: old, updatedAt: old, latestAttentionAt: old };
     let parentPinned = true;
@@ -231,9 +231,13 @@ describe("automatic settle evaluation", () => {
     const full = harness.behavior.callRpc("evaluateAutoSettle", {});
     await new Promise((resolve) => setTimeout(resolve, 0));
     held.resolve();
-    await expect(full).resolves.toEqual({ changedThreadIds: ["child"] });
+    await expect(full).resolves.toEqual({ changedThreadIds: ["parent"] });
     await expect(harness.behavior.callRpc("evaluateAutoSettle", {})).resolves.toEqual({ changedThreadIds: [] });
-    await expect(harness.behavior.callRpc("listLifecycle", {})).resolves.toEqual({ rows: [] });
+    expect(
+      ((await harness.behavior.callRpc("listLifecycle", {})) as LifecycleListResult).rows
+        .map((row) => row.threadId)
+        .sort(),
+    ).toEqual(["child", "parent"]);
   });
 
   it("waits for active descendants before automatically settling their parent", async () => {
@@ -339,9 +343,8 @@ describe("automatic settle evaluation", () => {
     expect(harness.inspection.sdk.callsTo("projects.list")).toEqual([
       [{ include: "threads", includePersonal: true }],
       [{ include: "threads", includePersonal: true }],
-      [{ include: "threads", includePersonal: true }],
     ]);
-    expect(harness.inspection.sdk.callsTo("threads.stop")).toEqual([[{ threadId: "thr_quiet" }]]);
+    expect(harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
   });
 
   it("never settles a thread still serving a port, or one whose host cannot be scanned", async () => {
@@ -401,11 +404,7 @@ describe("automatic settle evaluation", () => {
       changedThreadIds: ["thr_shared_a", "thr_shared_b", "thr_docker", "thr_gone"],
     });
     expect(scans.map((scan) => scan.hostId).sort()).toEqual(["host_1", "host_offline"]);
-    expect(
-      (harness.inspection.sdk.callsTo("threads.stop") as Array<[{ threadId: string }]>)
-        .map(([{ threadId }]) => threadId)
-        .sort(),
-    ).toEqual(["thr_docker", "thr_gone", "thr_shared_a", "thr_shared_b"]);
+    expect(harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
   });
 
   it("keeps manual un-settle active until real work clears the override", async () => {
@@ -607,7 +606,7 @@ describe("automatic settle evaluation", () => {
     expect(batches).toEqual([["env_closed"]]);
   });
 
-  it("returns a policy-settled thread whose PR reopened only once a rule changes", async () => {
+  it("keeps a policy-settled thread filed when its PR reopens and rules change", async () => {
     const recent = Date.now() - 60_000;
     let pullRequestState: "merged" | "open" = "merged";
     const batches: string[][] = [];
@@ -651,9 +650,11 @@ describe("automatic settle evaluation", () => {
     const full = harness.behavior.callRpc("evaluateAutoSettle", {});
     await new Promise((resolve) => setTimeout(resolve, 0));
     held.resolve();
-    await expect(full).resolves.toEqual({ changedThreadIds: ["thr_pr"] });
-    expect(batches[1]).toEqual(["env_pr"]);
-    await expect(harness.behavior.callRpc("listLifecycle", {})).resolves.toEqual({ rows: [] });
+    await expect(full).resolves.toEqual({ changedThreadIds: [] });
+    expect(batches).toEqual([["env_pr"]]);
+    await expect(harness.behavior.callRpc("listLifecycle", {})).resolves.toMatchObject({
+      rows: [{ threadId: "thr_pr", settledAt: expect.any(Number) }],
+    });
   });
 
   it("clears policy-owned settled state when the user pins the thread", async () => {

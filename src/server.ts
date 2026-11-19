@@ -135,7 +135,7 @@ export default async function plugin(bb: BbPluginApi) {
   const lifecycle = createServerLifecycle(ctx);
   const cleanup = createServerSettleCleanup(ctx, lifecycle, threadPortActions, getOpenPorts);
   const settle = createServerSettleActions(ctx, lifecycle, cleanup);
-  const policy = createServerPolicy(ctx, lifecycle, settings, cleanup, threadPortActions);
+  const policy = createServerPolicy(ctx, lifecycle, settings, threadPortActions);
   const handlers = createServerHandlers(
     ctx,
     lifecycle,

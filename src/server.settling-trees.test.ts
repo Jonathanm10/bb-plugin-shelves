@@ -155,7 +155,7 @@ describe("settling thread trees", () => {
     await expect(harness.behavior.callRpc("listLifecycle", {})).resolves.toEqual(before);
   });
 
-  it("finishes policy wakeups and runtime cleanup without ancestor lookups after writing rows", async () => {
+  it("finishes policy wakeups and filing without ancestor lookups after writing rows", async () => {
     const harness = await loadPlugin();
     const old = Date.now() - 8 * 86400000;
     const quiet = { createdAt: old, updatedAt: old, latestAttentionAt: old };
@@ -178,7 +178,7 @@ describe("settling thread trees", () => {
     });
     const { rows } = (await harness.behavior.callRpc("listLifecycle", {})) as LifecycleListResult;
     expect(rows.map((row) => row.threadId)).toEqual(["quiet-root"]);
-    expect(harness.inspection.sdk.callsTo("threads.stop")).toContainEqual([{ threadId: "quiet-root" }]);
+    expect(harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
     await expect(harness.behavior.callRpc("evaluateAutoSettle", {})).resolves.toEqual({ changedThreadIds: [] });
   });
 
@@ -217,7 +217,7 @@ describe("settling thread trees", () => {
     expect(rows.map((row) => row.threadId).sort()).toEqual(["child", "grandchild", "hidden", "parent"]);
     expect(new Set(rows.map((row) => row.settledAt)).size).toBe(1);
     expect(rows.every((row) => row.settledOverride === "settled" && row.snoozedUntil === null)).toBe(true);
-    expect(harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(4);
+    expect(harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
     expect(harness.inspection.experimental_rpcInvalidations.filter((tags) => tags?.includes("lifecycle"))).toHaveLength(
       1,
     );

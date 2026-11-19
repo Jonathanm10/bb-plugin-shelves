@@ -35,9 +35,10 @@ live again). Snoozed, Parked and Inactive-shelf threads stay live.
   the app sends live workspaces and splits longer lists.
 - Server: `server-policy` passes (run by the 5-minute `auto-settle` schedule,
   among others) skip PR lookups for policy-settled threads; only
-  `cannotAutoSettle` in `src/auto-settle.ts` can return them to Active. A
-  full re-check is pending from server start and from each auto-settle
-  settings change until a pass completes; unanswered lookups retry each pass.
+  `decideAutoSettledThread` in `src/auto-settle.ts` can return them to Active
+  for new attention or work. A
+  settings change or restart does not reopen settled work or look up its PR.
+  Live threads with unanswered lookups retry on later passes.
   Closed PR checks stay enabled when the optional merge and inactivity rules are off.
   New server jobs decide "settled" with `resolveRowShelf` or `resolveShelf`
   from shared `src/lifecycle.ts`.

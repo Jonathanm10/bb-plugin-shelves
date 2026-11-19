@@ -203,7 +203,7 @@ describe("lifecycle RPC", () => {
 
   it("does not close a previewed terminal when its thread starts working during inspection", async () => {
     let working = false;
-    let terminalLists = 0;
+    let cleaning = false;
     const closed: string[] = [];
     const { bb, harness } = createFakePluginHost({
       pluginId: "bb-sidebar-clean",
@@ -218,8 +218,7 @@ describe("lifecycle RPC", () => {
         },
         terminals: {
           list: async () => {
-            terminalLists += 1;
-            if (terminalLists === 3) working = true;
+            if (cleaning) working = true;
             return {
               sessions: [{ ...terminalSession({ id: "term_race", lastUserInputAt: 5 }), threadId: "thr_race" }],
             };
@@ -239,6 +238,7 @@ describe("lifecycle RPC", () => {
       threads: unknown[];
     };
     expect(preview.threads).toHaveLength(1);
+    cleaning = true;
     const result = await harness.behavior.callRpc("cleanSettled", { token: preview.token });
     expect(result).toMatchObject({ closedTerminals: 0, skipped: [expect.objectContaining({ resource: "terminal" })] });
     expect(closed).toEqual([]);

@@ -3,7 +3,6 @@ import type { ServerContext } from "./server-context";
 import type { createServerLifecycle, StoredLifecycleRow } from "./server-lifecycle";
 import type { createThreadPortActions } from "./thread-ports";
 import type { createServerSettings } from "./server-settings";
-import type { createServerSettleCleanup } from "./server-settle-cleanup";
 import {
   autoSettleNeedsPullRequest,
   decideAutoSettle,
@@ -14,7 +13,6 @@ import {
 } from "./auto-settle";
 import { threadTreeIds } from "./thread-tree";
 import { resolveShelf } from "./lifecycle";
-import { runThreadTasks } from "./thread-tasks";
 import { GITHUB_PR_STATUS_PLUGIN_ID, MAX_PULL_REQUEST_KEYS } from "./github-pr-status";
 
 // Reads wait for overdue PR data, so a batch can take a while; the next
@@ -38,11 +36,9 @@ export function createServerPolicy(
   ctx: ServerContext,
   lifecycle: ReturnType<typeof createServerLifecycle>,
   settings: Awaited<ReturnType<typeof createServerSettings>>,
-  cleanup: ReturnType<typeof createServerSettleCleanup>,
   threadPortActions: ReturnType<typeof createThreadPortActions>,
 ) {
   const { readSidebarSettings } = settings;
-  const { reclaimThreadResources } = cleanup;
   const {
     loadPolicyThreads,
     readAll,
@@ -142,19 +138,7 @@ export function createServerPolicy(
 
   let policySettingsRevision = 0;
 
-  // A settled thread is done. Ordinary passes only re-decide live threads; one
-  // the policy settled is looked at again only after a rule changes, or on the
-  // first pass after the server starts, when the rules may have changed while
-  // it was down. The flag stays set until such a pass completes at the current
-  // rules, so a failed or superseded pass cannot leave threads settled under
-  // rules the user turned off.
-  let fullRecheckPending = true;
-  // Policy-settled threads a re-check could not decide because their PR lookup
-  // had no answer. Each is looked up on later passes until one answers. Holding
-  // the flag instead would keep every pass full while a removed workspace keeps
-  // reporting `unavailable`.
-  let unansweredThreadIds = new Set<string>();
-
+  // Rule changes affect live threads; only new work or attention reopens settled rows.
   const evaluatePolicies = (): Promise<string[]> => {
     if (policyEvaluation !== null) {
       policyEvaluationQueued = true;
@@ -162,15 +146,6 @@ export function createServerPolicy(
     }
     const evaluation = (async () => {
       const settingsRevision = policySettingsRevision;
-      const fullRecheck = fullRecheckPending;
-      const rechecks = (threadId: string) => fullRecheck || unansweredThreadIds.has(threadId);
-      let unanswered = new Set<string>();
-      // Only a completed pass at the rules it read updates either record.
-      const finishRecheck = () => {
-        if (settingsRevision !== policySettingsRevision) return;
-        if (fullRecheck) fullRecheckPending = false;
-        unansweredThreadIds = unanswered;
-      };
       const configured = readSidebarSettings();
       const policySettings = {
         afterDays: parseAutoSettleAfterDays(configured.autoSettleInactive, String(configured.autoSettleAfterDays)),
@@ -186,11 +161,7 @@ export function createServerPolicy(
         ...new Set(
           threads.flatMap((thread) => {
             const row = lifecycleByThreadId.get(thread.id) ?? null;
-            if (
-              thread.environmentId === null ||
-              (!rechecks(thread.id) && isAutoSettled(row)) ||
-              !autoSettleNeedsPullRequest(row, thread)
-            )
+            if (thread.environmentId === null || isAutoSettled(row) || !autoSettleNeedsPullRequest(row, thread))
               return [];
             return [thread.environmentId];
           }),
@@ -199,7 +170,6 @@ export function createServerPolicy(
       const pullRequests = await loadPullRequests(environmentIds);
       const now = Date.now();
       const decide = (keepThreadIds: ReadonlySet<string>) => {
-        unanswered = new Set();
         return threads.flatMap((thread) => {
           if (keepThreadIds.has(thread.id) || (thread.visibility === "hidden" && thread.parentThreadId === null))
             return [];
@@ -208,7 +178,7 @@ export function createServerPolicy(
           // Decided per thread: PR rows are keyed by environment, so a settled
           // thread sharing a workspace with a live one would otherwise be
           // re-decided from the live thread's lookup.
-          if (!rechecks(thread.id) && isAutoSettled(row)) {
+          if (isAutoSettled(row)) {
             const decision = decideAutoSettledThread(row, thread);
             return decision === "keep" ? [] : [{ decision, row, threadId: thread.id }];
           }
@@ -217,17 +187,12 @@ export function createServerPolicy(
               ? { outcome: "absent" }
               : (pullRequests.get(thread.environmentId) ?? { outcome: "unknown" });
           const decision = decideAutoSettle({ lifecycle: row, now, pullRequest, settings: policySettings, thread });
-          if (decision === "keep" && pullRequest.outcome === "unknown" && isAutoSettled(row)) {
-            unanswered.add(thread.id);
-          }
           return decision === "keep" ? [] : [{ decision, row, threadId: thread.id }];
         });
       };
       let changes = decide(new Set());
-      // Settling stops the runtime, which kills what its agent left running in
-      // the background, and bb cannot see that work when the provider does not
-      // report it. A thread still serving a port, such as a dev server, stays
-      // out of policy reach until it stops.
+      // Keep serving workspaces visible conservatively, including commands
+      // a provider has not reported through bb's activity counters.
       const settling = new Set(changes.flatMap((change) => (change.decision === "settle" ? [change.threadId] : [])));
       if (settling.size > 0) {
         const servingPorts = await threadPortActions.threadsServingPorts(
@@ -263,11 +228,9 @@ export function createServerPolicy(
       // Settings can change while PRs or ports are loading. The queued pass
       // uses the latest rules; this older pass must not move or stop threads.
       if (settingsRevision !== policySettingsRevision || changes.length === 0) {
-        finishRecheck();
         return backfilled;
       }
       applyPolicyChanges(changes, now);
-      const cleanupRows = new Map(changes.map((change) => [change.threadId, readOne(change.threadId)]));
       const changedThreadIds = new Set(changes.map((change) => change.threadId));
       publishLifecycleChanges([...changedThreadIds]);
       for (const id of backfilled) changedThreadIds.add(id);
@@ -277,37 +240,6 @@ export function createServerPolicy(
             changedThreadIds.add(id);
         }
       }
-      // Outside the transaction, because releasing a runtime is a network call
-      // and holding a write lock open across one would block every other write.
-      await runThreadTasks(
-        changes.flatMap((change) => (change.decision === "settle" ? [change.threadId] : [])),
-        async (threadId) => {
-          await reclaimThreadResources(threadId, byId.get(threadId), cleanupRows.get(threadId), undefined, (thread) => {
-            if (settingsRevision === policySettingsRevision) return true;
-            const current = readSidebarSettings();
-            // A changed rule may return this thread to Active. Only finish its
-            // reclaim if it still qualifies under the new rules.
-            return (
-              decideAutoSettle({
-                lifecycle: null,
-                now: Date.now(),
-                pullRequest:
-                  thread.environmentId === null
-                    ? { outcome: "absent" }
-                    : (pullRequests.get(thread.environmentId) ?? { outcome: "unknown" }),
-                settings: {
-                  afterDays: parseAutoSettleAfterDays(current.autoSettleInactive, String(current.autoSettleAfterDays)),
-                  onMerge: current.autoSettleOnMerge,
-                  keepPullRequests: current.autoSettleKeepPullRequests,
-                },
-                thread,
-              }) === "settle"
-            );
-          });
-        },
-        4,
-      );
-      finishRecheck();
       return [...changedThreadIds];
     })();
     const settledEvaluation = evaluation.finally(() => {
@@ -326,7 +258,6 @@ export function createServerPolicy(
   };
   const settingsChanged = () => {
     policySettingsRevision += 1;
-    fullRecheckPending = true;
   };
 
   return { evaluatePolicies, settingsChanged };

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { makeThreadResponse } from "@get-bb/plugin-sdk/testing";
 import type { BbPluginApi } from "@get-bb/plugin-sdk";
 import {
@@ -41,53 +41,34 @@ describe("release lifecycle safety", () => {
     return harness;
   }
 
-  it.each(["activity", "return", "pin", "reparent"])("cancels queued reclaim after newer %s", async (change) => {
+  it("files a tree without queuing any runtime or terminal cleanup", async () => {
     const threads = [
       projectThread({ id: "root" }),
       ...Array.from({ length: 5 }, (_, i) => projectThread({ id: `child${i}`, parentThreadId: "root" })),
     ];
     const h = await host(threads);
-    const gate = deferred<void>();
-    const started = deferred<void>();
-    const stopped: string[] = [];
-    h.inspection.sdk.stub("threads.stop", async ({ threadId }) => {
-      stopped.push(threadId);
-      if (stopped.length === 4) started.resolve();
-      await gate.promise;
-      return { ok: true };
-    });
-    const settling = h.behavior.callRpc("settle", { threadId: "root" });
-    await started.promise;
-    const late = threads.at(-1)!;
-    if (change === "activity") {
-      late.status = "active";
-      await h.behavior.emitThreadEvent("thread.active", { thread: makeThreadResponse(late) });
-    } else if (change === "return") {
-      await h.behavior.callRpc("unsettle", { threadId: late.id });
-    } else if (change === "pin") {
-      late.pinnedAt = Date.now();
-    } else late.parentThreadId = null;
-    gate.resolve();
-    await settling;
-    expect(stopped).not.toContain(late.id);
+    await h.behavior.callRpc("settle", { threadId: "root" });
+    expect(((await h.behavior.callRpc("listLifecycle", {})) as LifecycleListResult).rows).toHaveLength(6);
+    expect(h.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
+    expect(h.inspection.sdk.callsTo("terminals.list")).toHaveLength(0);
   });
 
-  it("looks up only the settling thread before stopping it", async () => {
+  it("does not perform reclaim lookups after filing", async () => {
     const threads = [
       projectThread({ id: "root" }),
       ...Array.from({ length: 150 }, (_, i) => projectThread({ id: `other${i}` })),
     ];
     const h = await host(threads);
     await h.behavior.callRpc("settle", { threadId: "root" });
-    expect(h.inspection.sdk.callsTo("threads.stop")).toEqual([[{ threadId: "root" }]]);
+    expect(h.inspection.sdk.callsTo("threads.stop")).toEqual([]);
     // Each reclaim check is one id-filtered read, not a walk over every page.
     const reads = h.inspection.sdk.callsTo("threads.list") as Array<[{ threadIds?: string[] }]>;
     const reclaimReads = reads.filter(([args]) => args?.threadIds);
-    expect(reclaimReads.length).toBeGreaterThan(0);
+    expect(reclaimReads).toHaveLength(0);
     expect(reclaimReads.every(([args]) => args.threadIds?.join() === "root")).toBe(true);
   });
 
-  it("rechecks activity after terminal lookup before closing anything", async () => {
+  it("keeps the legacy reclaim activity check after terminal lookup before closing anything", async () => {
     const threads = [projectThread({ id: "root" })];
     const h = await host(threads);
     const gate = deferred<void>();
@@ -98,7 +79,7 @@ describe("release lifecycle safety", () => {
       return { sessions: [{ ...terminalSession({ id: "terminal" }), threadId: "root" }] };
     });
     h.inspection.sdk.stub("terminals.close", async () => ({ ok: true }));
-    const settling = h.behavior.callRpc("settle", { threadId: "root" });
+    const settling = h.behavior.callRpc("park", { threadId: "root" });
     await started.promise;
     threads[0]!.status = "active";
     await h.behavior.emitThreadEvent("thread.active", { thread: makeThreadResponse(threads[0]!) });
@@ -213,36 +194,22 @@ describe("release lifecycle safety", () => {
     expect(result.rows.map((r) => r.threadId).sort()).toEqual(["hidden", "root"]);
   });
 
-  it.each([false, true])(
-    "rechecks queued automatic cleanup under changed rules, still eligible=%s",
-    async (eligible) => {
-      const old = Date.now() - 8 * 86400000;
-      const threads = Array.from({ length: 6 }, (_, i) =>
-        projectThread({ id: `root${i}`, createdAt: old, updatedAt: old, latestAttentionAt: old }),
-      );
-      const h = await host(threads);
-      const gate = deferred<void>();
-      const entered = deferred<void>();
-      const stopped: string[] = [];
-      h.inspection.sdk.stub("threads.stop", async ({ threadId }) => {
-        stopped.push(threadId);
-        if (stopped.length === 4) entered.resolve();
-        await gate.promise;
-        return { ok: true };
-      });
-      const settling = h.behavior.callRpc("evaluateAutoSettle", {});
-      await entered.promise;
-      await h.behavior.callRpc(
-        "updateSidebarSettings",
-        eligible ? { autoSettleAfterDays: 4 } : { autoSettleInactive: false, autoSettleOnMerge: false },
-      );
-      gate.resolve();
-      await settling;
-      expect(stopped.includes("root5")).toBe(eligible);
-      if (!eligible)
-        await vi.waitFor(async () => expect(await h.behavior.callRpc("listLifecycle", {})).toEqual({ rows: [] }));
-    },
-  );
+  it.each([false, true])("changing auto-settle rules keeps filed rows, eligible=%s", async (eligible) => {
+    const old = Date.now() - 8 * 86400000;
+    const threads = Array.from({ length: 6 }, (_, i) =>
+      projectThread({ id: `root${i}`, createdAt: old, updatedAt: old, latestAttentionAt: old }),
+    );
+    const h = await host(threads);
+    await h.behavior.callRpc("evaluateAutoSettle", {});
+    const before = await h.behavior.callRpc("listLifecycle", {});
+    await h.behavior.callRpc(
+      "updateSidebarSettings",
+      eligible ? { autoSettleAfterDays: 4 } : { autoSettleInactive: false, autoSettleOnMerge: false },
+    );
+    await h.behavior.callRpc("evaluateAutoSettle", {});
+    expect(await h.behavior.callRpc("listLifecycle", {})).toEqual(before);
+    expect(h.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
+  });
 
   it("does not resurrect an archived child from an older project response", async () => {
     const root = projectThread({ id: "root" });
@@ -251,7 +218,7 @@ describe("release lifecycle safety", () => {
     h.inspection.sdk.stub("projects.list", async () => projectsWith([root, staleChild]));
     await h.behavior.callRpc("settle", { threadId: "root" });
     expect(await h.behavior.callRpc("listLifecycle", {})).toMatchObject({ rows: [{ threadId: "root" }] });
-    expect(h.inspection.sdk.callsTo("threads.stop")).toEqual([[{ threadId: "root" }]]);
+    expect(h.inspection.sdk.callsTo("threads.stop")).toEqual([]);
   });
 
   it("preserves unrelated settings across partial writes and rejects removed keys", async () => {

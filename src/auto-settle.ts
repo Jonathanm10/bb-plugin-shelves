@@ -38,8 +38,7 @@ interface AutoSettleSettings {
 
 type AutoSettleDecision = "keep" | "settle" | "unsettle";
 
-// Settling also stops the thread's runtime, so anything the sidebar would
-// refuse to park must keep it out of policy reach too.
+// Live work, questions and pins stay visible until the user resolves them.
 function cannotAutoSettle(lifecycle: AutoSettleLifecycleState | null, thread: AutoSettleThread): boolean {
   return (
     thread.pinnedAt !== null ||
@@ -54,7 +53,7 @@ export function autoSettleNeedsPullRequest(
   lifecycle: AutoSettleLifecycleState | null,
   thread: AutoSettleThread,
 ): boolean {
-  return lifecycle?.settledOverride == null && !cannotAutoSettle(lifecycle, thread);
+  return !isAutoSettled(lifecycle) && lifecycle?.settledOverride == null && !cannotAutoSettle(lifecycle, thread);
 }
 
 /** Settled by the policy itself, not by the user. */
@@ -71,7 +70,10 @@ export function decideAutoSettledThread(
   lifecycle: AutoSettleLifecycleState | null,
   thread: AutoSettleThread,
 ): AutoSettleDecision {
-  return cannotAutoSettle(lifecycle, thread) ? "unsettle" : "keep";
+  return cannotAutoSettle(lifecycle, thread) ||
+    (lifecycle?.settledAt != null && thread.latestAttentionAt > lifecycle.settledAt)
+    ? "unsettle"
+    : "keep";
 }
 
 export function isValidAutoSettleAfterDays(days: number): boolean {
@@ -104,10 +106,8 @@ export function decideAutoSettle({
 }): AutoSettleDecision {
   if (lifecycle?.settledOverride != null) return "keep";
 
-  const isAutomaticallySettled = lifecycle?.settledAt != null;
-  if (cannotAutoSettle(lifecycle, thread)) {
-    return isAutomaticallySettled ? "unsettle" : "keep";
-  }
+  if (isAutoSettled(lifecycle)) return decideAutoSettledThread(lifecycle, thread);
+  if (cannotAutoSettle(lifecycle, thread)) return "keep";
 
   // A failed lookup is not evidence that no open PR exists. Keep the current
   // state until the next evaluation can make a safe decision.
@@ -133,6 +133,5 @@ export function decideAutoSettle({
     shouldSettle = !keepPullRequest && activityAt < now - settings.afterDays * DAY_MS;
   }
 
-  if (shouldSettle === isAutomaticallySettled) return "keep";
-  return shouldSettle ? "settle" : "unsettle";
+  return shouldSettle ? "settle" : "keep";
 }
