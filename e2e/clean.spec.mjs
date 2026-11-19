@@ -48,6 +48,7 @@ for (const threadDisplay of ["full", "compact-all"]) {
     await shelf(page, "Snoozed").getByRole("button", { name: "Wake thread now" }).click();
     await expect(link(page, first.title)).toBeVisible();
     row = link(page, first.title).locator("xpath=..");
+    await link(page, first.title).focus();
     await row.getByRole("button", { name: "Settle thread" }).press("Enter");
     await expect(link(page, first.title)).toHaveCount(0);
     const toast = page.locator("[data-sonner-toast]").filter({ hasText: "Thread settled" }).last();
@@ -156,9 +157,10 @@ test("core sidebar compact titles keep space until actions are needed", async ({
   await link(page, fixture.threads[0].title).focus();
   await expect(settle).toBeVisible();
   const snooze = row.getByRole("combobox", { name: "Snooze thread" });
+  const trigger = await snooze.elementHandle();
   await snooze.press("Enter");
   await expect(page.getByRole("option", { name: "1 hour", exact: true })).toBeVisible();
-  await expect(snooze).toBeVisible();
+  expect(await trigger.isVisible()).toBe(true);
 });
 
 test.describe("core sidebar touch", () => {
