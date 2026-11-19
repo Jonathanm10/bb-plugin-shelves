@@ -30,7 +30,7 @@ const InboxThread = memo(function InboxThread({
   reorderable: boolean;
   showProject: boolean;
   compact: boolean;
-  renameShelf: "active" | "working" | "inactive";
+  renameShelf: "active" | "working";
   isWoke: boolean;
   childrenExpanded: boolean;
   threadReorderControls: ReorderControls;
@@ -55,7 +55,7 @@ const InboxThread = memo(function InboxThread({
     <ThreadCard
       thread={thread}
       showProject={showProject}
-      projectIconOnly={renameShelf !== "inactive" && settings.compactProjectIconOnly}
+      projectIconOnly={settings.compactProjectIconOnly}
       isActive={thread.id === activeThreadId}
       isWoke={isWoke}
       canPark={lifecycle.canPark(thread)}
@@ -97,7 +97,7 @@ export function createInboxThreadRenderer({
     reorderable = true,
     showProject = true,
     compact = false,
-    renameShelf: "active" | "working" | "inactive" = "active",
+    renameShelf: "active" | "working" = "active",
   ) => (
     <InboxThread
       key={thread.id}

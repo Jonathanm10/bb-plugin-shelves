@@ -4,9 +4,7 @@ import { threadNeedsAttention } from "./child-status";
 import type { LifecycleApi } from "./useLifecycle";
 
 export function useRenamingShelfLocks(threads: readonly PluginSidebarThread[], lifecycle: LifecycleApi) {
-  const [renamingShelfLocks, setRenamingShelfLocks] = useState<Map<string, "active" | "working" | "inactive">>(
-    () => new Map(),
-  );
+  const [renamingShelfLocks, setRenamingShelfLocks] = useState<Map<string, "active" | "working">>(() => new Map());
   useEffect(() => {
     const activeIds = new Set(
       threads

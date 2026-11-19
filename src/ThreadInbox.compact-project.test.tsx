@@ -93,13 +93,13 @@ describe("Compact project display", () => {
         }),
       },
     });
-    for (const shelf of ["Inactive", "Parked", "Snoozed", "Settled"]) {
+    for (const shelf of ["Parked", "Snoozed", "Settled"]) {
       const region = await screen.findByRole("region", { name: shelf });
       const collapsed = within(region).queryByRole("button", { expanded: false });
       if (collapsed) fireEvent.click(collapsed);
     }
     await waitFor(() => {
-      for (const shelf of ["Active", "Pinned", "Working", "Inactive", "Parked", "Snoozed", "Settled"]) {
+      for (const shelf of ["Active", "Pinned", "Working", "Parked", "Snoozed", "Settled"]) {
         const region = screen.getByRole("region", { name: shelf });
         const row = within(region).getByText(`${shelf} thread`).closest("li")!;
         const iconOnly = ["Active", "Pinned", "Working"].includes(shelf);

@@ -105,7 +105,7 @@ it("keeps selection usable when session storage is unavailable", () => {
 });
 
 it("filters every shelf without changing lifecycle or order", async () => {
-  const shelves = ["Pinned", "Active", "Working", "Inactive", "Snoozed", "Parked", "Settled"];
+  const shelves = ["Pinned", "Active", "Working", "Snoozed", "Parked", "Settled"];
   const now = Date.now();
   localStorage.setItem(
     STORAGE_KEYS.shelfExpansion.key,
@@ -120,7 +120,7 @@ it("filters every shelf without changing lifecycle or order", async () => {
         title: `${id} ${shelf}`,
         isPinned: shelf === "Pinned",
         indicator: shelf === "Working" ? "runtime" : "none",
-        updatedAt: shelf === "Inactive" ? now - 24 * 60 * 60_000 : now,
+        updatedAt: now,
       }),
     ),
   );

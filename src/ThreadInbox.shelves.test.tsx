@@ -86,35 +86,29 @@ describe("parking threads", () => {
 
     renderSlot(inbox, listProps, options);
     let activeShelf = screen.getByRole("region", { name: "Active" });
-    let inactiveShelf = screen.getByRole("region", { name: "Inactive" });
     let settledShelf = await screen.findByRole("region", { name: "Settled" });
     let snoozedShelf = await screen.findByRole("region", { name: "Snoozed" });
     fireEvent.click(within(activeShelf).getByRole("button", { expanded: true }));
-    fireEvent.click(within(inactiveShelf).getByRole("button"));
     fireEvent.click(within(settledShelf).getByRole("button", { expanded: false }));
     fireEvent.click(within(snoozedShelf).getByRole("button"));
     expect(within(activeShelf).queryByText("Active work")).toBeNull();
-    expect(within(inactiveShelf).getByText("Inactive work")).toBeDefined();
     expect(within(settledShelf).getByText("Finished work")).toBeDefined();
     expect(within(snoozedShelf).getByText("Later work")).toBeDefined();
 
     cleanup();
     renderSlot(inbox, listProps, options);
     activeShelf = screen.getByRole("region", { name: "Active" });
-    inactiveShelf = screen.getByRole("region", { name: "Inactive" });
     settledShelf = await screen.findByRole("region", { name: "Settled" });
     snoozedShelf = await screen.findByRole("region", { name: "Snoozed" });
     expect(within(activeShelf).getByRole("button", { name: /^Active/, expanded: false })).toBeDefined();
-    expect(within(inactiveShelf).getByRole("button", { expanded: true })).toBeDefined();
     expect(within(settledShelf).getByRole("button", { expanded: true })).toBeDefined();
     expect(within(snoozedShelf).getByRole("button", { expanded: true })).toBeDefined();
     expect(within(activeShelf).queryByText("Active work")).toBeNull();
-    expect(within(inactiveShelf).getByText("Inactive work")).toBeDefined();
     expect(within(settledShelf).getByText("Finished work")).toBeDefined();
     expect(within(snoozedShelf).getByText("Later work")).toBeDefined();
   });
 
-  it("does not flash inactive and parked threads as Active after an app restart", async () => {
+  it("preserves settled placement and keeps legacy inactive threads Active after restart", async () => {
     const now = Date.now();
     const pendingSettings = deferred<typeof defaultSidebarSettings>();
     const pendingLifecycle = deferred<{
@@ -155,7 +149,7 @@ describe("parking threads", () => {
       },
     });
 
-    await screen.findByRole("region", { name: "Inactive" });
+    await screen.findByRole("region", { name: "Active" });
     await screen.findByRole("region", { name: "Settled" });
     cleanup();
 
@@ -167,12 +161,9 @@ describe("parking threads", () => {
       },
     });
 
-    const inactiveShelf = screen.getByRole("region", { name: "Inactive" });
     const settledShelf = screen.getByRole("region", { name: "Settled" });
-    expect(within(inactiveShelf).getByRole("button", { expanded: false })).toBeDefined();
     expect(within(settledShelf).getByRole("button", { expanded: false })).toBeDefined();
-    expect(screen.queryByRole("region", { name: "Active" })).toBeNull();
-    expect(screen.queryByText("Inactive work")).toBeNull();
+    expect(screen.getByText("Inactive work")).toBeDefined();
     expect(screen.queryByText("Settled work")).toBeNull();
   });
 

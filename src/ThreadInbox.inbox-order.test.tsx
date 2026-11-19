@@ -142,7 +142,7 @@ describe("ThreadInbox", () => {
     await waitFor(() => expect(screen.getAllByRole("listitem")[0]!.textContent).toContain("Inbox B"));
   });
 
-  it.each(["Active", "Inactive"])("keeps %s order on remount while the saved order reloads", async (shelf) => {
+  it.each(["Active"])("keeps %s order on remount while the saved order reloads", async (shelf) => {
     const sidebarThreads = {
       status: "ready" as const,
       threads: [
@@ -161,9 +161,6 @@ describe("ThreadInbox", () => {
       },
     });
     await screen.findByRole("region", { name: shelf });
-    if (shelf === "Inactive") {
-      fireEvent.click(within(screen.getByRole("region", { name: shelf })).getByRole("button", { expanded: false }));
-    }
     const titles = () =>
       within(screen.getByRole("region", { name: shelf }))
         .getAllByRole("listitem")

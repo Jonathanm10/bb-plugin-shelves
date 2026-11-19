@@ -10,18 +10,15 @@ import {
   visibleInboxThreads,
 } from "./inbox";
 import { activeRepresentativeThreadId } from "./inbox-layout";
-import { isInactiveThread } from "./inactive";
-import { isWorkingTree } from "./working-tree";
 import { threadNeedsAttention, threadsWithAskingDescendants } from "./child-status";
+import { isWorkingTree } from "./working-tree";
 import { useWorkingForDisplay } from "./StatusSlot";
 
 interface InboxShelfThreadsOptions {
   activeThreadId: string | null;
   childrenByParentId: ReadonlyMap<string, readonly PluginSidebarThread[]>;
-  inactiveAfterHours: number | null;
   lifecycle: LifecycleApi;
-  now: number;
-  renamingShelfLocks: ReadonlyMap<string, "active" | "working" | "inactive">;
+  renamingShelfLocks: ReadonlyMap<string, "active" | "working">;
   scope: readonly string[];
   threads: readonly PluginSidebarThread[];
   workingShelfEnabled: boolean;
@@ -30,9 +27,7 @@ interface InboxShelfThreadsOptions {
 export function useInboxShelfThreads({
   activeThreadId,
   childrenByParentId,
-  inactiveAfterHours,
   lifecycle,
-  now,
   renamingShelfLocks,
   scope,
   threads,
@@ -62,7 +57,6 @@ export function useInboxShelfThreads({
     const askingParentIds = threadsWithAskingDescendants(threads);
     const activeUnpinned: typeof split.inbox = [];
     const working: typeof split.inbox = [];
-    const inactive: typeof split.inbox = [];
     for (const thread of split.inbox) {
       const lockedShelf = renamingShelfLocks.get(thread.id);
       const needsAttention = threadNeedsAttention(thread) || askingParentIds.has(thread.id);
@@ -74,10 +68,6 @@ export function useInboxShelfThreads({
         working.push(thread);
         continue;
       }
-      if (lockedShelf === "inactive" && !needsAttention) {
-        inactive.push(thread);
-        continue;
-      }
       // A thread with work running anywhere under it waits on the Working
       // shelf, unless it just woke from a snooze: that is news for Active.
       // A child's question is news too, however long the parent sat idle.
@@ -87,8 +77,6 @@ export function useInboxShelfThreads({
         isWorkingTree(thread, childrenByParentId.get(thread.id) ?? [], childrenByParentId, isWorking)
       ) {
         working.push(thread);
-      } else if (!askingParentIds.has(thread.id) && isInactiveThread(thread, now, inactiveAfterHours)) {
-        inactive.push(thread);
       } else {
         activeUnpinned.push(thread);
       }
@@ -100,7 +88,6 @@ export function useInboxShelfThreads({
       pinnedBase: split.pinned,
       inboxBase: sortByCreatedAtDescending(activeUnpinned),
       workingBase: sortByCreatedAtDescending(working),
-      inactiveBase: sortByCreatedAtDescending(inactive),
       // Keep a global order behind project-scoped and parked views. Child and
       // parked rows are included because they can become visible later; a
       // reorder elsewhere must not silently discard their old slot.
@@ -116,10 +103,8 @@ export function useInboxShelfThreads({
   }, [
     activeThreadId,
     childrenByParentId,
-    inactiveAfterHours,
     isWorking,
     lifecycle,
-    now,
     renamingShelfLocks,
     scope,
     threads,

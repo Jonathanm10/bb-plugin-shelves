@@ -76,11 +76,10 @@ describe("a child waiting on the user", () => {
       },
     });
 
-    const inactive = await screen.findByRole("region", { name: "Inactive" });
-    expect(within(inactive).getByText(/Inactive \(1\)/)).toBeDefined();
+    expect(screen.queryByRole("region", { name: "Inactive" })).toBeNull();
     const active = screen.getByRole("region", { name: "Active" });
     expect(within(active).getByText("Old tree")).toBeDefined();
-    expect(within(active).queryByText("Old quiet")).toBeNull();
+    expect(within(active).getByText("Old quiet")).toBeDefined();
   });
 
   it("brings a shelved parent back, and a snoozed one wakes", async () => {

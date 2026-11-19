@@ -199,7 +199,6 @@ function assertSettingsControls(container: HTMLElement, settings: (typeof snapsh
   const ui = within(container);
   for (const [label, field] of [
     ["Working shelf", "workingShelf"],
-    ["Inactive shelf", "inactiveThreadsEnabled"],
     ["Dock shelves to the bottom", "dockShelves"],
     ["Auto-settle inactive threads", "autoSettleInactive"],
     ["Auto-settle merged threads", "autoSettleOnMerge"],
@@ -219,7 +218,6 @@ function assertSettingsControls(container: HTMLElement, settings: (typeof snapsh
   // These controls are conditional. Reveal each while RPC and save timers stay gated,
   // check its cached value, then restore the original switch state.
   for (const [toggle, label, field] of [
-    ["Inactive shelf", "Hours before inactive", "inactiveAfterHours"],
     ["Auto-settle inactive threads", "Days of inactivity before auto-settle", "autoSettleAfterDays"],
   ] as const) {
     const control = ui.getByRole("switch", { name: toggle });

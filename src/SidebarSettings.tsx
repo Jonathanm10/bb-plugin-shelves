@@ -13,7 +13,6 @@ import { SidebarLayoutSettings } from "./SidebarLayoutSettings";
 import { ThreadBehaviorSettings } from "./ThreadBehaviorSettings";
 import { ChildThreadSettings } from "./ChildThreadSettings";
 import { configuredSnoozePresetError, parseConfiguredSnoozePresets } from "./lifecycle";
-import { isValidInactiveAfterHours } from "./inactive";
 import { isValidAutoSettleAfterDays } from "./auto-settle";
 import { SettingsSection, SwitchRow, type SaveStatus } from "./settings-ui";
 
@@ -48,7 +47,6 @@ const SECTION_BY_SETTING: Record<keyof SidebarSettingsValues, string> = {
 
 const validDraft = (value: SidebarSettingsValues) =>
   configuredSnoozePresetError(value.snoozePresets) === null &&
-  (!value.inactiveThreadsEnabled || isValidInactiveAfterHours(value.inactiveAfterHours)) &&
   (!value.autoSettleInactive || isValidAutoSettleAfterDays(value.autoSettleAfterDays));
 
 /**
@@ -121,7 +119,6 @@ export function SidebarSettings() {
   });
 
   const dirty = dirtyFields.current.size > 0;
-  const inactiveHoursValid = isValidInactiveAfterHours(draft.inactiveAfterHours);
   const autoSettleDaysValid = isValidAutoSettleAfterDays(draft.autoSettleAfterDays);
   const snoozePresetsError = configuredSnoozePresetError(draft.snoozePresets);
   const hasValidationError = !validDraft(draft);
@@ -148,8 +145,6 @@ export function SidebarSettings() {
       while (dirtyFields.current.size && validDraft(draftRef.current)) {
         const sentVersions = new Map(dirtyFields.current);
         const sent = { ...draftRef.current };
-        if (!isValidInactiveAfterHours(sent.inactiveAfterHours))
-          sent.inactiveAfterHours = DEFAULT_SIDEBAR_SETTINGS.inactiveAfterHours;
         if (!isValidAutoSettleAfterDays(sent.autoSettleAfterDays))
           sent.autoSettleAfterDays = DEFAULT_SIDEBAR_SETTINGS.autoSettleAfterDays;
         const patch = Object.fromEntries([...sentVersions.keys()].map((key) => [key, sent[key]]));
@@ -240,12 +235,7 @@ export function SidebarSettings() {
         <summary className="cursor-pointer rounded py-1 text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           Advanced settings
         </summary>
-        <SidebarLayoutSettings
-          draft={draft}
-          update={update}
-          status={statusFor("Sidebar layout")}
-          inactiveHoursValid={inactiveHoursValid}
-        />
+        <SidebarLayoutSettings draft={draft} update={update} status={statusFor("Sidebar layout")} />
 
         <ChildThreadSettings draft={draft} update={update} status={statusFor("Child threads")} />
       </details>

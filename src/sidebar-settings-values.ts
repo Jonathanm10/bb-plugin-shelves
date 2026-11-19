@@ -22,6 +22,7 @@ export interface ChildThreadSort {
 
 export interface SidebarSettingsValues {
   snoozePresets: string;
+  /** Deprecated compatibility values; the Inactive shelf is no longer rendered. */
   inactiveThreadsEnabled: boolean;
   inactiveAfterHours: number;
   showRunningChildrenWhenCollapsed: boolean;
