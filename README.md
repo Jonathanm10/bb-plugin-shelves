@@ -1,60 +1,45 @@
 # BB Sidebar Clean
 
-A BB sidebar for keeping work in three everyday sections:
+[![CI](https://github.com/ysskrishna/bb-sidebar-clean/actions/workflows/ci.yml/badge.svg?event=pull_request)](https://github.com/ysskrishna/bb-sidebar-clean/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.1.0-blue)](CHANGELOG.md) [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Author site](https://img.shields.io/badge/author-ysskrishna.space-informational)](https://ysskrishna.space)
 
-- **Active** - results, questions, and errors ready for you, newest returns first.
-- **Working** - continuing work, folded at the bottom by default. Finished or blocked work returns to Active automatically.
-- **Settled** - filed conversations, collapsed and available when you need them.
-
-Rows show project/status above the title. Snooze and Settle work on hover, keyboard focus, touch, and the row menu. Reading a conversation does not file it.
+A thread sidebar for [BB](https://getbb.app) that keeps ongoing work, returned results, and finished conversations easy to find.
 
 | Light | Dark |
 | --- | --- |
-| ![Readable sidebar](docs/screenshots/after-light-320.png) | ![Row actions](docs/screenshots/actions-dark-320.png) |
+| ![Thread sidebar in light mode](docs/screenshots/sidebar-light-320.png) | ![Thread actions in dark mode](docs/screenshots/actions-dark-320.png) |
 
-## Filing and snoozing
+## Features
 
-**Settle** files finished work. **Un-settle** restores it to Active and prevents automatic settlement until new activity. **Undo** restores the previous shelves. Busy thread trees remain protected.
+- **Working** holds continuing work, folded at the bottom by default.
+- **Active** shows results, errors, and questions, with recent returns first.
+- **Settled** keeps filed conversations accessible without filling the main list.
+- **Snooze / Wake** defer a thread until later without answering its question or stopping its runtime.
+- **Settle / Un-settle / Undo** file finished work and restore it when needed.
+- Automatic settling handles inactivity and merged or closed pull requests. Defaults are seven days, merged-PR settling on, and PR inactivity protection off.
+- Readable cards support keyboard actions, touch, narrow sidebars, and light/dark themes.
 
-**Snooze** defers a thread until a chosen time. The Snoozed section appears only while used. **Wake** brings it back immediately; new attention can wake it early. An existing question can be snoozed without answering it. Queued work and continuing background activity remain protected.
+Search, project and thread creation, and notifications use BB's native features. Use **Cmd/Ctrl+K** to search, including settled conversations, and **Project picker > New project** to create a project.
 
-Snooze and Settle leave runtimes and terminals running. Resource cleanup is a separate explicit action. Legacy Parked rows can still be resumed; normal menus do not create new Parked rows.
+Filing never archives or deletes a conversation. Running work, unanswered questions, queues, pins, and live children protect threads from automatic settling. Reading alone does not settle a thread. Rule changes leave settled work filed; new activity can return it.
 
-## Automatic settling
+## Installation
 
-| Rule | Default |
-| --- | --- |
-| Inactive threads | Settle after 7 days |
-| Merged pull requests | Settle automatically |
-| Closed pull requests | Settle independently of the merge switch |
-| Keep threads with a PR | Off; enable to exempt known PR threads from inactivity |
-
-Rules run when the sidebar opens and every five minutes on the BB server, including while the browser is closed. Completed results stay Active until a rule applies. Settings changes and server restarts leave settled conversations filed; new activity can bring them back.
-
-Running work, queued messages, pending questions, pinned threads, and live descendants prevent automatic settlement. Unknown PR data preserves the current state. PR rules use BB's GitHub PR Status plugin. Automatic settling never archives or deletes a conversation.
-
-## Native BB features
-
-- Search all threads, including filed ones, with **Cmd/Ctrl+K**.
-- Use BB's **New thread** action and **Project picker > New project**.
-- Use **Push notifications** for completion, question, and error alerts. Clicking a thread notification opens that thread. Enable completion delivery with `bb plugin config push-notifications set defaultLevel all`; per-thread and child overrides still apply. Each browser needs notification permission.
-
-For missing desktop banners, open **Settings > Push notifications** in the main BB desktop window and check its device permission as well as the Desktop notifications switch. BB suppresses system alerts for a thread already focused on that client. On macOS, also allow BB notifications and desktop banners in **System Settings > Notifications > BB**, and check Focus. Test a completion while viewing another thread or app. A successful CLI broadcast does not confirm that macOS displayed a banner.
-
-The plugin adds no second search index, project backend, or notification delivery service. Appearance, grouping, and compatibility preferences remain under Advanced settings or their existing menus. Inactive is off by default. Saved manual ordering and section expansion choices survive upgrades; choose **Recent returns** in Active's sort menu to adopt the new order on an existing device.
-
-## Install the review branch
-
-Requires BB 0.49.0 or newer. This branch is available for trial; it is not merged into main.
+Requires **BB 0.49.0 or newer**. The initial version is available on the review branch:
 
 ```sh
 bb plugin install git:github.com/ysskrishna/bb-sidebar-clean@feature/t3-clean-sidebar --yes
 bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
-Disable other sidebar plugins' automatic policies before trying this one. Selecting a visual provider alone does not stop background jobs. This plugin uses its own database, browser-storage namespace, and `bb clean-sidebar` command; it does not import or overwrite Beside or BB Sidebar data.
+Disable other sidebar plugins before trying this one so their background policies do not run alongside it. Each plugin keeps its own settings and filing data.
 
-For development:
+## Settings
+
+Open **Settings > BB Sidebar Clean** for Working and automatic settling preferences. **Keep threads with a PR** exempts known PR threads from inactivity; merge and close rules still apply. Unknown PR state keeps the thread in place. Rules run when the sidebar opens and every five minutes on the server.
+
+For missing desktop banners, check **Settings > Push notifications** in the main BB window. The desktop switch and device permission must both allow notifications. BB suppresses system alerts for a thread already focused on that client. On macOS, also check BB's notification and Focus settings. Test with BB open while viewing another thread or app; mobile delivery is independent.
+
+## Development
 
 ```sh
 git clone https://github.com/ysskrishna/bb-sidebar-clean.git
@@ -62,19 +47,45 @@ cd bb-sidebar-clean
 git switch feature/t3-clean-sidebar
 npm ci
 npm run check
-bb plugin install .
-bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
-## Scope and verification
-
-See the approved [core specification](SPEC.md). This independent repository starts from [BB Sidebar v0.3.12](https://github.com/yusuf8834/bb-sidebar/tree/a2f65687517cc5e3513d71017cea5a3306c11313); its license and notices are preserved. The [T3 thread-sidebar guide](https://github.com/pingdotgg/t3code/blob/470ca63499293f7f680f8ad2e77381a6752f1348/docs/user/thread-sidebar.md) informed the behavior. No model or decision API is used.
-
-This is a BB adaptation. Working order uses observed run starts because BB's sidebar API exposes no submission timestamp; unseen starts fall back to thread activity. PR eligibility uses the PR update time and available thread timestamps. Background commands and serving ports conservatively keep work visible. Pin protection is retained. Exact T3 monitor, PR-watch, and user-message semantics are outside this release.
+Run browser checks against an isolated scratch BB server:
 
 ```sh
-npm run check
 env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --grep 'core sidebar'
 ```
 
-Core browser acceptance covers light/dark layouts at 280/320px, keyboard and touch filing, Undo, Wake/Un-settle, persisted settings, and native search. The runner uses disposable BB threads and checks isolation from the real BB home. See [browser test isolation](e2e/README.md). Native notification broadcast/source checks cannot prove that an operating system displayed a banner.
+See [browser test setup](e2e/README.md) for Chromium, fixture-provider requirements, and isolation details. Browser fixtures contain disposable data. Working order uses observed run starts with activity fallbacks because BB exposes no sidebar submission timestamp.
+
+## Inspiration
+
+Based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar), with interaction inspiration from [T3 Code](https://github.com/pingdotgg/t3code). Inherited port parsing comes from [bb-plugin-worktree-ports](https://github.com/xlightxyearx/bb-plugin-worktree-ports). Copyright and license notices are retained in [LICENSE](LICENSE).
+
+## Built and maintained by
+
+| | Name | GitHub | Role |
+| --- | --- | --- | --- |
+| <img src="https://github.com/ysskrishna.png?size=120" width="60" height="60" alt="Y. Siva Sai Krishna"> | **Y. Siva Sai Krishna** | [@ysskrishna](https://github.com/ysskrishna) | Maintainer |
+
+## Changelog
+
+See [CHANGELOG](CHANGELOG.md) for this project's release notes.
+
+## Support
+
+- Star the repository.
+- [Report an issue](https://github.com/ysskrishna/bb-sidebar-clean/issues) or submit a pull request.
+- [Sponsor on GitHub](https://github.com/sponsors/ysskrishna) or [Patreon](https://patreon.com/ysskrishna).
+
+## License
+
+[MIT](LICENSE). Includes the original copyright notices for inherited code.
+
+---
+
+<p align="left">
+  <a href="https://github.com/ysskrishna">Author's GitHub</a> ·
+  <a href="https://linkedin.com/in/ysskrishna">Author's LinkedIn</a> ·
+  <a href="https://ysskrishna.space">Author's site</a> ·
+  <a href="https://github.com/ysskrishna/bb-sidebar-clean/issues">Report issues</a>
+</p>

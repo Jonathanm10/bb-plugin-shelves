@@ -1,4 +1,4 @@
-// Adapted from bb-plugin-worktree-ports. See THIRD_PARTY_NOTICES.md.
+// Adapted from bb-plugin-worktree-ports. See LICENSE.
 // Pure parsing and attribution. Everything that touches the system lives in
 // host.ts so this half stays unit-testable without spawning anything.
 import { sep } from "node:path";

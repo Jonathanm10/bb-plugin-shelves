@@ -13,7 +13,7 @@ Required when the PR changes anything a user can see: rows, cards, glyphs,
 labels, menus, hover cards, settings, colours, spacing or motion.
 Otherwise delete this section.
 
-- Show before and after, taken in the same state, side by side.
+- Show the current interface using disposable fixture data.
 - Changed colours or tones: include light and dark.
 - Changed layout: include the narrow sidebar or compact view if it is affected.
 - Changed motion: attach a short recording, or say how it behaves.
@@ -22,9 +22,7 @@ Otherwise delete this section.
   scratch bb (see e2e/README.md).
 -->
 
-| Before | After |
-| --- | --- |
-|  |  |
+<!-- Add current screenshots here. -->
 
 ## How I verified
 
@@ -47,6 +45,6 @@ start, install). Say why. -->
 ## Checklist
 
 - [ ] `npm run check` passes
-- [ ] CHANGELOG entry under Unreleased, for user-visible changes
+- [ ] CHANGELOG describes the current project version, for user-visible changes
 - [ ] Screenshots for visual changes, or this PR changes nothing a user can see
 - [ ] No AI tool, model or agent credited as an author or co-author

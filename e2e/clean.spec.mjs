@@ -7,15 +7,9 @@ for (const theme of ["light", "dark"]) {
       await reset(request);
       const [first, , , done] = fixture.threads;
       await rpc(request, "settle", { threadId: done.id });
-      await rpc(request, "updateSidebarSettings", { threadDisplay: "compact-all" });
       await open(page, { theme, width, core: true });
-      await expect(link(page, first.title).locator("xpath=..")).toHaveClass(/\bh-8\b/);
-      await page.mouse.move(1000, 750);
-      await page
-        .locator("[data-bb-sidebar-root]")
-        .screenshot({ path: `docs/screenshots/before-${theme}-${width}.png`, animations: "disabled" });
       const selectedUrl = page.url();
-      await rpc(request, "updateSidebarSettings", { threadDisplay: "full" });
+      await page.mouse.move(1000, 750);
       const row = link(page, first.title).locator("xpath=..");
       await expect(row).not.toHaveClass(/\bh-8\b/);
       expect((await row.boundingBox()).height).toBeGreaterThanOrEqual(48);
@@ -24,7 +18,7 @@ for (const theme of ["light", "dark"]) {
       for (const name of ["Inactive", "Parked", "Snoozed"]) await expect(shelf(page, name)).toHaveCount(0);
       await page
         .locator("[data-bb-sidebar-root]")
-        .screenshot({ path: `docs/screenshots/after-${theme}-${width}.png`, animations: "disabled" });
+        .screenshot({ path: `docs/screenshots/sidebar-${theme}-${width}.png`, animations: "disabled" });
       await row.hover();
       await row.getByRole("button", { name: "Settle thread" }).focus();
       await page

@@ -1,4 +1,4 @@
-// Adapted from bb-plugin-worktree-ports. See THIRD_PARTY_NOTICES.md.
+// Adapted from bb-plugin-worktree-ports. See LICENSE.
 import { describe, expect, it } from "vitest";
 import { attribute, parseCwds, parseDockerPorts, parseDockerRows, parseListeners } from "./port-scan";
 

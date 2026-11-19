@@ -8,7 +8,7 @@ as contributors or add `Co-authored-by` commit trailers crediting them.
 
 Pull requests follow `.github/pull_request_template.md`, including when the body
 is passed to `gh pr create`. A PR that changes anything a user can see includes
-before and after screenshots; `npm run e2e` starts a scratch bb to take them.
+current screenshots; `npm run e2e` starts a scratch bb to take them.
 
 Inbox layout: `src/inbox-layout.ts`; shelves: `ThreadInboxShelves.tsx`.
 Inbox hooks use `src/use*.ts`; gesture helpers use `src/drag-*.ts`.
@@ -262,11 +262,10 @@ dependencies and the `tsc` binary ignore for the TypeScript alias.
   `createFakePluginHost` options (stored data survives). Stubs added through
   `inspection.sdk.stub`, including `test-server.ts`'s default `threads.list`,
   are dropped, so reload tests pass `threads.list` in the options.
-- Fixtures in `src/fixtures/` have hashes; release data comes from pinned tags.
-  Generate with `npm run fixture:db -- <new-path> [git-ref]`. The default is
-  v0.2.34. An explicit tag or commit SHA generates a new schema
-  snapshot from a temporary git worktree using that checkout's `server.ts`.
-  Future schema changes add versions; never edit or overwrite old fixtures.
+- Fixtures in `src/fixtures/` are immutable inherited schema samples used by
+  upgrade tests. Their version labels refer to upstream history, not this
+  project's releases. Do not edit or overwrite them. Create new owned schema
+  samples when this project changes its persistence format.
 
 ### Browser e2e
 
