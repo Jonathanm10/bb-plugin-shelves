@@ -32,16 +32,18 @@ Search, project and thread creation, notifications, and retries use BB's native 
 Requires **BB 0.49.0 or newer**. The release badge above reflects published GitHub Releases.
 
 <details open>
-<summary><b>Install v0.1.0</b></summary>
+<summary><b>Install v0.1.1</b></summary>
 
-Use this command once `v0.1.0` appears in [Releases](https://github.com/ysskrishna/bb-thread-inbox/releases).
+Install the stable release from [Releases](https://github.com/ysskrishna/bb-thread-inbox/releases).
 
 ```sh
-bb plugin install git:github.com/ysskrishna/bb-thread-inbox@v0.1.0
-bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
+bb plugin install git:github.com/ysskrishna/bb-thread-inbox@v0.1.1
+bb settings ui set sidebar.threadListProvider bb-thread-inbox/inbox
 ```
 
-Disable other sidebar plugins before trying this one so their background policies do not run alongside it. The internal ID remains `bb-sidebar-clean` to preserve existing settings and filing data. BB shows the source for confirmation before installing it.
+Disable other sidebar plugins before trying this one so their background policies do not run alongside it. The plugin ID is `bb-thread-inbox`. BB shows the source for confirmation before installing it.
+
+Upgrading from 0.1.0 changes the installed identity. BB treats 0.1.1 as a separate plugin; an ordinary update does not transfer filing data. See [Upgrading from 0.1.0](docs/upgrade.md) before removing the previous installation.
 
 </details>
 
@@ -50,7 +52,7 @@ Disable other sidebar plugins before trying this one so their background policie
 
 ```sh
 bb plugin install git:github.com/ysskrishna/bb-thread-inbox@main
-bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
+bb settings ui set sidebar.threadListProvider bb-thread-inbox/inbox
 ```
 
 Git installs can also track a compatible semver range. See [BB's distribution guide](https://github.com/get-bb/bb/blob/main/plugins/bb-guide/skills/bb-plugin-authoring/references/distribution.md#releasing-a-git-plugin-with-semver-tags).

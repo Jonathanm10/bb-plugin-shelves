@@ -42,10 +42,10 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
   work or attention can return it. Preserve queue, pin, question, and child guards.
 - Declare browser keys in `src/lib/storage-keys.ts`, events in
   `src/lib/browser-events.ts`, and use the shared storage codecs/helpers.
-- The public repository and display name are Thread Inbox. The technical
-  package name `bb-plugin-bb-sidebar-clean`, runtime ID `bb-sidebar-clean`,
-  storage keys, and endpoint paths preserve installed data. Do not rename
-  them without an explicit migration.
+- The display name is Thread Inbox. The package, runtime, browser namespace,
+  and marketplace ID are `bb-thread-inbox`; the CLI is `bb thread-inbox`.
+  Identity changes require an explicit data transfer, since BB namespaces
+  plugin databases and settings by ID. Do not retain obsolete runtime aliases.
 - Append database migrations; do not reset installed databases. Immutable
   files in `src/fixtures/` cover inherited schema formats. Their labels are
   fixture provenance, not this project's release versions. Do not edit them.
