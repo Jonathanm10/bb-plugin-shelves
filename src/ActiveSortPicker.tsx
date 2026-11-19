@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./components/Popover";
 import { cn } from "./lib/utils";
 
 const SORT_LABELS: Record<ActiveSortMode, string> = {
+  attention: "Recent returns",
   manual: "Manual order",
   activity: "Recent activity",
   waiting: "Waiting longest",

@@ -86,6 +86,9 @@ export async function loadInboxApp() {
   // Register cleanup for each calling file, even if this helper is reused.
   afterEach(cleanupInboxTest);
   beforeEach(() => {
+    // Explicit legacy layout fixture. Core acceptance clears storage to use shipped defaults.
+    localStorage.setItem("bb-sidebar-clean:active-sort:v1", "manual");
+    localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ working: true }));
     localStorage.setItem(
       "bb-sidebar-clean:settings-cache:v1",
       JSON.stringify({ ...defaultSidebarSettings, inactiveThreadsEnabled: false }),

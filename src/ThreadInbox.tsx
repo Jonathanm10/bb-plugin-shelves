@@ -14,6 +14,7 @@ import { useListMotion, createListAnimationController } from "./useListMotion";
 import {
   sameOrder,
   sortActiveThreads,
+  sortWorkingThreads,
   visibleShelfThreads,
   type ReorderMode,
   type ReorderScope,
@@ -199,7 +200,7 @@ function ThreadInboxContent({
   const orderedInbox = useMemo(() => orderPinnedThreads(inboxBase, inboxReorder.ids), [inboxBase, inboxReorder.ids]);
   // Working and Inactive keep Active's manual order, so a thread that leaves
   // for either comes back to the slot it left.
-  const working = useMemo(() => orderPinnedThreads(workingBase, inboxReorder.ids), [workingBase, inboxReorder.ids]);
+  const working = useMemo(() => sortWorkingThreads(workingBase, workingSince), [workingBase, workingSince]);
   const inactive = useMemo(() => orderPinnedThreads(inactiveBase, inboxReorder.ids), [inactiveBase, inboxReorder.ids]);
   // Keep the root of an attention path reachable when its shelf is folded.
   const isWorking = useWorkingForDisplay();

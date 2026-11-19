@@ -41,7 +41,7 @@ it("fills older shelf shapes and drops unknown keys without stricter primitive r
   expect(shelfExpansionCodec.decode('{"settled":true,"unknown":true}')).toEqual({
     active: true,
     pinned: true,
-    working: true,
+    working: false,
     inactive: false,
     parked: false,
     snoozed: false,
@@ -67,5 +67,13 @@ it("uses legacy grouping only for missing or invalid sort modes without rewritin
   }
   expect(localStorage.getItem(STORAGE_KEYS.activeGrouping.key)).toBe("true");
   localStorage.setItem(STORAGE_KEYS.activeGrouping.key, "false");
-  expect(activeSortCodec.decode(null)).toBe("manual");
+  expect(activeSortCodec.decode(null)).toBe("attention");
+});
+
+it("starts Working folded and preserves explicit expansion choices", () => {
+  expect(shelfExpansionCodec.fallback().working).toBe(false);
+  expect(shelfExpansionCodec.decode('{"working":true}')?.working).toBe(true);
+  expect(shelfExpansionCodec.decode('{"working":false}')?.working).toBe(false);
+  expect(activeSortCodec.fallback()).toBe("attention");
+  expect(activeSortCodec.decode("manual")).toBe("manual");
 });

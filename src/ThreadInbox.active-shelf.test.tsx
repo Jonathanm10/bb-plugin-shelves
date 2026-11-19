@@ -306,6 +306,7 @@ describe("ThreadInbox", () => {
   });
 
   it("migrates the previous project grouping preference", async () => {
+    localStorage.removeItem("bb-sidebar-clean:active-sort:v1");
     window.localStorage.setItem("bb-sidebar-clean:active-grouping:v1", "true");
     render([thread({ id: "saved", title: "Saved grouping" })]);
 

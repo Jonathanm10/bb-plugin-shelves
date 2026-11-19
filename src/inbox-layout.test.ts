@@ -10,6 +10,7 @@ import {
   layoutActiveThreadsByProject,
   mergeProjectOrder,
   sortActiveThreads,
+  sortWorkingThreads,
   visibleShelfThreads,
   activeRepresentativeThreadId,
 } from "./inbox-layout";
@@ -242,4 +243,33 @@ describe("projectGroupView alerts", () => {
     });
     expect(view([])[0]).toMatchObject({ alerts: [] });
   });
+});
+
+it("orders recent returns by attention rather than renames or creation", () => {
+  const old = thread({ id: "old", createdAt: 1, updatedAt: 999, latestAttentionAt: 10 });
+  const returned = thread({ id: "returned", createdAt: 2, updatedAt: 20, latestAttentionAt: 30 });
+  const fresh = thread({ id: "fresh", createdAt: 25, updatedAt: 25, latestAttentionAt: 25 });
+  expect(sortActiveThreads([old, fresh, returned], "attention").map((row) => row.id)).toEqual([
+    "returned",
+    "fresh",
+    "old",
+  ]);
+});
+
+it("orders Working by the observed run start with activity as a stable fallback", () => {
+  const rows = [
+    thread({ id: "old", createdAt: 100, updatedAt: 500 }),
+    thread({ id: "new", createdAt: 1, updatedAt: 2 }),
+  ];
+  expect(
+    sortWorkingThreads(
+      rows,
+      new Map([
+        ["old", 10],
+        ["new", 20],
+      ]),
+    ).map((row) => row.id),
+  ).toEqual(["new", "old"]);
+  expect(sortWorkingThreads(rows, new Map()).map((row) => row.id)).toEqual(["old", "new"]);
+  expect(rows[0]!.id).toBe("old");
 });

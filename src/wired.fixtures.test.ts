@@ -367,6 +367,7 @@ it.each(snapshots)("reads $version legacy grouping when active-sort is absent", 
     readFileSync(fixturePath(`local-storage-${version}.json`), "utf8"),
   );
   // active-grouping is a legacy fallback; active-sort takes priority in the full dump.
+  localStorage.removeItem("bb-sidebar-clean:active-sort:v1");
   localStorage.setItem("bb-sidebar-clean:active-grouping:v1", fixture["bb-sidebar:active-grouping:v1"]!);
   expect(localStorage.getItem("bb-sidebar-clean:active-sort:v1")).toBeNull();
   const wired = await createWired([thread({ id: "first" }), thread({ id: "second" })], {

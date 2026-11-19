@@ -19,6 +19,8 @@ it("settles quiet work and wakes it on activity without changing the selected th
   ]);
   const slot = wired.mount();
   const working = await screen.findByRole("region", { name: "Working" });
+  expect(within(working).getByRole("button", { expanded: false })).toBeDefined();
+  fireEvent.click(within(working).getByRole("button", { expanded: false }));
   await within(working).findByRole("link", { name: "Running task" });
   const active = screen.getByRole("region", { name: "Active" });
   await within(active).findByRole("link", { name: "Recent result" });
@@ -130,4 +132,27 @@ it.each(["full", "compact-all"] as const)("keeps filing actions usable with %s r
   );
   await wired.flush();
   expect(await within(active).findByRole("link", { name: "File this result" })).toBeDefined();
+});
+
+it("puts the latest return first on a new device", async () => {
+  localStorage.clear();
+  const now = Date.now();
+  const wired = await createWired([
+    thread({ id: "renamed", title: "Renamed", createdAt: now, updatedAt: now, latestAttentionAt: now - 100 }),
+    thread({
+      id: "returned",
+      title: "Just finished",
+      createdAt: now - 1000,
+      updatedAt: now - 10,
+      latestAttentionAt: now,
+    }),
+  ]);
+  wired.mount();
+  await screen.findByRole("button", { name: "Sort active threads: Recent returns" });
+  const active = screen.getByRole("region", { name: "Active" });
+  expect(
+    within(active)
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("aria-label")),
+  ).toEqual(["Just finished", "Renamed"]);
 });

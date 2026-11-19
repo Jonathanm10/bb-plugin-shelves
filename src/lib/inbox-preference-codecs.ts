@@ -65,7 +65,7 @@ export const childExpansionCodec: PreferenceCodec<Set<string>> = {
 const DEFAULT_SHELF_EXPANSION: ShelfExpansionState = {
   active: true,
   pinned: true,
-  working: true,
+  working: false,
   inactive: false,
   parked: false,
   snoozed: false,
@@ -80,7 +80,7 @@ export const shelfExpansionCodec: PreferenceCodec<ShelfExpansionState> = {
       // Older shapes did not include independently collapsible Active or Pinned.
       active: parsed.active !== false,
       pinned: parsed.pinned !== false,
-      working: parsed.working !== false,
+      working: parsed.working === true,
       inactive: parsed.inactive === true,
       parked: parsed.parked === true,
       snoozed: parsed.snoozed === true,
@@ -91,11 +91,11 @@ export const shelfExpansionCodec: PreferenceCodec<ShelfExpansionState> = {
 };
 
 export const activeSortCodec: PreferenceCodec<ActiveSortMode> = {
-  fallback: () => "manual",
+  fallback: () => "attention",
   decode: (stored) => {
     if (stored && isActiveSortMode(stored)) return stored;
     // Read-only migration from the fifth inbox preference. Never write this key.
-    return readStorageRaw(STORAGE_KEYS.activeGrouping.key) === "true" ? "project" : "manual";
+    return readStorageRaw(STORAGE_KEYS.activeGrouping.key) === "true" ? "project" : "attention";
   },
   encode: (value) => value,
 };

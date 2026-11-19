@@ -3,7 +3,7 @@ import type { ChildStatusKind } from "./child-status";
 import type { OrderUnit } from "./pinned-order";
 import { visibleInboxThreads } from "./inbox";
 
-export const ACTIVE_SORT_MODES = ["manual", "activity", "waiting", "created", "project"] as const;
+export const ACTIVE_SORT_MODES = ["attention", "manual", "activity", "waiting", "created", "project"] as const;
 export type ActiveSortMode = (typeof ACTIVE_SORT_MODES)[number];
 
 export type ReorderMode = "thread" | "unit";
@@ -114,7 +114,7 @@ export function sameOrder(left: readonly string[], right: readonly string[]): bo
 
 /** Whether the mode orders Active by time, so the rows have no manual order to drag. */
 export function sortsActiveByTime(mode: ActiveSortMode): boolean {
-  return mode === "activity" || mode === "waiting" || mode === "created";
+  return mode === "attention" || mode === "activity" || mode === "waiting" || mode === "created";
 }
 
 export function sortActiveThreads(
@@ -132,11 +132,25 @@ export function sortActiveThreads(
         left.id.localeCompare(right.id),
     );
   }
-  if (mode !== "activity" && mode !== "created") return [...threads];
-  const primaryKey = mode === "activity" ? "updatedAt" : "createdAt";
+  if (mode !== "attention" && mode !== "activity" && mode !== "created") return [...threads];
+  const primaryKey = mode === "attention" ? "latestAttentionAt" : mode === "activity" ? "updatedAt" : "createdAt";
   return [...threads].sort(
     (left, right) =>
       right[primaryKey] - left[primaryKey] || right.updatedAt - left.updatedAt || right.createdAt - left.createdAt,
+  );
+}
+
+/** bb exposes no submission time; observed run starts survive reloads. */
+export function sortWorkingThreads(
+  threads: readonly PluginSidebarThread[],
+  startedAt: ReadonlyMap<string, number>,
+): PluginSidebarThread[] {
+  return [...threads].sort(
+    (left, right) =>
+      (startedAt.get(right.id) ?? right.updatedAt) - (startedAt.get(left.id) ?? left.updatedAt) ||
+      right.updatedAt - left.updatedAt ||
+      right.createdAt - left.createdAt ||
+      left.id.localeCompare(right.id),
   );
 }
 
