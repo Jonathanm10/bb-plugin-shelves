@@ -170,3 +170,34 @@ Wake/Un-settle, persisted auto-settle preferences, native search of filed work,
 and touch actions without hover. It uses fresh preferences. Historical
 manual-reorder flows explicitly seed manual order and an expanded Working
 section, without changing the shipped defaults.
+
+## README media
+
+Capture the current interface with a disposable Product platform project and
+fixed workflow titles. It uses the same real BB server and assertions as the
+core flows, not mocked browser responses:
+
+```sh
+env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --readme-demo --grep 'core sidebar|README demo'
+ffmpeg -y -ss 2 -i e2e-artifacts/demo/walkthrough.webm \
+  -vf 'fps=5,scale=900:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=96[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle' \
+  -loop 0 docs/screenshots/thread-inbox-demo.gif
+ffmpeg -y -i docs/screenshots/sidebar-light-320.png \
+  -i docs/screenshots/actions-dark-320.png -i docs/screenshots/settled-threads.png \
+  -i docs/screenshots/snoozed-threads.png -filter_complex 'hstack=inputs=4' \
+  -frames:v 1 docs/screenshots/marketplace-overview.png
+```
+
+FFmpeg is only a documentation capture tool; it is not a plugin dependency.
+The GIF comes from the continuous Playwright video of Settle, Un-settle, Snooze,
+Wake, and Search, sampled at five frames per second. The example trims two seconds of initial
+loading; inspect each new recording and adjust that trim before
+committing. Raw video/frames stay in ignored `e2e-artifacts/demo/`; only the
+finished GIF and current PNGs are published.
+The marketplace composite joins four actual sidebar captures to meet the
+registry's minimum width without stretching the interface.
+
+The committed public media uses BB 0.50.1 to match the installed desktop. To
+recapture that version on macOS, add `--app-dir /Applications/bb.app/Contents/Resources/app.asar.unpacked/node_modules/bb-app`
+to the browser command. This stages the application under scratch; it does not
+control the running desktop. The default remains the pinned BB 0.49.0 for minimum-version checks.

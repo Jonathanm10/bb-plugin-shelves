@@ -3,12 +3,14 @@ import { join, resolve } from "node:path";
 import { startScratchServer } from "./server.mjs";
 
 const started = performance.now();
-const server = await startScratchServer();
+const readmeDemo = process.argv.includes("--readme-demo");
+const server = await startScratchServer({ projectName: readmeDemo ? "Product platform" : undefined });
 try {
-  const threads = [await server.seed("Atlas planning", { idle: true })];
-  for (const title of ["Birch implementation", "Cedar review", "Delta follow-up"]) {
-    threads.push(await server.seed(title, { idle: true }));
-  }
+  const titles = readmeDemo
+    ? ["Plan API rollout", "Implement checkout", "Review access controls", "Ship onboarding update"]
+    : ["Atlas planning", "Birch implementation", "Cedar review", "Delta follow-up"];
+  const threads = [];
+  for (const title of titles) threads.push(await server.seed(title, { idle: true }));
   await server.checkIsolation("seeded");
   const settingsResponse = await fetch(`${server.url}/api/v1/plugins/bb-sidebar-clean/rpc/getSidebarSettings`, {
     method: "POST",
@@ -29,7 +31,7 @@ try {
       defaultSettings: settingsPayload.result,
     }),
   );
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(2).filter((arg) => arg !== "--readme-demo");
   const appIndex = args.indexOf("--app-dir");
   if (appIndex >= 0) args.splice(appIndex, 2);
   const result = await server.run(
