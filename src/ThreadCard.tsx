@@ -319,7 +319,12 @@ export function ThreadCard({
                     </>
                   )}
                   {showParkActions ? (
-                    <span className="pointer-events-auto flex items-center gap-0.5 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 [@media(hover:none)]:opacity-100">
+                    <span
+                      className={cn(
+                        "pointer-events-auto items-center gap-0.5 group-hover/card:flex group-focus-within/card:flex [@media(hover:none)]:flex",
+                        holdParkActions ? "flex" : "hidden",
+                      )}
+                    >
                       <ThreadFilingActions
                         snoozePresets={snoozePresets}
                         onOpenChange={setIsSnoozeOpen}
