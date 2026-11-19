@@ -97,8 +97,8 @@ export async function open(page, { theme = "light", width = 320, empty = false, 
         localStorage.getItem("bb-sidebar-clean:shelf-expansion:v1") ??
           localStorage.setItem("bb-sidebar-clean:shelf-expansion:v1", JSON.stringify({ working: true }));
       }
-      // bb 0.47.0 reserves 49 px for its navigation rail and border.
-      localStorage.setItem("bb.sidebar.width", String(width + 49));
+      // The pinned bb 0.49 host reserves 60 px outside the plugin body.
+      localStorage.setItem("bb.sidebar.width", String(width + 60));
     },
     { theme, width, core },
   );

@@ -10,6 +10,8 @@ for (const [name, theme, width] of [
 ]) {
   test(`environment groups in the actual sidebar: ${name}`, async ({ page, request, worktrees }) => {
     await reset(request);
+    // Grouping is independent of transient provider startup status in scratch.
+    await rpc(request, "updateSidebarSettings", { workingShelf: false });
     const [atlas, birch, cedar, delta] = fixture.threads;
     await cli(["thread", "pin", atlas.id]);
     await rpc(request, "park", { threadId: birch.id });
@@ -35,10 +37,10 @@ for (const [name, theme, width] of [
     const sidebar = page.locator("[data-bb-sidebar-root]");
     await page.addStyleTag({ path: "e2e/snapshot.css" });
     await page.mouse.move(1000, 750);
-    expect(Math.round((await sidebar.boundingBox()).width)).toBe(width);
     await sidebar.screenshot({ path: `e2e-artifacts/environment-picker-${name}.png`, animations: "disabled" });
     await page.keyboard.press("Escape");
     await expect(toggle).toHaveCount(0);
+    await expect.poll(async () => Math.round((await sidebar.boundingBox()).width)).toBe(width);
     await sidebar.screenshot({ path: `e2e-artifacts/environment-groups-${name}.png`, animations: "disabled" });
     await page.getByRole("button", { name: "feature/search (2)", exact: true }).click();
     await expect(search.getByRole("link")).toHaveCount(0);

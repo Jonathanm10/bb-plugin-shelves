@@ -52,50 +52,35 @@ test("shelf rows changed while the connection is down refresh after it reconnect
   await expect(link(page, thread.title)).toHaveCount(0, { timeout: 30_000 });
 });
 
-test("project colors changed while the connection is down refresh after it reconnects", async ({ page, request }) => {
+test("sidebar density changed while the connection is down refreshes after it reconnects", async ({
+  page,
+  request,
+}) => {
   test.setTimeout(60_000);
   const realtime = await controlRealtime(page);
   try {
-    await rpc(request, "updateSidebarSettings", {
-      ...fixture.defaultSettings,
-      projectColorsEnabled: true,
-      projectColorDisplay: "full",
-    });
     await open(page);
-    const row = shelf(page, "Active")
-      .getByRole("listitem")
-      .filter({ has: page.getByRole("link", { name: fixture.threads[0].title, exact: true }) });
-    await expect(row.locator("[data-project-stripe]")).toBeVisible();
+    const row = link(page, fixture.threads[0].title).locator("xpath=..");
+    await expect(row).not.toHaveCSS("height", "32px");
     await realtime.drop();
-    await rpc(request, "setProjectColor", { projectId: fixture.projectId, color: "#1f4e79" });
+    await rpc(request, "updateSidebarSettings", { threadDisplay: "compact-all" });
     await page.waitForTimeout(1_500);
-    await expect(row.locator("[data-project-stripe]")).not.toHaveCSS("background-color", "rgb(31, 78, 121)");
+    await expect(row).not.toHaveCSS("height", "32px");
     realtime.restore();
-    await expect(row.locator("[data-project-stripe]")).toHaveCSS("background-color", "rgb(31, 78, 121)", {
-      timeout: 30_000,
-    });
+    await expect(row).toHaveCSS("height", "32px", { timeout: 30_000 });
   } finally {
-    await rpc(request, "setProjectColor", { projectId: fixture.projectId, color: null });
     await rpc(request, "updateSidebarSettings", fixture.defaultSettings);
   }
 });
 
-test("a project color saved elsewhere shows without a reload", async ({ page, request }) => {
+test("sidebar density saved elsewhere shows without a reload", async ({ page, request }) => {
   try {
-    await rpc(request, "updateSidebarSettings", {
-      ...fixture.defaultSettings,
-      projectColorsEnabled: true,
-      projectColorDisplay: "full",
-    });
     await open(page);
-    const row = shelf(page, "Active")
-      .getByRole("listitem")
-      .filter({ has: page.getByRole("link", { name: fixture.threads[0].title, exact: true }) });
-    await expect(row.locator("[data-project-stripe]")).toBeVisible();
-    await rpc(request, "setProjectColor", { projectId: fixture.projectId, color: "#1f4e79" });
-    await expect(row.locator("[data-project-stripe]")).toHaveCSS("background-color", "rgb(31, 78, 121)");
+    const row = link(page, fixture.threads[0].title).locator("xpath=..");
+    await expect(row).not.toHaveCSS("height", "32px");
+    await rpc(request, "updateSidebarSettings", { threadDisplay: "compact-all" });
+    await expect(row).toHaveCSS("height", "32px");
   } finally {
-    await rpc(request, "setProjectColor", { projectId: fixture.projectId, color: null });
     await rpc(request, "updateSidebarSettings", fixture.defaultSettings);
   }
 });

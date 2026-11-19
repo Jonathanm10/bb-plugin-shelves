@@ -108,34 +108,31 @@ they are measurements, not a hardware-dependent FPS assertion. Extra threads
 are deleted during teardown.
 
 Each behavior test resets pin/read/lifecycle/order state through the scratch
-CLI and plugin RPC, then gets a new browser context. The fourteen flows assert
-selection/rendering, pin and pinned Alt+ArrowUp order persistence, Alt+ArrowUp manual order persistence,
-snooze/wake, settle/Undo, the complete right-click menu and its Copy thread link, and a sidebar settings
-change that updates visible snooze options and persists after reload. They also
-cover park/resume across reload, project filtering, custom project name/stripe
-colors through computed styles across reload, child-chip expansion/collapse,
-and native thread actions. Server assertions check core pin/idle/parent
-state and plugin lifecycle/order/settings/color state. No production test IDs
-were added. The visual capture uses the existing `data-bb-sidebar-root` marker
-because the whole plugin container has no accessible role.
+CLI and plugin RPC, then gets a new browser context. The suite covers native
+thread navigation/actions, pinned and manual ordering, Snooze/Wake, Settle/Undo,
+legacy Parked/Resume, project filtering, child expansion, settings persistence,
+and live updates across windows and reconnects. It checks native toast styling,
+mobile navigation, grouping, and shelf motion as well as the core flows below.
+Server assertions check native pin/idle/parent state and plugin filing/settings.
+No production test IDs were added. Visual captures use the existing
+`data-bb-sidebar-root` marker because the plugin container has no accessible role.
 
-`seeds.mjs` creates a separate scratch Git checkout and project with one idle
-thread for filtering, and an idle parent with two idle children for the child-chip flow. Fixtures
-delete these extra projects/threads even when assertions fail. Children are
-assigned through the sidebar's Parent menu after their empty turns stop.
-Parent assignment can asynchronously send ownership notifications that start
-an agent turn, so this flow uses a disposable parent instead of a shared seed.
-The family is deleted at teardown; its background turns cannot affect later tests.
-The color flow clears its override and settings in a `finally` block. These
-seeds and overrides are gone before the four original snapshot captures.
+`seeds.mjs` creates separate scratch projects/worktrees for filtering and grouping,
+and an idle parent with two idle children for the child-chip flow. Fixtures delete
+these extra projects/threads even when assertions fail. Children are assigned
+through the sidebar's Parent menu after their empty turns stop. Parent assignment
+can asynchronously send ownership notifications that start an agent turn, so this
+flow uses a disposable parent. The family is deleted at teardown; its background
+turns cannot affect later tests. Saved appearance rendering remains covered by
+unit/integration tests; the sidebar no longer offers project appearance editors.
 
 
 ## Visual baselines
 
 Three populated captures cover light, dark, and a 280 px wide plugin sidebar.
-A fourth capture shows empty Active after all threads have been settled.
-The wide captures are 320 px. The host's persisted width includes a 49 px
-navigation rail/border on bb 0.47, so the browser fixture adds that amount and
+Additional captures show compact rows and empty Active after all threads have been settled.
+The wide captures are 320 px. The host's persisted width includes a 60 px
+chrome offset on the pinned bb 0.49, so the browser fixture adds that amount and
 asserts the actual plugin width. Update the offset in `open()` when a host
 release changes it. The populated images contain Pinned, Active, Snoozed, and Settled.
 Titles, project name, branch, order, locale, and timezone are fixed. A capture
@@ -150,11 +147,11 @@ and Chromium download together when reviewing new baselines.
 ```sh
 # On macOS, after an intentional UI change, with no unit suite running:
 env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --update-snapshots
-# Inspect all four PNGs and git diff before committing them.
+# Inspect the generated PNGs and git diff before committing them.
 ```
 
-Only macOS has reviewed baselines, so Linux skips the four visual comparisons
-and runs all fourteen behavior tests. This avoids treating font/rendering
+Only macOS has reviewed baselines, so Linux skips the five visual comparisons
+and runs the behavior tests. This avoids treating font/rendering
 differences as product regressions. The manual Ubuntu workflow installs
 Chromium's Linux dependencies, the pinned Codex CLI, `lsof`, and `procps`.
 It uploads screenshots, traces, reports, thread/server diagnostics, and isolation

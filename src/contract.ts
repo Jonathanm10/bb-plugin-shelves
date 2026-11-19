@@ -47,9 +47,8 @@ export type ThreadPullRequest = z.infer<typeof threadPullRequestSchema>;
 
 const threadIdSchema = z.object({ threadId: z.string().trim().min(1) });
 /**
- * What parking a thread released. These counts are what the toast reminds the
- * user about, so they travel back with the acknowledgement rather than on the
- * realtime channel, which every other client would also receive.
+ * Legacy acknowledgement shape retained for installed clients. Current actions
+ * return an empty summary: filing never stops runtimes or closes terminals.
  */
 const reclaimSchema = z.object({
   closedTerminals: z.number().int().nonnegative(),

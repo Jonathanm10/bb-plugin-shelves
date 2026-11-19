@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { seededTest as test } from "./seeds.mjs";
-import { fixture, shelf, link, reset, open } from "./helpers.mjs";
+import { fixture, rpc, shelf, link, reset, open } from "./helpers.mjs";
 
 test("pinned projects can be drag sorted and keep their order after reload", async ({
   page,
@@ -8,6 +8,7 @@ test("pinned projects can be drag sorted and keep their order after reload", asy
   secondProject,
 }) => {
   await reset(request);
+  await rpc(request, "updateSidebarSettings", { workingShelf: false });
   await open(page, { width: 280 });
   await page.getByRole("button", { name: "Project scope: All projects", exact: true }).click();
   for (const name of ["Sidebar smoke", secondProject.name]) {
@@ -42,6 +43,7 @@ test("project filter remembers multiple projects per window and All projects res
   secondProject,
 }) => {
   await reset(request);
+  await rpc(request, "updateSidebarSettings", { workingShelf: false });
   await open(page, { width: 280 });
   await expect(link(page, secondProject.thread.title)).toBeVisible();
   for (const { title } of fixture.threads) await expect(link(page, title)).toBeVisible();
