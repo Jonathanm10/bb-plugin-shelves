@@ -2,24 +2,24 @@
   "name": "bb-plugin-bb-sidebar-clean",
   "version": "0.1.0",
   "type": "module",
-  "description": "A readable BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
+  "description": "A community BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
   "license": "MIT",
   "author": "YSS Krishna",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ysskrishna/bb-sidebar-clean.git"
+    "url": "git+https://github.com/ysskrishna/bb-thread-inbox.git"
   },
-  "homepage": "https://github.com/ysskrishna/bb-sidebar-clean#readme",
+  "homepage": "https://github.com/ysskrishna/bb-thread-inbox#readme",
   "bugs": {
-    "url": "https://github.com/ysskrishna/bb-sidebar-clean/issues"
+    "url": "https://github.com/ysskrishna/bb-thread-inbox/issues"
   },
   "engines": {
     "bb": ">=0.49.0",
     "bbPluginSdk": ">=0.6.132"
   },
   "bb": {
-    "name": "BB Sidebar Clean",
-    "description": "A readable BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
+    "name": "Thread Inbox",
+    "description": "A community BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
     "branding": {
       "icon": "PanelLeft"
     },

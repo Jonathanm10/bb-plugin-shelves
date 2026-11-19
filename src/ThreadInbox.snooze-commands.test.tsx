@@ -44,12 +44,12 @@ afterEach(() => {
 describe("palette snooze commands", () => {
   it("lists one self-identifying command per default preset and an unsnooze", () => {
     expect(paletteCommands().titles()).toEqual([
-      "BB Sidebar: Snooze this thread for 1 hour",
-      "BB Sidebar: Snooze this thread for 5 hours",
-      "BB Sidebar: Snooze this thread until this evening",
-      "BB Sidebar: Snooze this thread until tomorrow morning",
-      "BB Sidebar: Snooze this thread until next week",
-      "BB Sidebar: Unsnooze this thread",
+      "Thread Inbox: Snooze this thread for 1 hour",
+      "Thread Inbox: Snooze this thread for 5 hours",
+      "Thread Inbox: Snooze this thread until this evening",
+      "Thread Inbox: Snooze this thread until tomorrow morning",
+      "Thread Inbox: Snooze this thread until next week",
+      "Thread Inbox: Unsnooze this thread",
     ]);
   });
 
@@ -225,7 +225,7 @@ describe("palette snooze commands", () => {
     const commands = paletteCommands();
 
     commands.run("snooze-1h", "parent");
-    expect(toastMocks.error).toHaveBeenCalledWith("This thread is not in the BB Sidebar", expect.anything());
+    expect(toastMocks.error).toHaveBeenCalledWith("This thread is not in the Thread Inbox", expect.anything());
     commands.run("snooze-1h", "child");
     await waitFor(() => expect(snooze).toHaveBeenCalledTimes(1));
     expect(snooze.mock.calls[0]![0]).toMatchObject({ threadId: "child" });
@@ -278,6 +278,6 @@ describe("palette snooze commands", () => {
 
   it("tells the user to open the sidebar when no inbox is mounted", () => {
     paletteCommands().run("snooze-1h", "thr_1");
-    expect(toastMocks.error).toHaveBeenCalledWith("Open the BB Sidebar to snooze threads", expect.anything());
+    expect(toastMocks.error).toHaveBeenCalledWith("Open the Thread Inbox to snooze threads", expect.anything());
   });
 });

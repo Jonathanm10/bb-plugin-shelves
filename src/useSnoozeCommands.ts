@@ -30,7 +30,7 @@ export function useSnoozeCommands(
       const shown = filterByProjects(visibleInboxThreads(threads), scope);
       const thread = shown.find((candidate) => candidate.id === request.threadId);
       if (!thread) {
-        toast.error("This thread is not in the BB Sidebar");
+        toast.error("This thread is not in the Thread Inbox");
         return;
       }
       // A child has no shelf of its own while its parent's row carries it, so

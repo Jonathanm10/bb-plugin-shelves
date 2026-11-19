@@ -1,8 +1,8 @@
-# BB Sidebar Clean
+# Thread Inbox
 
-[![CI](https://github.com/ysskrishna/bb-sidebar-clean/actions/workflows/ci.yml/badge.svg?event=pull_request)](https://github.com/ysskrishna/bb-sidebar-clean/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.1.0-blue)](CHANGELOG.md) [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Author site](https://img.shields.io/badge/author-ysskrishna.space-informational)](https://ysskrishna.space)
+[![CI](https://github.com/ysskrishna/bb-thread-inbox/actions/workflows/ci.yml/badge.svg?event=pull_request)](https://github.com/ysskrishna/bb-thread-inbox/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.1.0-blue)](CHANGELOG.md) [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Author site](https://img.shields.io/badge/author-ysskrishna.space-informational)](https://ysskrishna.space)
 
-A thread sidebar for [BB](https://getbb.app) that keeps ongoing work, returned results, and finished conversations easy to find.
+A community sidebar for [BB](https://getbb.app) that keeps ongoing work, returned results, and finished conversations easy to find.
 
 | Light | Dark |
 | --- | --- |
@@ -27,23 +27,23 @@ Filing never archives or deletes a conversation. Running work, unanswered questi
 Requires **BB 0.49.0 or newer**. The initial version is available on the review branch:
 
 ```sh
-bb plugin install git:github.com/ysskrishna/bb-sidebar-clean@feature/t3-clean-sidebar --yes
+bb plugin install git:github.com/ysskrishna/bb-thread-inbox@feature/t3-clean-sidebar --yes
 bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
-Disable other sidebar plugins before trying this one so their background policies do not run alongside it. Each plugin keeps its own settings and filing data.
+Disable other sidebar plugins before trying this one so their background policies do not run alongside it. The internal identifier remains `bb-sidebar-clean` to preserve existing settings and filing data.
 
 ## Settings
 
-Open **Settings > BB Sidebar Clean** for Working and automatic settling preferences. **Keep threads with a PR** exempts known PR threads from inactivity; merge and close rules still apply. Unknown PR state keeps the thread in place. Rules run when the sidebar opens and every five minutes on the server.
+Open **Settings > Thread Inbox** for Working and automatic settling preferences. **Keep threads with a PR** exempts known PR threads from inactivity; merge and close rules still apply. Unknown PR state keeps the thread in place. Rules run when the sidebar opens and every five minutes on the server.
 
 For missing desktop banners, check **Settings > Push notifications** in the main BB window. The desktop switch and device permission must both allow notifications. BB suppresses system alerts for a thread already focused on that client. On macOS, also check BB's notification and Focus settings. Test with BB open while viewing another thread or app; mobile delivery is independent.
 
 ## Development
 
 ```sh
-git clone https://github.com/ysskrishna/bb-sidebar-clean.git
-cd bb-sidebar-clean
+git clone https://github.com/ysskrishna/bb-thread-inbox.git
+cd bb-thread-inbox
 git switch feature/t3-clean-sidebar
 npm ci
 npm run check
@@ -74,7 +74,7 @@ See [CHANGELOG](CHANGELOG.md) for this project's release notes.
 ## Support
 
 - Star the repository.
-- [Report an issue](https://github.com/ysskrishna/bb-sidebar-clean/issues) or submit a pull request.
+- [Report an issue](https://github.com/ysskrishna/bb-thread-inbox/issues) or submit a pull request.
 - [Sponsor on GitHub](https://github.com/sponsors/ysskrishna) or [Patreon](https://patreon.com/ysskrishna).
 
 ## License
@@ -87,5 +87,5 @@ See [CHANGELOG](CHANGELOG.md) for this project's release notes.
   <a href="https://github.com/ysskrishna">Author's GitHub</a> ·
   <a href="https://linkedin.com/in/ysskrishna">Author's LinkedIn</a> ·
   <a href="https://ysskrishna.space">Author's site</a> ·
-  <a href="https://github.com/ysskrishna/bb-sidebar-clean/issues">Report issues</a>
+  <a href="https://github.com/ysskrishna/bb-thread-inbox/issues">Report issues</a>
 </p>

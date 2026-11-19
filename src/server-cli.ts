@@ -94,7 +94,7 @@ export function createServerCli(lifecycle: ReturnType<typeof createServerLifecyc
 
   return defineCli({
     name: "clean-sidebar",
-    summary: "Snooze, settle, park, pin, and re-parent threads in the BB Sidebar",
+    summary: "Snooze, settle, park, pin, and re-parent threads in the Thread Inbox",
     commands: {
       list: cliCommand({
         summary: "List threads with their sidebar shelf",

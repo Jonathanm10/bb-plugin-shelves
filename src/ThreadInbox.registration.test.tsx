@@ -8,11 +8,11 @@ vi.mock("sonner", async () => (await import("./test-inbox")).sonnerMock());
 
 await loadInboxApp();
 
-describe("BB Sidebar registration", () => {
+describe("Thread Inbox registration", () => {
   it("registers exactly one thread list", () => {
     expect(app.threadLists).toHaveLength(1);
     expect(inbox.id).toBe("inbox");
-    expect(inbox.title).toBe("BB Sidebar Clean");
+    expect(inbox.title).toBe("Thread Inbox");
   });
 
   it("registers one custom settings page", () => {

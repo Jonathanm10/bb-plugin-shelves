@@ -73,7 +73,7 @@ test("core sidebar auto-settle settings persist", async ({ page, request }) => {
   await reset(request);
   await open(page, { core: true });
   await page.getByRole("button", { name: /^Settings \(/ }).click();
-  await page.getByRole("link", { name: "BB Sidebar Clean", exact: true }).click();
+  await page.getByRole("link", { name: "Thread Inbox", exact: true }).click();
   const keep = page.getByRole("switch", { name: "Keep threads with a PR" });
   await expect(keep).toHaveAttribute("aria-checked", "false");
   await expect(page.getByRole("switch", { name: "Working shelf" })).toBeVisible();
