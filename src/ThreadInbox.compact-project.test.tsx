@@ -37,7 +37,9 @@ describe("Compact project display", () => {
       fireEvent.click(await screen.findByRole("button", { name: "Parked (1)" }));
       const row = (title: string) => screen.getByText(title).closest("li")!;
       await waitFor(() => {
-        expect(row("Working thread").querySelector(".h-8") !== null).toBe(display !== "full");
+        expect(row("Working thread").querySelector(".h-8") !== null).toBe(
+          display !== "full" && display !== "working-shelf",
+        );
         expect(screen.getByText("Parked thread")).toBeDefined();
       });
 
@@ -47,7 +49,8 @@ describe("Compact project display", () => {
         await waitFor(() => {
           for (const title of ["Working thread", "Full pinned thread", "Parked thread"]) {
             const card = row(title);
-            const iconOnly = compactProjectIconOnly && title === "Working thread" && display !== "full";
+            const iconOnly =
+              compactProjectIconOnly && title === "Working thread" && display !== "full" && display !== "working-shelf";
             expect(within(card).getByText("Sidebar project").classList.contains("sr-only")).toBe(iconOnly);
             expect(card.querySelector("[data-letter]")).not.toBeNull();
             if (iconOnly) expect(within(card).queryByText("·")).toBeNull();

@@ -165,7 +165,7 @@ describe("lifecycle RPC", () => {
       childIconStyle: "disc",
       compactWorkingThreads: false,
       workingShelf: true,
-      dockShelves: false,
+      dockShelves: true,
       projectColorsEnabled: false,
       projectColorDisplay: "all",
     });

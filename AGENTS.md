@@ -63,7 +63,7 @@ live again). Snoozed, Parked and Inactive-shelf threads stay live.
 - Browser `.ts` modules are `project-colors`, `title-generation-state`,
   `sidebar-settings`, `working-since`, `working-tree`, `drag-preview`,
   `drag-reorder`, `drag-reorder-geometry`, `drag-auto-scroll`,
-  `settled-port-prompt`, and `bb-sdk`. `project-colors.ts` uses React's
+  and `bb-sdk`. `project-colors.ts` uses React's
   `CSSProperties` type and `title-generation-state.ts` uses
   `useSyncExternalStore` intentionally.
 - Shared modules are all other top-level `src/*.ts`, excluding `server-*.ts`,

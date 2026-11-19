@@ -25,7 +25,7 @@ const extraRpc = {
 };
 
 it.each([false, true])("drains an edit made during a pending save, unmounted=%s", async (unmount) => {
-  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false };
+  let stored = { ...DEFAULT_SIDEBAR_SETTINGS, workingShelf: false, dockShelves: false };
   const pending = deferred<void>();
   const writes: Partial<SidebarSettingsValues>[] = [];
   const slot = renderSlot(

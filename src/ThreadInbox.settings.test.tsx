@@ -283,6 +283,7 @@ describe("sidebar settings", () => {
 
     expect((await screen.findAllByRole("heading", { level: 2 })).map((heading) => heading.textContent)).toEqual([
       "Thread behavior",
+      "Sidebar",
       "Sidebar layout",
       "Project appearance",
       "Child threads",
@@ -291,8 +292,12 @@ describe("sidebar settings", () => {
     ]);
     expect(screen.queryByRole("navigation", { name: "Settings sections" })).toBeNull();
     const layout = screen.getByRole("region", { name: "Sidebar layout" });
-    expect(within(layout).getAllByText("Experimental")).toHaveLength(3);
-    expect(within(layout).getByRole("switch", { name: "Working shelf" })).toBeDefined();
+    expect(within(layout).queryByText("Experimental")).toBeNull();
+    expect(
+      within(screen.getByRole("region", { name: "Sidebar" })).getByRole("switch", {
+        name: "Working shelf",
+      }),
+    ).toBeDefined();
     expect(within(layout).queryByRole("switch", { name: "Archived shelf" })).toBeNull();
     const appearance = screen.getByRole("region", { name: "Project appearance" });
     expect(within(appearance).getByRole("switch", { name: "Project colors" })).toBeDefined();

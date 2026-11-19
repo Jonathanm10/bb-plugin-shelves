@@ -115,20 +115,16 @@ export function DockableShelves({
   attachUpperRef: (node: HTMLDivElement | null) => void;
   attachLowerRef: (node: HTMLDivElement | null) => void;
 }) {
-  if (!docked) {
-    return (
-      <div ref={attachUpperRef} className="flex flex-col">
-        {upper}
-        {lower}
-      </div>
-    );
-  }
   return (
-    <div className="flex min-h-full flex-col">
+    <div className={cn("flex flex-col", docked && "min-h-full")}>
       <div ref={attachUpperRef} className="flex flex-col">
         {upper}
       </div>
-      <div ref={attachLowerRef} data-shelf-dock="" className="mt-auto flex flex-col">
+      <div
+        ref={attachLowerRef}
+        data-shelf-dock={docked ? "" : undefined}
+        className={cn("flex flex-col", docked && "mt-auto")}
+      >
         {lower}
       </div>
     </div>

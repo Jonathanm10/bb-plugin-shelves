@@ -36,6 +36,7 @@ describe("settings cache codec", () => {
       threadDisplay: "full",
       compactWorkingThreads: false,
       workingShelf: false,
+      dockShelves: false,
     });
   });
   it("rejects missing and wrongly typed required fields", () => {
@@ -53,6 +54,7 @@ describe("settings cache codec", () => {
       threadDisplay: "full",
       compactWorkingThreads: false,
       workingShelf: false,
+      dockShelves: false,
       inactiveAfterHours: -1,
       autoSettleAfterDays: Infinity,
     });
@@ -72,6 +74,7 @@ describe("settings cache codec", () => {
       threadDisplay: "full",
       compactWorkingThreads: false,
       workingShelf: false,
+      dockShelves: false,
     });
   });
   it("retains the icon-only project preference", () => {
@@ -81,6 +84,7 @@ describe("settings cache codec", () => {
       threadDisplay: "full",
       compactWorkingThreads: false,
       workingShelf: false,
+      dockShelves: false,
       compactProjectIconOnly: true,
     });
   });

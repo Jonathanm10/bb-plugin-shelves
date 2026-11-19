@@ -130,21 +130,6 @@ const plugOf = (shelf: HTMLElement, title: string) =>
   });
 const pause = (ms: number) => act(() => new Promise((resolve) => setTimeout(resolve, ms)));
 
-/** Settles a row from its menu and answers "Close ports" on the prompt that follows. */
-async function settleAndClosePorts(slot: ReturnType<typeof mount>["slot"], title: string) {
-  const active = await screen.findByRole("region", { name: "Active" });
-  const row = within(active).getByRole("link", { name: title }).closest("li")!;
-  fireEvent.click(within(row).getByLabelText("Settle thread"));
-  await waitFor(() => expect(toastMocks.message).toHaveBeenCalledWith("Close this thread's ports?", expect.anything()));
-  await slot.behavior.experimental_invalidateRpc([LIFECYCLE_TAG]);
-  return async () => {
-    const options = toastMocks.message.mock.calls
-      .filter(([message]) => message === "Close this thread's ports?")
-      .at(-1)![1];
-    await act(async () => options.action.onClick());
-  };
-}
-
 async function settledRowLink() {
   const settled = await screen.findByRole("region", { name: "Settled" });
   fireEvent.click(within(settled).getByRole("button", { name: /^Settled/ }));
@@ -216,48 +201,17 @@ describe("open ports of settled threads", () => {
     expect(plugOf(settled, "Idle work")).not.toBeNull();
   });
 
-  it("drops a settled row's plug after the settle prompt closes its ports, and checks once more", async () => {
-    const { slot, scansOf, closeThreadPorts } = mount({
-      open: ["env_fresh"],
+  it("settles a port-owning thread without prompting to stop its ports", async () => {
+    const { slot, closeThreadPorts } = mount({
       rows: [],
       extra: [thread({ id: "fresh", title: "Fresh work", environment: environment("env_fresh") })],
     });
-    const active = await screen.findByRole("region", { name: "Active" });
-    await waitFor(() => expect(plugOf(active, "Fresh work")).not.toBeNull());
-    const closePorts = await settleAndClosePorts(slot, "Fresh work");
-    const settled = await screen.findByRole("region", { name: "Settled" });
-    fireEvent.click(within(settled).getByRole("button", { name: /^Settled/ }));
-    fireEvent.pointerMove(await within(settled).findByRole("link", { name: "Fresh work" }), { pointerType: "mouse" });
-    await waitFor(() => expect(plugOf(settled, "Fresh work")).not.toBeNull());
-    const before = scansOf("env_fresh");
-    await closePorts();
-    expect(closeThreadPorts).toHaveBeenCalledTimes(1);
-    await waitFor(() => expect(plugOf(settled, "Fresh work")).toBeNull());
-    expect(scansOf("env_fresh")).toBe(before);
-    await waitFor(() => expect(scansOf("env_fresh")).toBe(before + 1));
-    await pause(1_500);
-    expect(scansOf("env_fresh")).toBe(before + 1);
-    expect(plugOf(settled, "Fresh work")).toBeNull();
-  });
-
-  it("rescans a workspace shared with a live thread soon after the settle prompt closes its ports", async () => {
-    const { slot, scansOf } = mount({
-      open: ["env_live"],
-      rows: [],
-      owner: "shared",
-      extra: [thread({ id: "shared", title: "Shared work", environment: environment("env_live") })],
-    });
-    const active = await screen.findByRole("region", { name: "Active" });
-    await waitFor(() => expect(plugOf(active, "Shared work")).not.toBeNull());
-    const closePorts = await settleAndClosePorts(slot, "Shared work");
-    const settled = await screen.findByRole("region", { name: "Settled" });
-    fireEvent.click(within(settled).getByRole("button", { name: /^Settled/ }));
-    await waitFor(() => expect(plugOf(settled, "Shared work")).not.toBeNull());
-    const before = scansOf("env_live");
-    await closePorts();
-    await waitFor(() => expect(plugOf(settled, "Shared work")).toBeNull());
-    expect(scansOf("env_live")).toBe(before + 1);
-    await pause(1_500);
-    expect(scansOf("env_live")).toBe(before + 1);
+    const row = (await screen.findByRole("link", { name: "Fresh work" })).closest("li")!;
+    fireEvent.click(within(row).getByLabelText("Settle thread"));
+    await waitFor(() => expect(toastMocks.success).toHaveBeenCalledWith("Thread settled", expect.anything()));
+    await slot.behavior.experimental_invalidateRpc([LIFECYCLE_TAG]);
+    expect(await screen.findByRole("region", { name: "Settled" })).toBeDefined();
+    expect(toastMocks.message).not.toHaveBeenCalled();
+    expect(closeThreadPorts).not.toHaveBeenCalled();
   });
 });

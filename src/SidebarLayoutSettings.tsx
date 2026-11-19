@@ -25,8 +25,7 @@ export function SidebarLayoutSettings({
     <SettingsSection title="Sidebar layout" status={status}>
       <SettingRow
         title="Thread display"
-        experimental
-        description="Full cards show each thread on three lines. Compact working threads use one line while a thread or its child agents are working. Compact all threads keeps every thread on one line, with its status, unread state, and children chip."
+        description="Full cards show the project and status above the title. Compact working threads use one line while a thread or its child agents are working. Compact all threads keeps every thread on one line, with its status, unread state, and children chip."
         control={
           <SettingsSelect
             aria-label="Thread display"
@@ -66,13 +65,6 @@ export function SidebarLayoutSettings({
         onChange={(checked) => update("compactProjectIconOnly", checked)}
       />
       <SwitchRow
-        title="Working shelf"
-        experimental
-        description="Keep working threads in their own shelf. They return to Active when work finishes, fails, or needs you. Pinned threads stay pinned."
-        checked={draft.workingShelf}
-        onChange={(checked) => update("workingShelf", checked)}
-      />
-      <SwitchRow
         title="Inactive shelf"
         description="Move quiet, unpinned threads out of Active. New activity brings them back."
         checked={draft.inactiveThreadsEnabled}
@@ -95,7 +87,6 @@ export function SidebarLayoutSettings({
 
       <SwitchRow
         title="Dock shelves to the bottom"
-        experimental
         description="Keep shelves below Active at the bottom of the sidebar. Expanded shelves scroll with the thread list."
         checked={draft.dockShelves}
         onChange={(checked) => update("dockShelves", checked)}

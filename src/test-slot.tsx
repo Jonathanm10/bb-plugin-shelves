@@ -145,6 +145,8 @@ export function renderSlot<Props extends object>(
       getSidebarSettings: () => ({
         ...DEFAULT_SIDEBAR_SETTINGS,
         threadDisplay: "full",
+        dockShelves: false,
+        showRunningChildrenWhenCollapsed: true,
         workingShelf: false,
         inactiveThreadsEnabled: false,
       }),

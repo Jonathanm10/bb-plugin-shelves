@@ -127,6 +127,8 @@ import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings-values";
 export const defaultSidebarSettings = {
   ...DEFAULT_SIDEBAR_SETTINGS,
   inactiveThreadsEnabled: true,
+  showRunningChildrenWhenCollapsed: true,
+  dockShelves: false,
   autoSettleAfterDays: 3,
   autoSettleOnMerge: false,
   autoSettleKeepPullRequests: true,

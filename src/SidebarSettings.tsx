@@ -18,7 +18,7 @@ import { ProjectManagement } from "./ProjectManagement";
 import { configuredSnoozePresetError, parseConfiguredSnoozePresets } from "./lifecycle";
 import { isValidInactiveAfterHours } from "./inactive";
 import { isValidAutoSettleAfterDays } from "./auto-settle";
-import type { SaveStatus } from "./settings-ui";
+import { SettingsSection, SwitchRow, type SaveStatus } from "./settings-ui";
 
 /** Long enough to finish typing a shortcut, short enough to feel instant. */
 const SAVE_DELAY_MS = 500;
@@ -225,6 +225,19 @@ export function SidebarSettings() {
         snoozePresetsError={snoozePresetsError}
         snoozePreview={snoozePreview}
       />
+
+      <SettingsSection title="Sidebar" status={statusFor("Sidebar layout")}>
+        <SwitchRow
+          title="Working shelf"
+          description="Fold continuing work below Active. Finished work and requests return to Active."
+          checked={draft.workingShelf}
+          onChange={(checked) => update("workingShelf", checked)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Search threads with Cmd/Ctrl+K. Create projects from BB's project picker. Completion, error, and input alerts
+          use BB's Push notifications settings.
+        </p>
+      </SettingsSection>
 
       <details className="space-y-8">
         <summary className="cursor-pointer text-sm text-muted-foreground">Advanced settings</summary>

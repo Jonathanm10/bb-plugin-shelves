@@ -58,7 +58,7 @@ export const DEFAULT_SIDEBAR_SETTINGS: SidebarSettingsValues = {
   snoozePresets: DEFAULT_SNOOZE_PRESET_CONFIG,
   inactiveThreadsEnabled: false,
   inactiveAfterHours: DEFAULT_INACTIVE_AFTER_HOURS,
-  showRunningChildrenWhenCollapsed: true,
+  showRunningChildrenWhenCollapsed: false,
   autoSettleInactive: true,
   autoSettleAfterDays: 7,
   autoSettleOnMerge: true,
@@ -72,7 +72,7 @@ export const DEFAULT_SIDEBAR_SETTINGS: SidebarSettingsValues = {
   keepWokeThreadsFull: false,
   compactWorkingThreads: false,
   workingShelf: true,
-  dockShelves: false,
+  dockShelves: true,
   projectColorsEnabled: false,
   projectColorDisplay: "all",
 };

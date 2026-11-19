@@ -378,10 +378,10 @@ describe("parking threads", () => {
       // Done, or needing you, is Active's business; pinned stays pinned.
       expect(titlesIn("Active")).toEqual(["Asking parent", "Done work"]);
       expect(titlesIn("Pinned")).toEqual(["Pinned busy"]);
-      // One line like the other shelves, even with compact mode off.
+      // Working respects the readable default instead of forcing compact rows.
       for (const title of ["Busy work", "Waiting on child"]) {
         const row = screen.getByRole("link", { name: title }).closest("[data-parent-card]")! as HTMLElement;
-        expect(row.classList.contains("h-8")).toBe(true);
+        expect(row.classList.contains("h-8")).toBe(false);
         expect(within(row).getByRole("img", { name: "codex" }).querySelector(".rounded-full")).not.toBeNull();
       }
     },

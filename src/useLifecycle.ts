@@ -9,8 +9,6 @@ import type { PluginSidebarThread } from "@get-bb/plugin-sdk";
 import { errorDetail, toast } from "./lib/toast";
 import type { bbSidebarRpcContract } from "./contract";
 import { describeReclaim } from "./reclaim";
-import { promptToCloseSettledPorts } from "./settled-port-prompt";
-import { announcePortsClosed } from "./OpenPorts";
 import {
   canPark,
   canSnooze,
@@ -140,7 +138,6 @@ export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleR
   const rowStatuses = useSidebarThreadRowStatuses();
   const latestRowStatuses = useRef(rowStatuses);
   latestRowStatuses.current = rowStatuses;
-  const portPromptVersions = useRef(new Map<string, number>());
 
   // Arm one timer for the soonest wake instead of polling: the shelf empties
   // the moment a snooze expires, and nothing ticks while nothing is snoozed.
@@ -187,9 +184,6 @@ export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleR
       }
       if (inFlightThreadIds.current.has(threadId)) return false;
       inFlightThreadIds.current.add(threadId);
-      const portPromptVersion = (portPromptVersions.current.get(threadId) ?? 0) + 1;
-      portPromptVersions.current.set(threadId, portPromptVersion);
-      toast.dismiss(`settled-ports:${threadId}`);
       let parkReminder: string | undefined;
       let settleUndoToken: string | undefined;
       // An unsnooze clears the row server-side, so its wake time has to be
@@ -241,7 +235,7 @@ export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleR
         });
       } else if (method === "snooze") {
         // The wake time is the headline; the reminder follows it, because a
-        // snooze releases the same resources a settle does.
+        // legacy servers may append a resource reminder.
         const wakes = `Wakes ${formatSnoozeWakeTime(request.snoozedUntil)}`;
         toast.success("Thread snoozed", {
           description: parkReminder === undefined ? wakes : `${wakes} · ${parkReminder}`,
@@ -252,19 +246,8 @@ export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleR
           },
         });
       } else if (method === "settle") {
-        void promptToCloseSettledPorts(
-          threadId,
-          () => rpc.call("getThreadPorts", { threadId }),
-          // Whatever the answer, the row's plug may now be stale.
-          (ports) =>
-            rpc.call("closeThreadPorts", { threadId, ports }).finally(() => {
-              const environmentId = latestThreads.current.find((thread) => thread.id === threadId)?.environment?.id;
-              if (environmentId) announcePortsClosed([environmentId]);
-            }),
-          () => portPromptVersions.current.get(threadId) === portPromptVersion,
-        );
         // Undo restores lifecycle rows captured by this action, including the
-        // children's previous shelves. Released resources and pins stay released.
+        // children's previous shelves. Native pins stay released.
         toast.success(SUCCESS_MESSAGE.settle, {
           description: parkReminder,
           duration: parkReminder === undefined ? undefined : PARK_REMINDER_TOAST_MS,

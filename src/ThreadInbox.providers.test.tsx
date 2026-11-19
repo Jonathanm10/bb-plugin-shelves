@@ -66,9 +66,9 @@ describe("ThreadInbox", () => {
 
       await waitFor(() => {
         const row = screen.getByRole("link", { name: "Pi thread" }).closest("[data-parent-card]")!;
-        expect(row.classList.contains("h-8")).toBe(display !== "full");
+        expect(row.classList.contains("h-8")).toBe(display !== "full" && display !== "working-shelf");
       });
-      const region = screen.getByRole("region", { name: display === "working-shelf" ? "Working" : "Active" });
+      const region = await screen.findByRole("region", { name: display === "working-shelf" ? "Working" : "Active" });
       const glyph = within(region).getByRole("img", { name: "Pi" });
       const row = glyph.closest("[data-parent-card]")! as HTMLElement;
       expect(within(row).getByText("Working")).toBeDefined();

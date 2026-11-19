@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
-import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { renderSlot } from "./test-slot";
 import { formatSnoozeWakeTime } from "./lifecycle";
 import {
@@ -142,7 +142,7 @@ describe("row context menu", () => {
     );
   });
 
-  it("asks to close owned ports after settling, and only closes on confirmation", async () => {
+  it("files work without a port cleanup prompt", async () => {
     const ports = [{ port: 3000, pid: 123 }];
     const close = vi.fn(() => ({ signalled: [3000], skipped: [], failed: [] }));
     renderSlot(inbox, listProps, {
@@ -159,13 +159,9 @@ describe("row context menu", () => {
       },
     });
     fireEvent.click(await screen.findByLabelText("Settle thread"));
-    await waitFor(() =>
-      expect(toastMocks.message).toHaveBeenCalledWith("Close this thread's ports?", expect.anything()),
-    );
+    await waitFor(() => expect(toastMocks.success).toHaveBeenCalledWith("Thread settled", expect.anything()));
+    expect(toastMocks.message).not.toHaveBeenCalled();
     expect(close).not.toHaveBeenCalled();
-    const options = toastMocks.message.mock.calls.find(([message]) => message === "Close this thread's ports?")![1];
-    await act(async () => options.action.onClick());
-    expect(close).toHaveBeenCalledWith({ threadId: "thr_ports", ports });
   });
 
   it("ends snapshot Undo without offering an unrestricted tree redo", async () => {

@@ -207,7 +207,7 @@ export function ThreadInboxView({
                     <Shelf label={null}>
                       {/* One line, like every shelf after Active. */}
                       {working.visibleThreads.map((thread) =>
-                        renderActiveThread(thread, "inbox", false, true, true, "working"),
+                        renderActiveThread(thread, "inbox", false, true, false, "working"),
                       )}
                     </Shelf>
                   </CollapsibleShelf>

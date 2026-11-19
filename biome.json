@@ -70,7 +70,6 @@
         "src/drag-reorder.ts",
         "src/drag-reorder-geometry.ts",
         "src/drag-auto-scroll.ts",
-        "src/settled-port-prompt.ts",
         "src/bb-sdk.ts"
       ],
       "linter": {
@@ -116,7 +115,6 @@
         "!src/drag-reorder.ts",
         "!src/drag-reorder-geometry.ts",
         "!src/drag-auto-scroll.ts",
-        "!src/settled-port-prompt.ts",
         "!src/server-*.ts",
         "!src/bb-sdk.ts"
       ],

@@ -204,7 +204,7 @@ export function ThreadCard({
   const rowRuns = useRowStatusRuns(thread.id);
   const canShelve = !rowRuns && canPark;
   const snoozable = !rowRuns && canSnooze;
-  const showParkActions = !isWoke && (canShelve || snoozable);
+  const showParkActions = canShelve || snoozable;
 
   const unpinButton = thread.isPinned ? (
     <Tooltip label="Unpin thread">
@@ -423,6 +423,13 @@ export function ThreadCard({
                     {unpinButton}
                     <WokeMarker onDismiss={onAcknowledgeWake} />
                     <StatusOrTime thread={thread} now={now} />
+                    <ThreadFilingActions
+                      snoozePresets={snoozePresets}
+                      onOpenChange={setIsSnoozeOpen}
+                      onSnooze={snoozable ? onSnooze : undefined}
+                      onSettle={canShelve ? startSettle : undefined}
+                      settling={isSettling}
+                    />
                   </span>
                 ) : (
                   <span
