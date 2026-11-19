@@ -2,8 +2,7 @@
 
 ## Supported versions
 
-Until the first stable GitHub Release, security fixes target `main`. Once stable
-releases exist, fixes target the latest published release. Older releases and
+Security fixes target the latest published stable release and `main`. Older releases and
 unmerged branches are not maintained separately.
 
 ## Report a vulnerability
@@ -19,6 +18,7 @@ is no guaranteed response time or bug bounty program.
 
 Thread Inbox reads BB thread, project, status, and pull-request information. It
 stores filing state and preferences in BB plugin storage. Actions such as thread
-deletion use BB APIs and require an explicit user action. Automatic title recovery
-uses BB's configured title service; see the [scope review](docs/scope-review.md).
+deletion use BB APIs and require an explicit user action. Previously saved icon
+paths can read that explicit image from the project through BB. No automatic
+icon discovery, historical PR scanning, or title-service calls are included.
 The plugin does not scan listening ports, stop processes, or close terminals.

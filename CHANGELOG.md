@@ -1,15 +1,13 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0]
 
-Development preview for the first release. No version is published by this heading.
+Initial release of Thread Inbox for BB.
 
-- Working, Active, and Settled sections with readable thread cards.
-- Recent-return ordering and live status updates.
-- Snooze, Wake, Settle, Un-settle, and Undo.
-- Automatic settling for inactivity and merged or closed pull requests.
-- Native BB search, project creation, and notifications.
-- Keyboard and touch actions, with light and dark themes.
-- Removed workspace port scanning, indicators, links, and port-based settling exceptions.
-- Tag-based GitHub Releases with manifest validation and changelog notes.
-- Expanded documentation, demo media, security reporting, and marketplace submission guidance.
+- Working, Active, and Settled sections with live status and recent-return ordering.
+- Always-visible Search threads control that opens BB's native search, including settled conversations.
+- Settle, Un-settle, Undo, Snooze, and Wake with keyboard and touch support.
+- Automatic settling for inactivity and merged or closed pull requests, with busy, queue, question, pin, and child protections.
+- Light and dark themes, aligned settings, project filtering, and optional compact cards.
+- Existing filing data and saved project appearance are preserved.
+- Tag-based GitHub Releases, security reporting, and installation documentation.

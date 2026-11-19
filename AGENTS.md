@@ -9,13 +9,15 @@ management. Reuse native BB actions instead of implementing those systems here.
 Do not add process shutdown, terminal cleanup, custom Continue scheduling, or
 project editors to the sidebar.
 
-Keep existing filing data, preferences, and read-only project appearance.
+Keep existing filing data, preferences, and read-only saved project appearance.
+Do not add automatic project icon discovery, historical PR scans, paid title
+recovery, or an Inactive shelf. Legacy inactivity preferences remain accepted
+for compatibility but have no effect on placement.
 Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 
 ## Architecture
 
-- Browser entry: `app.tsx`. Server entry: `src/server.ts`. Host entry:
-  `src/pr-host.ts`. Keep browser, Node, and shared modules separate;
+- Browser entry: `app.tsx`. Server entry: `src/server.ts`. No host entry is needed. Keep browser, Node, and shared modules separate;
   `biome.json` and `scripts/check-import-boundaries.mjs` enforce the boundaries.
 - Experimental app SDK hooks go through `src/bb-sdk.ts`.
 - Use BB's status resolver for display through `src/working-tree.ts` and
@@ -31,8 +33,8 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 
 ## State and background work
 
-- A settled thread is filed. Recurring scans and PR lookups skip settled work;
-  read it on demand when opened, hovered, or returned to Active.
+- A settled thread is filed. Native current-branch PR badges read on demand;
+  there is no historical PR scan.
 - Unknown PR results preserve the thread's place. Filing never stops a
   runtime, closes a terminal, archives, or deletes a conversation.
 - Settings changes and restart do not reopen already auto-settled work. New
@@ -63,6 +65,9 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 - Run browser tests only through the isolated scratch launcher, never against
   the live host. See `e2e/README.md`. Capture current light/dark/narrow images
   using disposable fixture data; public docs do not use before/after comparisons.
+  Test the visible Search threads button with hidden native navigation. Review
+  settings alignment and both disclosures. Record demos without simultaneous
+  screenshots; watch the entire encoded animation, including its loop.
 - `npm run test:stress` is manual only; run it only when the user asks.
 - Preserve licenses and copyright notices for retained inherited code in
   `LICENSE`. Keep machine configuration, credentials, private audit notes, and
@@ -71,10 +76,11 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 ## Tag-based releases
 
 - A package version is manifest metadata, not proof of publication. Keep unreleased
-  work on a development version and the README release badge tied to GitHub Releases.
-- Prepare a release on a branch: `npm version X.Y.Z --no-git-tag-version`, move
+  work on the planned stable X.Y.Z version and the README release badge tied to GitHub Releases.
+  Only stable vX.Y.Z tags are supported; do not introduce version suffixes.
+- Prepare a release on a branch: `npm version X.Y.Z --no-git-tag-version`, put
   the shipped notes under a nonempty `## [X.Y.Z]` section in `CHANGELOG.md`, and
-  leave a new `## [Unreleased]` section for future work. Review through a PR.
+  document only this project's shipped behavior. Review through a PR.
 - Run `npm run check` and the isolated browser suite before release. Verify both
   lockfile version fields match the manifest. Do not publish from an unmerged branch.
 - Only after the release preparation is merged and publication is authorized,

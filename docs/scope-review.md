@@ -1,51 +1,46 @@
-# Scope review
+# Scope audit for 0.1.0
 
-Reviewed against the requested Working / Active / Settled sidebar, Snooze, and
-native BB controls. Confidence measures how certain the recommendation is from
-source and caller evidence; it is not a test coverage score. These are proposals
-for maintainer review, not additional removals authorized by this PR.
+Reviewed runtime entry points, background jobs, RPC callers, settings, dynamic UI
+registration, and tests. No usage telemetry is collected, so a reachable feature
+is not called unused simply because it is optional. Confidence describes the
+source evidence. S is up to half a day; M is roughly one to two days including
+verification.
 
-P0 means urgent correctness, security, or data-loss risk. P1 means the next
-cleanup priority. P2 means optional simplification. Sizes: S is up to half a day,
-M is roughly one to two days, including verification.
+## Completed cleanup
 
-## Findings
+| Priority | Decision | Confidence | Size |
+| --- | --- | --- | --- |
+| P1 | Removed paid automatic title recovery and manual title regeneration. BB owns titles. Historical migration/table retained. | 99% | S |
+| P1 | Removed historical PR event scanning, its caches, hover history, RPC and `gh` host entry. The stale closed-PR cache disappeared with this subsystem. Native current-branch status and PR-based auto-settling remain. | 99% | M |
+| P1 | Removed automatic favicon discovery, manifest/HTML parsing, candidate traversal, and project file search. Unconfigured projects use letter tiles without file reads. Explicitly saved paths/uploads and saved colors remain readable. | 99% | M |
+| P2 | Retired the optional Inactive shelf and its controls/classification. Legacy settings remain accepted and stored; they cannot create another shelf or hide quiet Active threads. | 99% | M |
+| P1 | Added a visible native Search threads button. It works with fresh settings and hidden native search navigation. | 99% | S |
+| P2 | Aligned settings help and disclosures; separated screenshots from video capture to avoid recording artifacts. | 99% | S |
 
-| Priority | Candidate | Confidence | Size | Evidence and recommendation |
-| --- | --- | --- | --- | --- |
-| P0 | No new P0 runtime defect established | Medium (70%) | - | This review traced feature ownership, background work, mutations, dependencies, and callers. It is not a full security audit or a guarantee that no critical bug exists. |
-| P1 | Automatic title recovery | High (99%) | S | `src/auto-title.ts` subscribes to thread events, schedules recovery after 10 seconds, persists claims, and permits up to three paid title-service attempts. `src/server.ts` starts it unconditionally. Remove this worker and its regeneration menu/RPC; let BB own titles. Preserve the historical migration/table. |
-| P1 | Project favicon discovery and legacy appearance layer | High (95%) | M | `src/server-project-icons.ts` reads project files, searches for icon candidates, and serves its own image route. `src/ProjectColors.tsx` and `src/server-project-colors.ts` maintain separate appearance rendering. Optional for a thread inbox. Prefer native project marks; removing it changes saved appearance, so make that an explicit decision and retain stored records. |
-| P1 | Historical PR discovery beyond native PR Status | High (92%) | M | `src/thread-pull-requests.ts` scans completed thread events for PR URLs, caches states, and calls `gh` through `src/pr-host.ts`; `src/ThreadPullRequests.tsx` renders the results. This supplies a multi-PR history beyond the native current-branch status. Remove if that history is unwanted; keep `src/server-policy.ts` integration with native GitHub PR Status for automatic settling. |
-| P1 | Reopened PR details stay stale | High (99%) | S | `src/thread-pull-requests.ts` caches both merged and closed PRs indefinitely. Closed PRs can reopen, so a previously closed PR can keep its old badge/details. If historical PR discovery is retained, refresh closed states rather than treating them as terminal. This finding concerns the history display; automatic settling reads native PR Status separately. |
-| P2 | Parent assignment and custom recursive delete | High (90%) | M | `src/RowContextMenu.tsx`, `src/ParentThreadMenu.tsx`, and server `setThreadParent`/`deleteThread` handlers extend sidebar management beyond filing. Consider retaining child display and using native management entry points. Do not remove descendant busy/attention guards or recursive-delete confirmation while deletion remains available. |
-| P2 | Inactive shelf | High (99%) | M | `src/SidebarLayoutSettings.tsx` can enable an extra shelf and inactivity threshold. It is off by default, but duplicates the role of the requested auto-settling policy. Remove its setting and rendering if three main sections are the intended permanent scope; define how saved enabled preferences behave first. |
-| P2 | Multiple density/grouping/reordering modes | Medium (85%) | M | `src/SidebarLayoutSettings.tsx`, `src/ActiveSortPicker.tsx`, `src/drag-reorder.ts`, and `src/drag-reorder-geometry.ts` support full/compact variants and several order/group views. Active's recent-return order and a single card style would reduce code and testing substantially, but remove existing customization. Choose the modes to keep before changing persisted preferences. |
+Workspace port detection, Docker/process inspection, polling, links, and
+port-based filing exceptions were also removed. Filing never stops a process.
 
-## Removed in this PR
+## Deliberately retained after tracing callers
 
-Workspace port detection, Docker/process inspection, polling/cache, row glyphs,
-port links and device selection, and the port-based auto-settle exemption are
-removed. An otherwise inactive thread can settle while its development server
-continues running. Filing never stops that server. Native reported running work,
-queues, pins, questions, and descendant protections remain.
+| Area | Why it remains | Confidence |
+| --- | --- | --- |
+| Parent assignment and guarded deletion | These are reachable menu actions with server handlers and child-tree behavior, not unused code. Existing parent changes reopen the ancestor path; deletion previews include archived/lifecycle dependents. Removing the safeguards while keeping deletion would reduce safety. | 99% |
+| Density, grouping and manual ordering | Settings and row renderers actively use them, and saved preferences restore them. They are optional presentation choices under Advanced settings, rather than additional thread states. | 99% |
+| Saved project appearance | Existing settings, fixtures, and renderers use colors and explicit icons. No new project appearance editor or automatic discovery remains. | 99% |
+| Legacy Parked recovery | Existing records must stay reachable through Resume. Normal controls cannot create Parked rows. | 99% |
+| Database migrations and storage codecs | They preserve installed data and settings. Old labels in immutable fixtures are provenance, not this project's release history. | 99% |
+| Native lifecycle guards and PR policy | Running work, queued work, questions, pins, and children must remain reachable. Unknown PR state preserves placement. | 99% |
 
-## Retain
+No new P0 defect was established by this scoped review. This is not a full
+security audit or a claim that all possible bugs are excluded.
 
-- Database migrations, inherited fixture snapshots, and compatibility reads:
-  these protect installed data. They are not unused just because the old UI is gone.
-- Native status resolution, synchronization/reconnect handling, and lifecycle
-  guards: these keep returned work and unanswered questions reachable.
-- Snooze time parsing and wake behavior: part of the requested functionality.
-- PR lookup for merge/close-based auto-settling: a requested feature. Removing
-  optional PR history must not remove the native policy integration.
-- Current SDK import boundaries and browser isolation checks: these catch real
-  runtime mistakes and protect developer data during tests.
+## Verification gates
 
-## Release and listing follow-up
+Meaningful regression tests cover visible search activation, retired RPCs,
+no project-file access for default icons, and legacy Inactive preferences.
+The release also requires the repository checks and isolated browser flows,
+including hidden search navigation, both settings themes, narrow sidebars,
+filing/Undo, persistence, and a full playback review of the encoded GIF.
 
-This PR adds release automation and corrects the development version display.
-Actual tag publication and BB Community submission remain separate steps after
-merge. Before submission, validate a fresh Git install through BB's current
-marketplace checks, including host-entry dependency placement and engine ranges.
-See [marketplace submission](marketplace.md) and [release instructions](../AGENTS.md#tag-based-releases).
+Publication follows [tag-based releases](../AGENTS.md#tag-based-releases).
+The separate [BB Community submission plan](marketplace.md) is unchanged.

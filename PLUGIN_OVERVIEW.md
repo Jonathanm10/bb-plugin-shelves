@@ -14,16 +14,15 @@ archiving or deleting it.
 Automatic settling handles inactivity and merged or closed pull requests.
 Running work, queues, unanswered questions, pinned threads, and live children
 protect conversations from automatic filing. New activity can return filed work.
-BB's native search includes settled threads. Search, project creation,
+The visible Search threads button opens BB's native search, including settled threads. Project creation,
 notifications, retries, and runtime management use native BB controls.
 
 ## Requirements
 
 BB 0.49.0 or newer. Merge/close-based settling uses BB's GitHub PR Status plugin
 and its GitHub access; unknown PR state leaves the conversation in place.
-Optional PR history details use the `gh` CLI on the workspace host. Inherited
-automatic title recovery uses the title service configured in BB, which can
-incur provider charges. No listening-port scanner or process shutdown is included.
+No listening-port scanner, process shutdown, historical PR scanner, or paid
+title recovery is included. Saved project appearance remains readable.
 
 The technical plugin ID is `bb-sidebar-clean`, preserving existing filing data.
 For installation and release status, see the
