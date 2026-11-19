@@ -64,6 +64,8 @@ it("shows auto-settle controls first and persists the PR protection switch", asy
   );
   expect(screen.getByRole("switch", { name: "Inactive shelf" }).closest("details")!.open).toBe(false);
   expect(screen.getByText("Advanced settings").closest("details")!.open).toBe(false);
+  expect(screen.queryByText("Project appearance")).toBeNull();
+  expect(screen.queryByText("Project management")).toBeNull();
   expect(screen.getByRole("switch", { name: "Working shelf" }).closest("details")).toBeNull();
   fireEvent.click(keep);
   await waitFor(async () => {

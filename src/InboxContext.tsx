@@ -26,7 +26,6 @@ import type { useRenamingShelfLocks } from "./useRenamingShelfLocks";
 interface InboxContextInputs {
   providerById: ReadonlyMap<string, SidebarProvider>;
   projectNameById: ReadonlyMap<string, string>;
-  projectIconRevision: number;
   projects: ReturnType<typeof useSidebarThreads>["projects"];
   sidebarSettings: SidebarSettingsValues | null;
   snoozePresets: readonly ConfiguredSnoozePreset[];
@@ -50,7 +49,6 @@ interface InboxContextInputs {
 export function useInboxContextValues({
   providerById,
   projectNameById,
-  projectIconRevision,
   projects,
   sidebarSettings,
   snoozePresets,
@@ -73,23 +71,13 @@ export function useInboxContextValues({
     () => ({
       providerById,
       projectNameById,
-      projectIconRevision,
       projects,
       sidebarSettings,
       snoozePresets,
       lifecycle,
       childrenByParentId,
     }),
-    [
-      providerById,
-      projectNameById,
-      projectIconRevision,
-      projects,
-      sidebarSettings,
-      snoozePresets,
-      lifecycle,
-      childrenByParentId,
-    ],
+    [providerById, projectNameById, projects, sidebarSettings, snoozePresets, lifecycle, childrenByParentId],
   );
   const actions = useMemo(
     () => ({

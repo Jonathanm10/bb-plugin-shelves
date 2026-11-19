@@ -1,6 +1,5 @@
 import { defineRpcContract } from "@get-bb/plugin-sdk";
 import { z } from "zod";
-import { normalizeProjectIconPath } from "./project-icons";
 import {
   CHILD_THREAD_SORT_FIELDS,
   CHILD_THREAD_SORT_DIRECTIONS,
@@ -11,10 +10,7 @@ import {
 import { configuredSnoozePresetError } from "./lifecycle";
 import { MAX_INACTIVE_AFTER_HOURS, MIN_INACTIVE_AFTER_HOURS } from "./inactive";
 import { MAX_AUTO_SETTLE_AFTER_DAYS, MIN_AUTO_SETTLE_AFTER_DAYS } from "./auto-settle";
-export {
-  SIDEBAR_SETTINGS_CHANNEL,
-  PROJECT_ICONS_CHANNEL,
-} from "./realtime-channels";
+export { SIDEBAR_SETTINGS_CHANNEL } from "./realtime-channels";
 
 export const openPortSchema = z.object({
   port: z.number().int().min(1).max(65535),
@@ -72,15 +68,6 @@ const orderedThreadIdsSchema = z
     }
   });
 const threadIdsSchema = orderedThreadIdsSchema.min(1);
-const projectIdSchema = z.string().trim().min(1);
-const projectIconPathSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(1_000)
-  .refine((path) => normalizeProjectIconPath(path) !== null, {
-    message: "Choose a relative SVG, PNG, ICO, JPEG, GIF, AVIF, or WebP path",
-  });
 export const sidebarSettingsSchema = z
   .object({
     snoozePresets: z
@@ -112,20 +99,6 @@ export const sidebarSettingsSchema = z
     projectColorDisplay: z.enum(PROJECT_COLOR_DISPLAYS),
   })
   .strict();
-const uploadFilenameSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(255)
-  .refine(
-    (filename) => !filename.includes("/") && !filename.includes("\\") && normalizeProjectIconPath(filename) !== null,
-    { message: "Choose a supported image file" },
-  );
-const iconBase64Schema = z
-  .string()
-  .min(1)
-  .max(1_400_000)
-  .regex(/^[A-Za-z0-9+/]*={0,2}$/, "Invalid image data");
 export const bbSidebarRpcContract = defineRpcContract({
   // The app names the workspaces to scan: those of live threads on its poll,
   // or one settled thread's when the user looks at it, 500 per call (the app
@@ -168,19 +141,6 @@ export const bbSidebarRpcContract = defineRpcContract({
   getProjectColors: {
     input: z.object({}).strict(),
     output: z.object({ colors: z.record(z.string(), z.string()) }),
-  },
-  setProjectColor: {
-    input: z
-      .object({
-        projectId: z.string().trim().min(1),
-        color: z
-          .string()
-          .regex(/^#[0-9a-fA-F]{6}$/)
-          .transform((value) => value.toLowerCase())
-          .nullable(),
-      })
-      .strict(),
-    output: z.object({ ok: z.boolean() }),
   },
   getSidebarSettings: {
     input: z.object({}).strict(),
@@ -245,103 +205,5 @@ export const bbSidebarRpcContract = defineRpcContract({
   evaluateAutoSettle: {
     input: z.object({}).strict(),
     output: z.object({ changedThreadIds: z.array(z.string()) }).strict(),
-  },
-  listProjectIconSettings: {
-    input: z.object({}).strict(),
-    output: z
-      .object({
-        projects: z.array(
-          z
-            .object({
-              id: z.string(),
-              name: z.string(),
-              customPath: z.string().nullable(),
-              customUploadName: z.string().nullable(),
-            })
-            .strict(),
-        ),
-      })
-      .strict(),
-  },
-  listProjects: {
-    input: z.object({}).strict(),
-    output: z
-      .object({
-        projects: z.array(
-          z
-            .object({
-              id: z.string(),
-              name: z.string(),
-            })
-            .strict(),
-        ),
-      })
-      .strict(),
-  },
-  renameProject: {
-    input: z.object({ projectId: projectIdSchema, name: z.string().trim().min(1).max(500) }).strict(),
-    output: z.object({ ok: z.literal(true) }).strict(),
-  },
-  projectPathHosts: {
-    input: z.object({ projectId: projectIdSchema }).strict(),
-    output: z.object({ hosts: z.array(z.object({ id: z.string(), name: z.string() }).strict()) }).strict(),
-  },
-  addProjectPath: {
-    input: z
-      .object({
-        projectId: projectIdSchema,
-        hostId: z.string().trim().min(1),
-        path: z.string().trim().min(1).max(4096),
-      })
-      .strict(),
-    output: z.object({ ok: z.literal(true) }).strict(),
-  },
-  removeProject: {
-    input: z
-      .object({
-        projectId: projectIdSchema,
-        confirmation: z.string().max(500),
-      })
-      .strict(),
-    output: z.object({ ok: z.literal(true) }).strict(),
-  },
-  searchProjectIconFiles: {
-    input: z
-      .object({
-        projectId: projectIdSchema,
-        query: z.string().trim().max(200),
-      })
-      .strict(),
-    output: z.object({ paths: z.array(z.string()) }).strict(),
-  },
-  setProjectIcon: {
-    input: z
-      .object({
-        projectId: projectIdSchema,
-        path: projectIconPathSchema.nullable(),
-      })
-      .strict(),
-    output: z
-      .object({
-        customPath: z.string().nullable(),
-        customUploadName: z.string().nullable(),
-      })
-      .strict(),
-  },
-  uploadProjectIcon: {
-    input: z
-      .object({
-        projectId: projectIdSchema,
-        filename: uploadFilenameSchema,
-        mimeType: z.string().max(100),
-        contentBase64: iconBase64Schema,
-      })
-      .strict(),
-    output: z
-      .object({
-        customPath: z.string().nullable(),
-        customUploadName: z.string().nullable(),
-      })
-      .strict(),
   },
 });

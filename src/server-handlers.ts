@@ -1,8 +1,6 @@
 import type { ServerContext, ServerHandlers } from "./server-context";
 import type { createServerLifecycle } from "./server-lifecycle";
-import type { createServerProjectIcons } from "./server-project-icons";
 import type { createServerProjectColors } from "./server-project-colors";
-import type { createServerProjectManagement } from "./server-project-management";
 import type { createServerSettleActions } from "./server-settle-actions";
 import type { createServerSettings } from "./server-settings";
 import type { createServerPolicy } from "./server-policy";
@@ -25,9 +23,7 @@ export function createServerHandlers(
   threadPullRequests: ReturnType<typeof createThreadPullRequests>,
   regenerateTitle: ReturnType<typeof createTitleRegenerator>,
   modules: {
-    icons: ReturnType<typeof createServerProjectIcons>;
     colors: ReturnType<typeof createServerProjectColors>;
-    projects: ReturnType<typeof createServerProjectManagement>;
     settle: ReturnType<typeof createServerSettleActions>;
   },
 ) {
@@ -264,8 +260,6 @@ export function createServerHandlers(
   return {
     ...modules.settle.handlers,
     ...modules.colors.handlers,
-    ...modules.icons.handlers,
-    ...modules.projects.handlers,
     ...handlers,
   } satisfies ServerHandlers;
 }

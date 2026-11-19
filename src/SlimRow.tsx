@@ -41,7 +41,7 @@ export const SlimRow = memo(function SlimRow({
   now: number;
   childrenExpanded: boolean;
 }) {
-  const { projectNameById, projectIconRevision, snoozePresets, lifecycle, childrenByParentId } = useInboxEnvironment();
+  const { projectNameById, snoozePresets, lifecycle, childrenByParentId } = useInboxEnvironment();
   const { onNavigate, settleThread, snoozeThread, toggleChildExpansion } = useInboxActions();
   const { activeThreadId } = useInboxActivity();
   const childThreads = childrenByParentId.get(thread.id) ?? [];
@@ -56,7 +56,7 @@ export const SlimRow = memo(function SlimRow({
   // Another plugin's running status keeps the thread where it is.
   const canShelve = !useRowStatusRuns(thread.id);
   const projectName = projectNameById.get(thread.projectId) ?? null;
-  const projectIconUrl = iconUrl(thread.projectId, projectIconRevision);
+  const projectIconUrl = iconUrl(thread.projectId);
   const onSettle = () => settleThread(thread);
   const onSnooze = (until: number) => snoozeThread(thread, until);
   const onRestore = () =>

@@ -12,7 +12,6 @@ import { createServerLifecycle, LIFECYCLE_BACKFILLS_MIGRATION } from "./server-l
 import { createServerProjectIcons } from "./server-project-icons";
 import { PROJECT_ICON_MISSING_HEADER } from "./project-icons";
 import { createServerProjectColors } from "./server-project-colors";
-import { createServerProjectManagement } from "./server-project-management";
 import { createServerSettleActions } from "./server-settle-actions";
 import { createServerPolicy } from "./server-policy";
 import { createServerHandlers } from "./server-handlers";
@@ -129,7 +128,6 @@ export default async function plugin(bb: BbPluginApi) {
   const settings = await createServerSettings(ctx);
   const icons = createServerProjectIcons(ctx);
   const colors = createServerProjectColors(ctx);
-  const projects = createServerProjectManagement(ctx, icons);
   const lifecycle = createServerLifecycle(ctx);
   const settle = createServerSettleActions(ctx, lifecycle);
   const policy = createServerPolicy(ctx, lifecycle, settings, threadPortActions);
@@ -141,7 +139,7 @@ export default async function plugin(bb: BbPluginApi) {
     getOpenPorts,
     threadPullRequests,
     regenerateTitle,
-    { icons, colors, projects, settle },
+    { colors, settle },
   );
   const { resolveProjectIcon } = icons;
   const { wakeAncestors, clearSettlingState, clear, settleUnarchivedTree } = lifecycle;

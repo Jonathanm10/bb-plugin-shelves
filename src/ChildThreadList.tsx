@@ -1,7 +1,7 @@
 import { useInboxChildList, type InboxChildListInputs } from "./InboxContext";
 import { useSidebarThreadSplit, useSidebarThreads } from "./bb-sdk";
 import { useId, useState, type ReactNode } from "react";
-import { useRealtime, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
+import type { PluginSidebarThread } from "@get-bb/plugin-sdk/app";
 import { Icon } from "./components/Icon";
 import { Tooltip } from "./components/Tooltip";
 import { Disc } from "./Disc";
@@ -35,7 +35,6 @@ import { ChildThreadIcon, compareChildThreads, useChildThreadDisplay } from "./C
 import { ProviderGlyph } from "./ProviderGlyph";
 import { ProjectFavicon } from "./ProjectFavicon";
 import { projectIconUrl } from "./project-icons";
-import { PROJECT_ICONS_CHANNEL } from "./realtime-channels";
 const MAX_CHILD_DOTS = 3;
 
 export function childThreadsByParent(
@@ -454,13 +453,9 @@ function childThreadOpenLabel(
  * these rows subscribe to icon updates; same-project rows draw nothing.
  */
 function ForeignProjectMark({ project }: { project: ForeignProject }) {
-  const [iconRevision, setIconRevision] = useState(0);
-  useRealtime(PROJECT_ICONS_CHANNEL, () => {
-    setIconRevision((revision) => revision + 1);
-  });
   return (
     <span data-foreign-project={project.id} className="flex shrink-0 items-center pl-1">
-      <ProjectFavicon src={projectIconUrl(project.id, iconRevision)} name={project.name} className="size-3" />
+      <ProjectFavicon src={projectIconUrl(project.id)} name={project.name} className="size-3" />
     </span>
   );
 }

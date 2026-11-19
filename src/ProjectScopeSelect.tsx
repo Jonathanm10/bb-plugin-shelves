@@ -33,14 +33,12 @@ function hasCoarsePointer(): boolean {
 export function ProjectScopeSelect({
   scope,
   projects,
-  projectIconRevision,
   onScopeChange,
   pinnedProjects,
   onToggleProjectPin,
 }: {
   scope: readonly string[];
   projects: readonly PluginSidebarProject[];
-  projectIconRevision: number;
   onScopeChange: (scope: string[]) => void;
   pinnedProjects: readonly string[];
   onToggleProjectPin: (projectId: string) => void;
@@ -146,11 +144,7 @@ export function ProjectScopeSelect({
                   ? ALL_PROJECTS_LABEL
                   : unpinnedScope.map((id, index) => (
                       <span key={id} className="flex min-w-0 max-w-full items-center gap-1.5">
-                        <ProjectFavicon
-                          src={projectIconUrl(id, projectIconRevision)}
-                          name={scopeNames[index]}
-                          className="size-3"
-                        />
+                        <ProjectFavicon src={projectIconUrl(id)} name={scopeNames[index]} className="size-3" />
                         <span className="min-w-0 whitespace-normal [overflow-wrap:anywhere]">{scopeNames[index]}</span>
                       </span>
                     ))}
@@ -236,11 +230,7 @@ export function ProjectScopeSelect({
                 <div role="gridcell" className="flex min-w-0 flex-1 items-center gap-1.5 py-1.5">
                   <span className="flex min-w-0 flex-1 items-center gap-1.5">
                     {option.id !== ALL_PROJECTS ? (
-                      <ProjectFavicon
-                        src={projectIconUrl(option.id, projectIconRevision)}
-                        name={option.name}
-                        className="size-3"
-                      />
+                      <ProjectFavicon src={projectIconUrl(option.id)} name={option.name} className="size-3" />
                     ) : null}
                     <span className="truncate">{option.name}</span>
                   </span>

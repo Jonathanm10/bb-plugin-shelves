@@ -1,8 +1,7 @@
 import { useProviders, useSidebarThreadSplit, useSidebarThreads } from "./bb-sdk";
 import { useCallback, useEffect, useId, useRef, useState, type ReactElement } from "react";
-import { useRpc, useRealtime, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
+import { useRpc, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
 import type { bbSidebarRpcContract } from "./contract";
-import { PROJECT_ICONS_CHANNEL } from "./realtime-channels";
 import { ThreadHoverCard } from "./components/ThreadHoverCard";
 import { threadDisplayTitle } from "./inbox";
 import { Icon, type IconName } from "./components/Icon";
@@ -33,10 +32,6 @@ export function ThreadDetailsTooltip({
   const provider = providers.find((entry) => entry.id === thread.providerId);
   const { projects, threads } = useSidebarThreads();
   const { call } = useRpc<typeof bbSidebarRpcContract>();
-  const [iconRevision, setIconRevision] = useState(0);
-  useRealtime(PROJECT_ICONS_CHANNEL, () => {
-    setIconRevision((revision) => revision + 1);
-  });
   const [open, setOpen] = useState(false);
   const [subthreadsExpanded, setSubthreadsExpanded] = useState(false);
   const subthreadsId = useId();
@@ -118,7 +113,7 @@ export function ThreadDetailsTooltip({
       <div className="flex flex-col gap-1.5 text-xs leading-4 text-muted-foreground">
         {project ? (
           <div className="flex items-center gap-2">
-            <ProjectFavicon src={projectIconUrl(project.id, iconRevision)} name={project.name} />
+            <ProjectFavicon src={projectIconUrl(project.id)} name={project.name} />
             <span className="truncate">
               <span className="sr-only">Project: </span>
               {project.name}

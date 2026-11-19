@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import plugin from "./server";
-import { createFakePluginHost, disposers, standardProject, loadPlugin } from "./test-server";
+import { createFakePluginHost, disposers } from "./test-server";
 
 describe("lifecycle RPC", () => {
   it("loads archive-preview storage without resetting shelves or project appearance", async () => {
@@ -33,24 +33,5 @@ describe("lifecycle RPC", () => {
     await expect(restored.behavior.callRpc("getProjectColors", {})).resolves.toEqual({ colors: { proj_1: "#668899" } });
     expect(restored.inspection.sdk.callsTo("threads.archive")).toHaveLength(0);
     expect(restored.inspection.sdk.callsTo("threads.unarchive")).toHaveLength(0);
-  });
-
-  it("persists per-project colors, validates them, and resets to automatic", async () => {
-    const harness = await loadPlugin();
-    harness.inspection.sdk.stub("projects.get", async () => standardProject());
-    await expect(harness.behavior.callRpc("getProjectColors", {})).resolves.toEqual({ colors: {} });
-    await harness.behavior.callRpc("setProjectColor", { projectId: "proj_1", color: "#Ab12CD" });
-    const reloaded = await harness.lifecycle.reload(plugin);
-    const restored = reloaded.harness;
-    disposers.push(() => restored.lifecycle.dispose());
-    restored.inspection.sdk.stub("projects.get", async () => standardProject());
-    await expect(restored.behavior.callRpc("getProjectColors", {})).resolves.toEqual({ colors: { proj_1: "#ab12cd" } });
-    await expect(
-      restored.behavior.callRpc("setProjectColor", { projectId: "proj_1", color: "url(https://example.com)" }),
-    ).rejects.toThrow();
-    await expect(restored.behavior.callRpc("getProjectColors", {})).resolves.toEqual({ colors: { proj_1: "#ab12cd" } });
-    await restored.behavior.callRpc("setProjectColor", { projectId: "proj_1", color: null });
-    await expect(restored.behavior.callRpc("getProjectColors", {})).resolves.toEqual({ colors: {} });
-    expect(restored.inspection.experimental_rpcInvalidations).toContainEqual(["project-colors"]);
   });
 });

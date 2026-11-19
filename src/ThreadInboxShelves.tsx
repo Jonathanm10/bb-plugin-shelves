@@ -329,7 +329,7 @@ export function ProjectGroups({
   renderThread: (thread: PluginSidebarThread, grouped: boolean, environmentGrouped?: boolean) => React.ReactNode;
   onToggleEnvironment: (key: string) => void;
 }) {
-  const { projectNameById, projectIconRevision } = useInboxEnvironment();
+  const { projectNameById } = useInboxEnvironment();
   const { toggleProjectCollapse: onToggle } = useInboxActions();
   const attachListMotionRef = useListMotion<HTMLUListElement>();
   if (units.length === 0) return null;
@@ -344,7 +344,7 @@ export function ProjectGroups({
             unitKey={unit.key}
             projectId={unit.projectId}
             projectName={projectName}
-            projectIconUrl={projectIconUrl(unit.projectId, projectIconRevision)}
+            projectIconUrl={projectIconUrl(unit.projectId)}
             threadCount={unit.threadCount}
             alerts={unit.alerts}
             expanded={unit.expanded}

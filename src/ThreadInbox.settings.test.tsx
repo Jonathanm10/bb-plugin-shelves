@@ -2,16 +2,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { renderSlot } from "./test-slot";
-import {
-  inbox,
-  sidebarSettings,
-  defaultSidebarSettings,
-  thread,
-  listProps,
-  deferred,
-  toastMocks,
-  loadInboxApp,
-} from "./test-inbox";
+import { inbox, sidebarSettings, defaultSidebarSettings, thread, listProps, loadInboxApp } from "./test-inbox";
 
 vi.mock("sonner", async () => (await import("./test-inbox")).sonnerMock());
 
@@ -174,69 +165,6 @@ describe("sidebar settings", () => {
     expect(document.querySelector(".bb-sidebar-project-monogram")).toBeNull();
   });
 
-  it("saves the color switch and lets users choose and reset a project's color", async () => {
-    let saved = { ...defaultSidebarSettings };
-    let colors: Record<string, string> = {};
-    const setProjectColor = vi.fn((input: unknown) => {
-      const { projectId, color } = input as { projectId: string; color: string | null };
-      if (color === null) delete colors[projectId];
-      else colors = { ...colors, [projectId]: color };
-      return { ok: true };
-    });
-    renderSlot(
-      sidebarSettings,
-      {},
-      {
-        rpc: {
-          getSidebarSettings: () => saved,
-          updateSidebarSettings: (input) => {
-            saved = { ...saved, ...(input as Partial<typeof saved>) };
-            return saved;
-          },
-          listProjects: () => ({ projects: [] }),
-          listProjectIconSettings: () => ({
-            projects: [{ id: "proj_1", name: "add_on", customPath: null, customUploadName: null }],
-          }),
-          getProjectColors: () => ({ colors }),
-          setProjectColor,
-          listLifecycle: () => ({ rows: [] }),
-        },
-      },
-    );
-    const toggle = await screen.findByRole("switch", { name: "Project colors" });
-    expect(toggle.getAttribute("aria-checked")).toBe("false");
-    expect(screen.queryByRole("combobox", { name: "Show project stripes in" })).toBeNull();
-    expect(screen.queryByRole("switch", { name: "Archived shelf" })).toBeNull();
-    vi.useFakeTimers();
-    fireEvent.click(toggle);
-    const colorDisplay = screen.getByRole("combobox", { name: "Show project stripes in" });
-    expect(colorDisplay).toHaveProperty("value", "all");
-    expect(
-      within(colorDisplay)
-        .getAllByRole("option")
-        .map((option) => option.textContent),
-    ).toEqual(["Full and collapsed mode", "Full mode only", "Grouped projects only", "No stripes"]);
-    fireEvent.change(colorDisplay, { target: { value: "grouped" } });
-    await act(async () => vi.advanceTimersByTimeAsync(500));
-    expect(saved).toMatchObject({ projectColorsEnabled: true, projectColorDisplay: "grouped" });
-    fireEvent.click(toggle);
-    expect(screen.queryByRole("combobox", { name: "Show project stripes in" })).toBeNull();
-    await act(async () => vi.advanceTimersByTimeAsync(500));
-    expect(saved.projectColorsEnabled).toBe(false);
-    vi.useRealTimers();
-    fireEvent.click(toggle);
-    expect(screen.getByRole("combobox", { name: "Show project stripes in" })).toHaveProperty("value", "grouped");
-    const picker = await screen.findByLabelText("Project color");
-    fireEvent.change(picker, { target: { value: "#13579b" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save color" }));
-    await waitFor(() => expect(setProjectColor).toHaveBeenCalledWith({ projectId: "proj_1", color: "#13579b" }));
-    const reset = await screen.findByRole("button", { name: "Reset color" });
-    await waitFor(() => expect(reset).toHaveProperty("disabled", false));
-    fireEvent.click(reset);
-    await waitFor(() => expect(setProjectColor).toHaveBeenCalledWith({ projectId: "proj_1", color: null }));
-    await waitFor(() => expect(screen.queryByRole("button", { name: "Reset color" })).toBeNull());
-  });
-
   it("lists device hosts in settings and saves the local port-link choice", async () => {
     renderSlot(
       sidebarSettings,
@@ -285,10 +213,8 @@ describe("sidebar settings", () => {
       "Thread behavior",
       "Sidebar",
       "Sidebar layout",
-      "Project appearance",
       "Child threads",
       "This device",
-      "Project management",
     ]);
     expect(screen.queryByRole("navigation", { name: "Settings sections" })).toBeNull();
     const layout = screen.getByRole("region", { name: "Sidebar layout" });
@@ -299,11 +225,7 @@ describe("sidebar settings", () => {
       }),
     ).toBeDefined();
     expect(within(layout).queryByRole("switch", { name: "Archived shelf" })).toBeNull();
-    const appearance = screen.getByRole("region", { name: "Project appearance" });
-    expect(within(appearance).getByRole("switch", { name: "Project colors" })).toBeDefined();
-    expect(await within(appearance).findByLabelText("Project color")).toBeDefined();
-    expect(within(appearance).getByLabelText("Choose project icon image")).toBeDefined();
-    expect(within(appearance).queryByRole("button", { name: "Remove…" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Project appearance" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Archiving" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Archive all settled threads" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();
@@ -406,57 +328,6 @@ describe("sidebar settings", () => {
     });
   });
 
-  it("uploads a project icon from the file picker", async () => {
-    let upload: {
-      projectId: string;
-      filename: string;
-      mimeType: string;
-      contentBase64: string;
-    } | null = null;
-    renderSlot(
-      sidebarSettings,
-      {},
-      {
-        rpc: {
-          getSidebarSettings: () => defaultSidebarSettings,
-          listProjectIconSettings: () => ({
-            projects: [
-              {
-                id: "proj_1",
-                name: "Sidebar",
-                customPath: null,
-                customUploadName: null,
-              },
-            ],
-          }),
-          uploadProjectIcon: (input) => {
-            upload = input as typeof upload;
-            return {
-              customPath: null,
-              customUploadName: "brand.svg",
-            };
-          },
-        },
-      },
-    );
-
-    const picker = await screen.findByLabelText("Choose project icon image");
-    fireEvent.change(picker, {
-      target: {
-        files: [new File(["<svg/>"], "brand.svg", { type: "image/svg+xml" })],
-      },
-    });
-    await waitFor(() =>
-      expect(upload).toEqual({
-        projectId: "proj_1",
-        filename: "brand.svg",
-        mimeType: "image/svg+xml",
-        contentBase64: "PHN2Zy8+",
-      }),
-    );
-    expect(screen.getByText("Uploaded: brand.svg")).toBeDefined();
-  });
-
   it("keeps a settings cache written before the child-thread settings", () => {
     const previous: Record<string, unknown> = {
       ...defaultSidebarSettings,
@@ -480,7 +351,7 @@ describe("sidebar settings", () => {
     );
 
     expect(screen.queryByText("Loading settings...")).toBeNull();
-    expect(screen.getByRole("combobox", { name: "Show project stripes in" })).toHaveProperty("value", "all");
+    expect(screen.queryByRole("combobox", { name: "Show project stripes in" })).toBeNull();
     expect((screen.getByLabelText("Hours before inactive") as HTMLInputElement).value).toBe("12");
     expect((screen.getByLabelText("Child threads sort field") as HTMLSelectElement).value).toBe("created");
     expect((screen.getByLabelText("Child thread icon") as HTMLSelectElement).value).toBe("disc");
@@ -506,113 +377,5 @@ describe("sidebar settings", () => {
     await rendered.emitRealtime("sidebar-settings", {});
 
     expect((shortcuts as HTMLInputElement).value).toBe("Local=45m");
-  });
-
-  it("ignores an older project-icon load after a newer refresh", async () => {
-    const older = deferred<{
-      projects: Array<{
-        id: string;
-        name: string;
-        customPath: null;
-        customUploadName: null;
-      }>;
-    }>();
-    let loads = 0;
-    const rendered = renderSlot(
-      sidebarSettings,
-      {},
-      {
-        rpc: {
-          getSidebarSettings: () => defaultSidebarSettings,
-          listProjectIconSettings: () => {
-            loads += 1;
-            return loads === 1
-              ? older.promise
-              : {
-                  projects: [
-                    {
-                      id: "new",
-                      name: "Newest project",
-                      customPath: null,
-                      customUploadName: null,
-                    },
-                  ],
-                };
-          },
-        },
-      },
-    );
-
-    await waitFor(() => expect(loads).toBe(1));
-    await rendered.emitRealtime("project-icons", {});
-    expect(await screen.findByText("Newest project")).toBeDefined();
-
-    older.resolve({
-      projects: [
-        {
-          id: "old",
-          name: "Stale project",
-          customPath: null,
-          customUploadName: null,
-        },
-      ],
-    });
-    await Promise.resolve();
-    expect(screen.queryByText("Stale project")).toBeNull();
-    expect(screen.getByText("Newest project")).toBeDefined();
-  });
-
-  it("keeps project removal separate from appearance and requires confirmation", async () => {
-    let removal: { projectId: string; confirmation: string } | null = null;
-    renderSlot(
-      sidebarSettings,
-      {},
-      {
-        rpc: {
-          getSidebarSettings: () => defaultSidebarSettings,
-          listProjectIconSettings: () => ({
-            projects: [
-              { id: "proj_1", name: "Sidebar", customPath: null, customUploadName: null },
-              { id: "personal", name: "Personal", customPath: null, customUploadName: null },
-            ],
-          }),
-          listProjects: () => ({
-            projects: [{ id: "proj_1", name: "Sidebar" }],
-          }),
-          removeProject: (input) => {
-            removal = input as typeof removal;
-            return { ok: true as const };
-          },
-        },
-      },
-    );
-
-    const appearance = await screen.findByRole("region", { name: "Project appearance" });
-    fireEvent.change(await within(appearance).findByRole("combobox", { name: "Project" }), {
-      target: { value: "personal" },
-    });
-    expect(within(appearance).queryByRole("button", { name: "Remove…" })).toBeNull();
-    const management = screen.getByRole("region", { name: "Project management" });
-    expect(within(management).getByRole("combobox", { name: "Project to remove" })).toHaveProperty("value", "proj_1");
-    expect(within(management).queryByRole("option", { name: "Personal" })).toBeNull();
-    fireEvent.click(await within(management).findByRole("button", { name: "Remove…" }));
-    expect(screen.queryByRole("alertdialog")).toBeNull();
-    const confirmation = screen.getByRole("group", {
-      name: "Confirm removal of Sidebar",
-    });
-    expect(within(confirmation).getByText("Remove Sidebar?")).toBeDefined();
-    expect(removal).toBeNull();
-
-    fireEvent.click(within(confirmation).getByRole("button", { name: "Remove from BB" }));
-
-    await waitFor(() =>
-      expect(removal).toEqual({
-        projectId: "proj_1",
-        confirmation: "Sidebar",
-      }),
-    );
-    expect(await within(management).findByText("No projects to remove.")).toBeDefined();
-    expect(within(appearance).getByRole("combobox", { name: "Project" })).toHaveProperty("value", "personal");
-    expect(toastMocks.success).toHaveBeenCalledWith("Sidebar removed from BB", { className: "bb-sidebar-toast" });
   });
 });

@@ -10,11 +10,9 @@ import {
   type SidebarSettingsValues,
 } from "./sidebar-settings";
 import { SidebarLayoutSettings } from "./SidebarLayoutSettings";
-import { ProjectAppearanceSection } from "./ProjectAppearanceSection";
 import { ThreadBehaviorSettings } from "./ThreadBehaviorSettings";
 import { ChildThreadSettings } from "./ChildThreadSettings";
 import { DeviceSettings } from "./DeviceSettings";
-import { ProjectManagement } from "./ProjectManagement";
 import { configuredSnoozePresetError, parseConfiguredSnoozePresets } from "./lifecycle";
 import { isValidInactiveAfterHours } from "./inactive";
 import { isValidAutoSettleAfterDays } from "./auto-settle";
@@ -248,16 +246,12 @@ export function SidebarSettings() {
           inactiveHoursValid={inactiveHoursValid}
         />
 
-        <ProjectAppearanceSection draft={draft} update={update} status={statusFor("Project appearance")} />
-
         <ChildThreadSettings draft={draft} update={update} status={statusFor("Child threads")} />
 
         <DeviceSettings
           status={statusFor("This device")}
           onSaved={() => setSaveFeedback({ section: "This device", status: "saved" })}
         />
-
-        <ProjectManagement />
       </details>
     </div>
   );

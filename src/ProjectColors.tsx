@@ -8,7 +8,7 @@ export type ProjectStripeView = "full" | "collapsed" | "group-full" | "group-col
 const NO_OVERRIDES: Record<string, string> = {};
 
 /** Saved project colors. Automatic colors stand in until the first answer and through a failed read. */
-export function useProjectColorOverrides(enabled = true) {
+function useProjectColorOverrides(enabled = true) {
   const { data, refresh } = useSidebarRead("getProjectColors", { enabled });
   return { overrides: data?.colors ?? NO_OVERRIDES, reload: refresh };
 }

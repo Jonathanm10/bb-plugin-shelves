@@ -62,15 +62,7 @@ async function isMissingIcon(url: string): Promise<boolean> {
  * CSS draws the letter from `data-letter`, so like the icon it stands in for
  * it stays out of the row's text, copy, and find-in-page.
  */
-export function ProjectMonogram({
-  name,
-  className,
-  projectId,
-}: {
-  name: string;
-  className?: string;
-  projectId?: string;
-}) {
+function ProjectMonogram({ name, className, projectId }: { name: string; className?: string; projectId?: string }) {
   const color = useProjectColor(projectId);
   return (
     <span

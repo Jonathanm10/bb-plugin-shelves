@@ -7,7 +7,6 @@ import { createDragReorderHandler } from "./drag-reorder";
 import type { InboxDragOrder } from "./drag-reorder-geometry";
 import { ThreadInboxView } from "./ThreadInboxView";
 import { useQuantizedNow } from "./useQuantizedNow";
-import { useProjectIconRevision } from "./useProjectIconRevision";
 import { useRenamingShelfLocks } from "./useRenamingShelfLocks";
 import { useDragClickSuppression } from "./useDragClickSuppression";
 import { useListMotion, createListAnimationController } from "./useListMotion";
@@ -84,7 +83,6 @@ function ThreadInboxContent({
   const { providers } = useProviders();
   const sidebarSettings = useSidebarSettings();
   const lifecycle = useLifecycle(threads, lifecycleRows);
-  const projectIconRevision = useProjectIconRevision();
   const listAnimationController = useMemo(() => createListAnimationController(!isCompactViewport), [isCompactViewport]);
   const attachShelvesMotionRef = useListMotion<HTMLDivElement>(listAnimationController);
   const attachDockMotionRef = useListMotion<HTMLDivElement>(listAnimationController);
@@ -406,7 +404,6 @@ function ThreadInboxContent({
   const inboxContext = useInboxContextValues({
     providerById,
     projectNameById,
-    projectIconRevision,
     projects,
     sidebarSettings,
     snoozePresets,

@@ -1,4 +1,4 @@
-import type { ServerContext, ServerHandlers } from "./server-context";
+import type { ServerContext } from "./server-context";
 import {
   PROJECT_ICON_CANDIDATES,
   extractProjectIconHref,
@@ -10,7 +10,6 @@ import {
   PROJECT_ICON_SEARCH_QUERIES,
   rankDiscoveredProjectIcons,
 } from "./project-icon-discovery";
-import { PROJECT_ICONS_CHANNEL } from "./contract";
 interface StoredProjectIconRow {
   project_id: string;
   path: string;
@@ -83,8 +82,6 @@ export function createServerProjectIcons(ctx: ServerContext) {
 
   const pendingProjectIconResolutions = new Map<string, Promise<ResolvedProjectIcon | null>>();
 
-  const projectIconGenerations = new Map<string, number>();
-
   const defaultProjectHostIds = new Map<string, Promise<string | null>>();
 
   const readProjectIconOverride = (projectId: string): string | null =>
@@ -107,20 +104,6 @@ export function createServerProjectIcons(ctx: ServerContext) {
           WHERE project_id = ?`,
       )
       .get(projectId) as StoredProjectIconUploadRow | undefined) ?? null;
-
-  const clearProjectIconCache = (projectId: string): void => {
-    projectIconGenerations.set(projectId, (projectIconGenerations.get(projectId) ?? 0) + 1);
-    for (const key of projectIconCache.keys()) {
-      if (key.startsWith(`${projectId}\0`)) projectIconCache.delete(key);
-    }
-    for (const key of pendingProjectIconResolutions.keys()) {
-      if (key.startsWith(`${projectId}\0`)) {
-        pendingProjectIconResolutions.delete(key);
-      }
-    }
-  };
-
-  const projectIconGeneration = (projectId: string): number => projectIconGenerations.get(projectId) ?? 0;
 
   const defaultProjectHostId = async (projectId: string): Promise<string | null> => {
     let pending = defaultProjectHostIds.get(projectId);
@@ -193,7 +176,6 @@ export function createServerProjectIcons(ctx: ServerContext) {
   const resolveProjectIconUncached = async (
     projectId: string,
     environmentId: string | null,
-    generation: number,
   ): Promise<ResolvedProjectIcon | null> => {
     const cacheKey = `${projectId}\0${environmentId ?? ""}`;
     const upload = readProjectIconUpload(projectId);
@@ -205,12 +187,11 @@ export function createServerProjectIcons(ctx: ServerContext) {
         path: upload.filename,
         sizeBytes: upload.size_bytes,
       };
-      if (projectIconGeneration(projectId) === generation) {
-        projectIconCache.set(cacheKey, {
-          expiresAt: Date.now() + PROJECT_ICON_CACHE_MS,
-          icon,
-        });
-      }
+
+      projectIconCache.set(cacheKey, {
+        expiresAt: Date.now() + PROJECT_ICON_CACHE_MS,
+        icon,
+      });
       return icon;
     }
     const candidates: string[] = [];
@@ -273,12 +254,11 @@ export function createServerProjectIcons(ctx: ServerContext) {
     if (!icon && unavailable) {
       throw new Error(`Project icon files for ${projectId} could not be read`);
     }
-    if (projectIconGeneration(projectId) === generation) {
-      projectIconCache.set(cacheKey, {
-        expiresAt: Date.now() + (icon ? PROJECT_ICON_CACHE_MS : PROJECT_ICON_MISS_CACHE_MS),
-        icon,
-      });
-    }
+
+    projectIconCache.set(cacheKey, {
+      expiresAt: Date.now() + (icon ? PROJECT_ICON_CACHE_MS : PROJECT_ICON_MISS_CACHE_MS),
+      icon,
+    });
     return icon;
   };
 
@@ -290,8 +270,7 @@ export function createServerProjectIcons(ctx: ServerContext) {
     }
     const pending = pendingProjectIconResolutions.get(cacheKey);
     if (pending) return pending;
-    const generation = projectIconGeneration(projectId);
-    const resolution = resolveProjectIconUncached(projectId, environmentId, generation).finally(() => {
+    const resolution = resolveProjectIconUncached(projectId, environmentId).finally(() => {
       if (pendingProjectIconResolutions.get(cacheKey) === resolution) {
         pendingProjectIconResolutions.delete(cacheKey);
       }
@@ -300,113 +279,5 @@ export function createServerProjectIcons(ctx: ServerContext) {
     return resolution;
   };
 
-  const handlers = {
-    async listProjectIconSettings() {
-      const projects = await ctx.bb.sdk.projects.list();
-      return {
-        projects: projects
-          .filter((project) => project.kind === "standard")
-          .map((project) => ({
-            id: project.id,
-            name: project.name,
-            customPath: readProjectIconOverride(project.id),
-            customUploadName: readProjectIconUpload(project.id)?.filename ?? null,
-          })),
-      };
-    },
-    async searchProjectIconFiles({ projectId, query }) {
-      const hostId = await defaultProjectHostId(projectId);
-      const request = {
-        projectId,
-        includeFiles: "true" as const,
-        includeDirectories: "false" as const,
-        limit: "100",
-        query,
-      };
-      const result = hostId
-        ? await ctx.bb.sdk.projects.paths({ ...request, hostId })
-        : await ctx.bb.sdk.projects.paths(request);
-      return {
-        paths: [
-          ...new Set(
-            result.paths.flatMap((entry) => {
-              if (entry.kind !== "file") return [];
-              const path = normalizeProjectIconPath(entry.path);
-              return path ? [path] : [];
-            }),
-          ),
-        ].slice(0, 30),
-      };
-    },
-    async setProjectIcon({ projectId, path }) {
-      await ctx.bb.sdk.projects.get({ projectId });
-      const normalized = path === null ? null : normalizeProjectIconPath(path);
-      if (path !== null && normalized === null) {
-        throw new Error("Choose a relative image path inside the project");
-      }
-      if (normalized === null) {
-        ctx.db.transaction(() => {
-          ctx.db.prepare(`DELETE FROM project_icons WHERE project_id = ?`).run(projectId);
-          ctx.db.prepare(`DELETE FROM project_icon_uploads WHERE project_id = ?`).run(projectId);
-        })();
-      } else {
-        ctx.db.transaction(() => {
-          ctx.db
-            .prepare(
-              `INSERT INTO project_icons (project_id, path, updated_at)
-             VALUES (?, ?, ?)
-             ON CONFLICT(project_id) DO UPDATE SET
-               path = excluded.path,
-               updated_at = excluded.updated_at`,
-            )
-            .run(projectId, normalized, Date.now());
-          ctx.db.prepare(`DELETE FROM project_icon_uploads WHERE project_id = ?`).run(projectId);
-        })();
-      }
-      clearProjectIconCache(projectId);
-      ctx.bb.realtime.publish(PROJECT_ICONS_CHANNEL, { projectId });
-      return { customPath: normalized, customUploadName: null };
-    },
-    async uploadProjectIcon({ projectId, filename, mimeType, contentBase64 }) {
-      await ctx.bb.sdk.projects.get({ projectId });
-      const bytes = Buffer.from(contentBase64, "base64");
-      if (bytes.byteLength === 0 || bytes.byteLength > PROJECT_ICON_MAX_BYTES) {
-        throw new Error("Choose an image smaller than 1 MB");
-      }
-      const normalizedFilename = filename.trim();
-      const canonicalBase64 = bytes.toString("base64");
-      if (canonicalBase64 !== contentBase64) {
-        throw new Error("The selected image data is invalid");
-      }
-      const resolvedMimeType = iconMimeType(normalizedFilename, mimeType);
-      ctx.db.transaction(() => {
-        ctx.db
-          .prepare(
-            `INSERT INTO project_icon_uploads (
-             project_id, filename, mime_type, content_base64,
-             size_bytes, updated_at
-           ) VALUES (?, ?, ?, ?, ?, ?)
-           ON CONFLICT(project_id) DO UPDATE SET
-             filename = excluded.filename,
-             mime_type = excluded.mime_type,
-             content_base64 = excluded.content_base64,
-             size_bytes = excluded.size_bytes,
-             updated_at = excluded.updated_at`,
-          )
-          .run(projectId, normalizedFilename, resolvedMimeType, canonicalBase64, bytes.byteLength, Date.now());
-        ctx.db.prepare(`DELETE FROM project_icons WHERE project_id = ?`).run(projectId);
-      })();
-      clearProjectIconCache(projectId);
-      ctx.bb.realtime.publish(PROJECT_ICONS_CHANNEL, { projectId });
-      return {
-        customPath: null,
-        customUploadName: normalizedFilename,
-      };
-    },
-  } satisfies Pick<
-    ServerHandlers,
-    "listProjectIconSettings" | "searchProjectIconFiles" | "setProjectIcon" | "uploadProjectIcon"
-  >;
-
-  return { resolveProjectIcon, clearProjectIconCache, defaultProjectHostIds, handlers };
+  return { resolveProjectIcon };
 }

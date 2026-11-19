@@ -201,7 +201,6 @@ function assertSettingsControls(container: HTMLElement, settings: (typeof snapsh
     ["Working shelf", "workingShelf"],
     ["Inactive shelf", "inactiveThreadsEnabled"],
     ["Dock shelves to the bottom", "dockShelves"],
-    ["Project colors", "projectColorsEnabled"],
     ["Auto-settle inactive threads", "autoSettleInactive"],
     ["Auto-settle merged threads", "autoSettleOnMerge"],
     ["Show children that need attention", "showRunningChildrenWhenCollapsed"],
@@ -228,13 +227,8 @@ function assertSettingsControls(container: HTMLElement, settings: (typeof snapsh
     expect(ui.getByRole("spinbutton", { name: label })).toHaveProperty("value", String(settings[field]));
     fireEvent.click(control);
   }
-  const colors = ui.getByRole("switch", { name: "Project colors" });
-  if (!settings.projectColorsEnabled) fireEvent.click(colors);
-  expect(ui.getByRole("combobox", { name: "Show project stripes in" })).toHaveProperty(
-    "value",
-    settings.projectColorDisplay,
-  );
-  if (!settings.projectColorsEnabled) fireEvent.click(colors);
+  expect(ui.queryByRole("switch", { name: "Project colors" })).toBeNull();
+  expect(ui.queryByRole("combobox", { name: "Show project stripes in" })).toBeNull();
 }
 
 it.each(databaseSnapshots)(
@@ -320,6 +314,7 @@ it.each(snapshots)(
         .map((row) => row.textContent),
     ).toEqual([expect.stringContaining("Golden second"), expect.stringContaining("Golden first")]);
     assertSettingsControls(settingsSlot.container, settings);
+    expect(inboxSlot.container.querySelector("[data-project-stripe]") !== null).toBe(settings.projectColorsEnabled);
     expect(screen.getByText("Working · 5m")).toBeDefined();
     expect(screen.getByRole("combobox", { name: "Open port links on" })).toHaveProperty("value", "host_1");
     expect(

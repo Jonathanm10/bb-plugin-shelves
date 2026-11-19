@@ -95,7 +95,6 @@ export function ThreadCard({
   const {
     providerById,
     projectNameById,
-    projectIconRevision,
     snoozePresets,
     childrenByParentId: childrenByParent,
     sidebarSettings,
@@ -104,7 +103,7 @@ export function ThreadCard({
   const { now } = useInboxActivity();
   const provider = providerById.get(thread.providerId) ?? null;
   const projectName = projectNameById.get(thread.projectId) ?? null;
-  const projectIconUrl = iconUrl(thread.projectId, projectIconRevision);
+  const projectIconUrl = iconUrl(thread.projectId);
   const showRunningChildrenWhenCollapsed =
     sidebarSettings?.showRunningChildrenWhenCollapsed ?? DEFAULT_SIDEBAR_SETTINGS.showRunningChildrenWhenCollapsed;
   const onSettle = () => settleThread(thread);

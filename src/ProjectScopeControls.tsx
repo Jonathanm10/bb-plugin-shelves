@@ -19,7 +19,7 @@ export function ProjectScopeControls({
   scope: readonly string[];
   status: ReturnType<typeof useSidebarThreads>["status"];
 }) {
-  const { projects, projectIconRevision } = useInboxEnvironment();
+  const { projects } = useInboxEnvironment();
   const { setScope } = useInboxActions();
   const { pinnedProjects, toggleProjectPin, moveProjectPin } = usePinnedProjects({ projects, status });
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -37,7 +37,6 @@ export function ProjectScopeControls({
       <ProjectScopeSelect
         scope={scope}
         projects={projects}
-        projectIconRevision={projectIconRevision}
         onScopeChange={setScope}
         pinnedProjects={pinnedProjects}
         onToggleProjectPin={toggleProjectPin}
@@ -109,11 +108,7 @@ export function ProjectScopeControls({
                     )}
                   />
                 ) : null}
-                <ProjectFavicon
-                  src={projectIconUrl(project.id, projectIconRevision)}
-                  name={project.name}
-                  className="size-3"
-                />
+                <ProjectFavicon src={projectIconUrl(project.id)} name={project.name} className="size-3" />
                 <span className="truncate">{project.name}</span>
               </button>
             );
