@@ -1,61 +1,69 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { expect } from "@playwright/test";
 import { test, fixture, reset, rpc, open, link, shelf, expand } from "./helpers.mjs";
 
-test.use({ video: { mode: "on", size: { width: 1100, height: 800 } } });
-
 // Capture real interactions against disposable BB data, with no mocked browser responses.
-test("README demo settles, restores, snoozes, wakes, and searches a thread", async ({ page, request }) => {
+test("README demo settles, restores, snoozes, wakes, and searches a thread", async ({ browser, request }) => {
   await reset(request);
   const first = fixture.threads[0];
   await rpc(request, "settle", { threadId: fixture.threads[3].id });
+  const context = await browser.newContext({
+    viewport: { width: 1100, height: 800 },
+    recordVideo: { dir: "e2e-artifacts/demo/raw", size: { width: 1100, height: 800 } },
+    reducedMotion: "reduce",
+    locale: "en-US",
+    timezoneId: "UTC",
+  });
+  const recordingStarted = Date.now();
+  const page = await context.newPage();
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
   await open(page, { core: true, theme: "dark" });
-  const sidebar = page.locator("[data-bb-sidebar-root]");
+  const trimStartSeconds = (Date.now() - recordingStarted) / 1000 + 0.3;
   mkdirSync("e2e-artifacts/demo", { recursive: true });
-  async function frame(number, screenshot) {
+  // Screenshots can temporarily resize the capture surface. Record interactions only.
+  async function frame() {
     await page.mouse.move(1000, 750);
-    await sidebar.screenshot({ path: `e2e-artifacts/demo/${number}.png`, animations: "disabled" });
-    if (screenshot) await sidebar.screenshot({ path: `docs/screenshots/${screenshot}.png`, animations: "disabled" });
-    // Hold each demonstrated state long enough to read in the recording.
-    await page.waitForTimeout(900);
+    await page.waitForTimeout(1200);
   }
 
   let row = link(page, first.title).locator("xpath=..");
   await row.getByRole("button", { name: "Settle thread" }).focus();
-  await frame("01");
+  await frame();
   await row.getByRole("button", { name: "Settle thread" }).press("Enter");
   await expect(link(page, first.title)).toHaveCount(0);
   await expand(page, "Settled");
   const settled = shelf(page, "Settled").getByRole("link", { name: new RegExp(`${first.title}$`) });
   await expect(settled).toBeVisible();
   row = settled.locator("xpath=..");
-  await frame("02", "settled-threads");
+  await frame();
   await row.getByRole("button", { name: "Un-settle thread" }).press("Enter");
   await expect(link(page, first.title)).toBeVisible();
-  await frame("03");
+  await frame();
 
   row = link(page, first.title).locator("xpath=..");
   await row.getByRole("combobox", { name: "Snooze thread" }).press("Enter");
   await expect(page.getByRole("option", { name: "1 hour", exact: true })).toBeVisible();
-  await frame("04", "snooze-options");
+  await frame();
   await page.getByRole("option", { name: "1 hour", exact: true }).click();
   await expect(link(page, first.title)).toHaveCount(0);
   await expand(page, "Snoozed");
   await expect(shelf(page, "Snoozed").getByText(first.title, { exact: true })).toBeVisible();
-  await frame("05", "snoozed-threads");
+  await frame();
   await shelf(page, "Snoozed").getByRole("button", { name: "Wake thread now" }).click();
   await expect(link(page, first.title)).toBeVisible();
-  await frame("06");
+  await frame();
 
   for (const close of await page.locator("[data-sonner-toast] [data-close-button]").all()) await close.click();
-  await page.keyboard.press("ControlOrMeta+K");
+  await page.getByRole("button", { name: "Search threads", exact: true }).click();
   const palette = page.getByRole("dialog");
   await expect(palette).toBeVisible();
   await palette.getByRole("combobox").fill(fixture.threads[3].title);
   await expect(palette.getByRole("option").filter({ hasText: fixture.threads[3].title }).first()).toBeVisible();
-  await page.screenshot({ path: "docs/screenshots/native-search.png", animations: "disabled" });
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(1200);
   const recording = page.video();
-  await page.close();
+  writeFileSync("e2e-artifacts/demo/timing.json", JSON.stringify({ trimStartSeconds }));
+  await context.close();
+  expect(errors).toEqual([]);
   await recording.saveAs("e2e-artifacts/demo/walkthrough.webm");
 });

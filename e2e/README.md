@@ -178,9 +178,10 @@ fixed workflow titles. It uses the same real BB server and assertions as the
 core flows, not mocked browser responses:
 
 ```sh
-env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --readme-demo --grep 'core sidebar|README demo'
-ffmpeg -y -ss 2 -i e2e-artifacts/demo/walkthrough.webm \
-  -vf 'fps=5,scale=900:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=96[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle' \
+env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --readme-demo --grep 'core sidebar|README demo|README gallery'
+demo_trim=$(node -p 'JSON.parse(require("node:fs").readFileSync("e2e-artifacts/demo/timing.json", "utf8")).trimStartSeconds')
+ffmpeg -y -ss "$demo_trim" -i e2e-artifacts/demo/walkthrough.webm \
+  -vf 'fps=10,scale=900:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle' \
   -loop 0 docs/screenshots/thread-inbox-demo.gif
 ffmpeg -y -i docs/screenshots/sidebar-light-320.png \
   -i docs/screenshots/actions-dark-320.png -i docs/screenshots/settled-threads.png \
@@ -190,9 +191,10 @@ ffmpeg -y -i docs/screenshots/sidebar-light-320.png \
 
 FFmpeg is only a documentation capture tool; it is not a plugin dependency.
 The GIF comes from the continuous Playwright video of Settle, Un-settle, Snooze,
-Wake, and Search, sampled at five frames per second. The example trims two seconds of initial
-loading; inspect each new recording and adjust that trim before
-committing. Raw video/frames stay in ignored `e2e-artifacts/demo/`; only the
+Wake, and Search, sampled at ten frames per second. The timing file trims startup
+after the real sidebar is ready. Screenshot capture runs in a separate test to
+avoid altering the video surface. Watch the entire encoded GIF and its loop,
+inspect suspicious frames, and reject flashes or layout jumps before committing. Raw video/frames stay in ignored `e2e-artifacts/demo/`; only the
 finished GIF and current PNGs are published.
 The marketplace composite joins four actual sidebar captures to meet the
 registry's minimum width without stretching the interface.

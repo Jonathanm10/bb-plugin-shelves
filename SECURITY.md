@@ -2,8 +2,8 @@
 
 ## Supported versions
 
-Security fixes target the latest published stable release and `main`. Older releases and
-unmerged branches are not maintained separately.
+Security fixes target the latest published stable release and `main`. Older
+releases and unmerged branches are not maintained separately.
 
 ## Report a vulnerability
 

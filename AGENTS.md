@@ -17,7 +17,8 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 
 ## Architecture
 
-- Browser entry: `app.tsx`. Server entry: `src/server.ts`. No host entry is needed. Keep browser, Node, and shared modules separate;
+- Browser entry: `app.tsx`. Server entry: `src/server.ts`. No host entry is needed.
+  Keep browser, Node, and shared modules separate;
   `biome.json` and `scripts/check-import-boundaries.mjs` enforce the boundaries.
 - Experimental app SDK hooks go through `src/bb-sdk.ts`.
 - Use BB's status resolver for display through `src/working-tree.ts` and
@@ -76,7 +77,8 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 ## Tag-based releases
 
 - A package version is manifest metadata, not proof of publication. Keep unreleased
-  work on the planned stable X.Y.Z version and the README release badge tied to GitHub Releases.
+  work on the planned stable X.Y.Z version and tie the README release badge
+  to GitHub Releases.
   Only stable vX.Y.Z tags are supported; do not introduce version suffixes.
 - Prepare a release on a branch: `npm version X.Y.Z --no-git-tag-version`, put
   the shipped notes under a nonempty `## [X.Y.Z]` section in `CHANGELOG.md`, and

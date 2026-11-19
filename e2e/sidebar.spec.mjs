@@ -138,7 +138,6 @@ test("right-click menu matches the sidebar action list", async ({ page, context 
     "Snooze",
     "Settle",
     "Rename",
-    "Regenerate title",
     "Mark read",
     "Copy",
     "Archive",

@@ -25,17 +25,19 @@ The GIF records actual interactions in BB 0.50.1 with disposable demo data: **Se
 
 Filing never archives or deletes a conversation, stops a runtime, or closes a terminal. Running work reported by BB, unanswered questions, queues, pins, and live children protect threads from automatic settling. Reading alone does not settle a thread; new activity can return filed work.
 
-Search, project and thread creation, notifications, and retries use BB's native controls. **Cmd/Ctrl+K** finds threads, including settled conversations. Use **Project picker > New project** to create a project.
+Search, project and thread creation, notifications, and retries use BB's native controls. Click **Search threads** at the top of the inbox, or use **Cmd/Ctrl+K**, to find threads, including settled conversations. The button works even if native Search is hidden in BB's navigation. Use **Project picker > New project** to create a project.
 
 ## Installation
 
-Requires **BB 0.49.0 or newer**. The release badge above reflects published GitHub Releases. A development package version does not mean a release has been published.
+Requires **BB 0.49.0 or newer**. The release badge above reflects published GitHub Releases.
 
 <details open>
-<summary><b>Install the development preview</b></summary>
+<summary><b>Install v0.1.0</b></summary>
+
+Use this command once `v0.1.0` appears in [Releases](https://github.com/ysskrishna/bb-thread-inbox/releases).
 
 ```sh
-bb plugin install git:github.com/ysskrishna/bb-thread-inbox@main
+bb plugin install git:github.com/ysskrishna/bb-thread-inbox@v0.1.0
 bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
@@ -44,12 +46,10 @@ Disable other sidebar plugins before trying this one so their background policie
 </details>
 
 <details>
-<summary><b>Install a published release</b></summary>
-
-After the first release is published, select a tag from [Releases](https://github.com/ysskrishna/bb-thread-inbox/releases) and replace `vX.Y.Z` below with that exact tag:
+<summary><b>Track development</b></summary>
 
 ```sh
-bb plugin install git:github.com/ysskrishna/bb-thread-inbox@vX.Y.Z
+bb plugin install git:github.com/ysskrishna/bb-thread-inbox@main
 bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
@@ -93,7 +93,7 @@ Choose a shortcut or a date and time. **Wake** returns a snoozed thread immediat
 <details>
 <summary><b>Search includes settled work</b></summary>
 
-BB's native search opens a filed conversation directly.
+Click **Search threads** in the sidebar. BB's native search opens a filed conversation directly.
 
 ![BB's thread search finding a conversation still visible in Settled](docs/screenshots/native-search.png)
 
@@ -104,7 +104,9 @@ BB's native search opens a filed conversation directly.
 
 Open **Settings > Thread Inbox**. Defaults are seven days of inactivity, merged-PR settling on, and PR inactivity protection off. **Keep threads with a PR** exempts known PR threads from inactivity; merge and close rules still apply. Unknown PR state keeps the thread in place. Rules run when the sidebar opens and every five minutes on the server.
 
-![Thread Inbox preferences for inactivity and pull-request settling](docs/screenshots/auto-settle-settings.png)
+![Thread Inbox preferences in dark mode](docs/screenshots/settings-dark.png)
+
+![Thread Inbox preferences in light mode](docs/screenshots/settings-light.png)
 
 </details>
 
