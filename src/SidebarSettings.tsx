@@ -230,14 +230,16 @@ export function SidebarSettings() {
           checked={draft.workingShelf}
           onChange={(checked) => update("workingShelf", checked)}
         />
-        <p className="text-xs text-muted-foreground">
-          Search threads with Cmd/Ctrl+K. Create projects from BB's project picker. Completion, error, and input alerts
-          use BB's Push notifications settings.
+        <p className="border-t border-border px-4 py-3 text-xs leading-5 text-muted-foreground">
+          Use Search threads at the top of the inbox, or Cmd/Ctrl+K. BB's project picker creates projects, and its Push
+          notifications settings control completion and input alerts.
         </p>
       </SettingsSection>
 
-      <details className="space-y-8">
-        <summary className="cursor-pointer text-sm text-muted-foreground">Advanced settings</summary>
+      <details className="space-y-4 rounded-lg border border-border p-4">
+        <summary className="cursor-pointer rounded py-1 text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          Advanced settings
+        </summary>
         <SidebarLayoutSettings
           draft={draft}
           update={update}

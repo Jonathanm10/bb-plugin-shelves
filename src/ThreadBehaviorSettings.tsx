@@ -56,8 +56,10 @@ export function ThreadBehaviorSettings({
           onChange={(checked) => update("autoSettleKeepPullRequests", checked)}
         />
       </SettingsGroup>
-      <details>
-        <summary className="cursor-pointer text-xs text-muted-foreground">Snooze shortcuts</summary>
+      <details className="mx-4 mb-2 mt-3 border-t border-border pt-3">
+        <summary className="cursor-pointer rounded py-1 text-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          Snooze shortcuts
+        </summary>
         <SettingsGroup title="Snooze">
           <SettingRow
             title="Snooze shortcuts"

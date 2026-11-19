@@ -23,6 +23,7 @@ import {
 import { INBOX_ORDER_TAG, LIFECYCLE_TAG, PROJECT_COLORS_TAG, SIDEBAR_SETTINGS_TAG } from "./rpc-tags";
 
 export {
+  experimental_useSidebarNavigation as useSidebarNavigation,
   experimental_useSidebarThreads as useSidebarThreads,
   experimental_useProviders as useProviders,
   experimental_useSidebarThreadSplit as useSidebarThreadSplit,
