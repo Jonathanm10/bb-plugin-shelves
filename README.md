@@ -43,8 +43,6 @@ bb settings ui set sidebar.threadListProvider bb-thread-inbox/inbox
 
 Disable other sidebar plugins before trying this one so their background policies do not run alongside it. The plugin ID is `bb-thread-inbox`. BB shows the source for confirmation before installing it.
 
-Upgrading from 0.1.0 changes the installed identity. BB treats 0.1.1 as a separate plugin; an ordinary update does not transfer filing data. See [Upgrading from 0.1.0](docs/upgrade.md) before removing the previous installation.
-
 </details>
 
 <details>
