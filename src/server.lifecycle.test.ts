@@ -212,6 +212,7 @@ describe("lifecycle RPC", () => {
 
   it("clears a woken snooze when the user acknowledges it", async () => {
     const harness = await loadPlugin();
+    harness.inspection.sdk.stub("projects.list", async () => projectsWith([projectThread({ id: "thr_woke" })]));
     await harness.behavior.callRpc("snooze", {
       threadId: "thr_woke",
       snoozedUntil: Date.now() - 1,

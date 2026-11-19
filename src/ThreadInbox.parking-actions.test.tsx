@@ -160,10 +160,7 @@ describe("parking threads", () => {
     });
 
     await screen.findByText("Still working");
-    for (const [title, statusText] of [
-      ["Still working", "Working · 5m"],
-      ["Still asking", "Needs you"],
-    ] as const) {
+    for (const [title, statusText] of [["Still working", "Working · 5m"]] as const) {
       const row = screen.getByText(title).closest("li")!;
       expect(within(row).queryByRole("combobox", { name: "Snooze thread" })).toBeNull();
       expect(within(row).queryByRole("button", { name: "Settle thread" })).toBeNull();
@@ -174,6 +171,9 @@ describe("parking threads", () => {
       expect(slot.className).toContain("w-auto");
       expect(slot.className).toContain("min-w-20");
     }
+    const question = screen.getByText("Still asking").closest("li")!;
+    expect(within(question).getByRole("combobox", { name: "Snooze thread" })).toBeDefined();
+    expect(within(question).queryByRole("button", { name: "Settle thread" })).toBeNull();
   });
 
   it("settles a thread when the user clicks Settle", async () => {

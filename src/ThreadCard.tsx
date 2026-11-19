@@ -64,6 +64,7 @@ export function ThreadCard({
   isActive,
   isWoke,
   canPark,
+  canSnooze,
   childThreads,
   childrenExpanded,
   reorder,
@@ -80,6 +81,7 @@ export function ThreadCard({
   isWoke: boolean;
   /** False while the thread is working or blocked on the user. */
   canPark: boolean;
+  canSnooze: boolean;
   childThreads: readonly PluginSidebarThread[];
   childrenExpanded: boolean;
   reorder?: ThreadReorderControls;
@@ -199,8 +201,10 @@ export function ThreadCard({
   // Collapsed cards leave their child rows behind the expansion badge.
   const showChildrenWhenCollapsed = showRunningChildrenWhenCollapsed && !compact;
   const emphasis = isWoke ? "woke" : thread.isUnread ? "unread" : thread.indicator === "none" ? "read-idle" : "active";
-  const canShelve = !useRowStatusRuns(thread.id) && canPark;
-  const showParkActions = !isWoke && canShelve;
+  const rowRuns = useRowStatusRuns(thread.id);
+  const canShelve = !rowRuns && canPark;
+  const snoozable = !rowRuns && canSnooze;
+  const showParkActions = !isWoke && (canShelve || snoozable);
 
   const unpinButton = thread.isPinned ? (
     <Tooltip label="Unpin thread">
@@ -243,7 +247,7 @@ export function ThreadCard({
   return (
     <RowContextMenu
       thread={thread}
-      canSnooze={canShelve}
+      canSnooze={snoozable}
       canArchive={canPark}
       snoozePresets={snoozePresets}
       onSnooze={onSnooze}
@@ -323,8 +327,8 @@ export function ThreadCard({
                       <ThreadFilingActions
                         snoozePresets={snoozePresets}
                         onOpenChange={setIsSnoozeOpen}
-                        onSnooze={onSnooze}
-                        onSettle={startSettle}
+                        onSnooze={snoozable ? onSnooze : undefined}
+                        onSettle={canShelve ? startSettle : undefined}
                         settling={isSettling}
                       />
                     </span>
@@ -460,8 +464,8 @@ export function ThreadCard({
                         <ThreadFilingActions
                           snoozePresets={snoozePresets}
                           onOpenChange={setIsSnoozeOpen}
-                          onSnooze={onSnooze}
-                          onSettle={startSettle}
+                          onSnooze={snoozable ? onSnooze : undefined}
+                          onSettle={canShelve ? startSettle : undefined}
                           settling={isSettling}
                         />
                       </span>

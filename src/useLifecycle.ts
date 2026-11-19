@@ -13,6 +13,7 @@ import { promptToCloseSettledPorts } from "./settled-port-prompt";
 import { announcePortsClosed } from "./OpenPorts";
 import {
   canPark,
+  canSnooze,
   parkBlocker,
   type ParkBlocker,
   formatSnoozeWakeTime,
@@ -32,6 +33,7 @@ import type { LifecycleRows } from "./useLifecycleRows";
 export interface LifecycleApi {
   shelfFor(thread: PluginSidebarThread): ThreadShelf;
   canPark(thread: PluginSidebarThread): boolean;
+  canSnooze(thread: PluginSidebarThread): boolean;
   parkBlocker(thread: PluginSidebarThread): ParkBlocker | null;
   wakeAtFor(thread: PluginSidebarThread): number | null;
   settledAtFor(thread: PluginSidebarThread): number | null;
@@ -308,6 +310,7 @@ export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleR
     return {
       shelfFor: (thread) => resolveRowShelf(rows.get(thread.id), signalsFor(thread), now, thread.isPinned),
       canPark: (thread) => canPark(signalsFor(thread)),
+      canSnooze: (thread) => canSnooze(signalsFor(thread)),
       parkBlocker: (thread) => parkBlocker(signalsFor(thread)),
       wakeAtFor: (thread) => rows.get(thread.id)?.snoozedUntil ?? null,
       parkedAtFor: (thread) => rows.get(thread.id)?.parkedAt ?? null,

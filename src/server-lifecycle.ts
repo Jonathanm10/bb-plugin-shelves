@@ -22,6 +22,7 @@ export interface StoredLifecycleRow {
   settledOverride: SettledOverride | null;
   snoozedUntil: number | null;
   snoozedAt: number | null;
+  snoozedPendingInteraction?: boolean;
 }
 interface LifecycleDbRow {
   thread_id: string;
@@ -30,6 +31,7 @@ interface LifecycleDbRow {
   settled_override: SettledOverride | null;
   snoozed_until: number | null;
   snoozed_at: number | null;
+  snoozed_pending_interaction: number;
 }
 
 export function createServerLifecycle(ctx: ServerContext) {
@@ -38,7 +40,7 @@ export function createServerLifecycle(ctx: ServerContext) {
       ctx.db
         .prepare(
           `SELECT thread_id, settled_at, settled_override,
-                  snoozed_until, snoozed_at, parked_at
+                  snoozed_until, snoozed_at, parked_at, snoozed_pending_interaction
              FROM thread_lifecycle`,
         )
         .all() as LifecycleDbRow[]
@@ -49,13 +51,14 @@ export function createServerLifecycle(ctx: ServerContext) {
       settledOverride: row.settled_override,
       snoozedUntil: row.snoozed_until,
       snoozedAt: row.snoozed_at,
+      ...(row.snoozed_pending_interaction === 1 ? { snoozedPendingInteraction: true } : {}),
     }));
 
   const readOne = (threadId: string): StoredLifecycleRow | null => {
     const row = ctx.db
       .prepare(
         `SELECT thread_id, settled_at, settled_override,
-                snoozed_until, snoozed_at, parked_at
+                snoozed_until, snoozed_at, parked_at, snoozed_pending_interaction
            FROM thread_lifecycle
           WHERE thread_id = ?`,
       )
@@ -68,6 +71,7 @@ export function createServerLifecycle(ctx: ServerContext) {
           settledOverride: row.settled_override,
           snoozedUntil: row.snoozed_until,
           snoozedAt: row.snoozed_at,
+          ...(row.snoozed_pending_interaction === 1 ? { snoozedPendingInteraction: true } : {}),
         }
       : null;
   };
@@ -76,16 +80,25 @@ export function createServerLifecycle(ctx: ServerContext) {
     ctx.db
       .prepare(
         `INSERT INTO thread_lifecycle
-         (thread_id, settled_at, settled_override, snoozed_until, snoozed_at, parked_at)
-       VALUES (?, ?, ?, ?, ?, ?)
+         (thread_id, settled_at, settled_override, snoozed_until, snoozed_at, parked_at, snoozed_pending_interaction)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(thread_id) DO UPDATE SET
          settled_at = excluded.settled_at,
          settled_override = excluded.settled_override,
          snoozed_until = excluded.snoozed_until,
          snoozed_at = excluded.snoozed_at,
-         parked_at = excluded.parked_at`,
+         parked_at = excluded.parked_at,
+         snoozed_pending_interaction = excluded.snoozed_pending_interaction`,
       )
-      .run(row.threadId, row.settledAt, row.settledOverride, row.snoozedUntil, row.snoozedAt, row.parkedAt ?? null);
+      .run(
+        row.threadId,
+        row.settledAt,
+        row.settledOverride,
+        row.snoozedUntil,
+        row.snoozedAt,
+        row.parkedAt ?? null,
+        row.snoozedPendingInteraction ? 1 : 0,
+      );
     if (publish) {
       ctx.bb.rpc.experimental_invalidate([LIFECYCLE_TAG]);
     }

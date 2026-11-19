@@ -114,6 +114,7 @@ const migrations = [
    VALUES (1, '', 1, 6, 1, 3, 1)`,
   LIFECYCLE_BACKFILLS_MIGRATION,
   ...INSTALL_DEFAULTS_MIGRATIONS,
+  `ALTER TABLE thread_lifecycle ADD COLUMN snoozed_pending_interaction INTEGER NOT NULL DEFAULT 0`,
 ];
 
 export default async function plugin(bb: BbPluginApi) {

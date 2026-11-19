@@ -59,6 +59,7 @@ const InboxThread = memo(function InboxThread({
       isActive={thread.id === activeThreadId}
       isWoke={isWoke}
       canPark={lifecycle.canPark(thread)}
+      canSnooze={lifecycle.canSnooze(thread)}
       onRenamingChange={onRenamingChange}
       childThreads={childrenByParentId.get(thread.id) ?? NO_CHILDREN}
       childrenExpanded={childrenExpanded}

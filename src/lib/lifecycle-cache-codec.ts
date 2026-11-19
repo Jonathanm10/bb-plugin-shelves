@@ -22,6 +22,7 @@ export function decodeLifecycleRows(input: unknown): ReadonlyMap<string, ThreadL
       !isNullableNumber(row.settledAt) ||
       !isNullableNumber(row.snoozedUntil) ||
       !isNullableNumber(row.snoozedAt) ||
+      (row.snoozedPendingInteraction !== undefined && typeof row.snoozedPendingInteraction !== "boolean") ||
       (row.settledOverride !== undefined &&
         row.settledOverride !== null &&
         row.settledOverride !== "active" &&
@@ -35,6 +36,7 @@ export function decodeLifecycleRows(input: unknown): ReadonlyMap<string, ThreadL
       settledOverride: row.settledOverride ?? null,
       snoozedUntil: row.snoozedUntil,
       snoozedAt: row.snoozedAt,
+      ...(row.snoozedPendingInteraction ? { snoozedPendingInteraction: true } : {}),
     });
   }
   return pruneRows(rows);

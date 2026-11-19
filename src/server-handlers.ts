@@ -13,6 +13,8 @@ import type { createThreadPullRequests } from "./thread-pull-requests";
 import type { createTitleRegenerator } from "./regenerate-title";
 import { SIDEBAR_SETTINGS_CHANNEL } from "./contract";
 import { INBOX_ORDER_TAG, SIDEBAR_SETTINGS_TAG } from "./rpc-tags";
+import { canSnooze } from "./lifecycle";
+import { EMPTY_RECLAIM } from "./reclaim";
 import { runThreadTasks } from "./thread-tasks";
 
 const CATALOG_TTL_MS = 5 * 60_000;
@@ -216,20 +218,31 @@ export function createServerHandlers(
       return { ok: true };
     },
     async snooze({ threadId, snoozedUntil }) {
-      await ctx.bb.sdk.threads.unpin({ threadId });
-      const now = Date.now();
-      write({
-        threadId,
-        settledAt: null,
-        settledOverride: null,
-        snoozedUntil,
-        snoozedAt: now,
+      return lifecycle.withThreadChanges([threadId], async () => {
+        const check = async () => {
+          const tree = await lifecycle.loadSettleTree(threadId);
+          if (tree.some((thread) => !canSnooze(lifecycle.threadSignals(thread)))) {
+            throw new Error("Cannot snooze while this thread or its children are working or have queued work");
+          }
+          return tree;
+        };
+        const before = await check();
+        if (before.find((thread) => thread.id === threadId)?.pinnedAt != null) {
+          await ctx.bb.sdk.threads.unpin({ threadId });
+        }
+        const tree = await check();
+        write({
+          threadId,
+          settledAt: null,
+          settledOverride: null,
+          snoozedUntil,
+          snoozedAt: Date.now(),
+          ...(tree.some((thread) => thread.hasPendingInteraction) ? { snoozedPendingInteraction: true } : {}),
+        });
+        return { ok: true, reclaim: { ...EMPTY_RECLAIM } };
       });
-      // A snooze is a parked thread with a return date, and the shortest
-      // preset is half an hour. Nobody snoozes a conversation they are in the
-      // middle of, so the wake time is not worth keeping a runtime warm for.
-      return { ok: true, reclaim: await reclaimThreadResources(threadId) };
     },
+
     async releaseRuntimes({ threadIds }) {
       // bb's archive force-closes a thread's terminals but only stops its
       // runtime when a turn is in flight, so an idle thread archived from this

@@ -20,6 +20,8 @@ export interface ThreadLifecycleRow {
   snoozedUntil: number | null;
   /** When the snooze was set — used to detect activity since. */
   snoozedAt: number | null;
+  /** A question already present when the user snoozed it. */
+  snoozedPendingInteraction?: boolean;
 }
 
 /** The activity signals that outrank a user's parking decision. */
@@ -32,6 +34,8 @@ export interface ThreadActivitySignals {
   isUnread: boolean;
   /** Newest attention timestamp bb reports for the thread. */
   latestAttentionAt: number;
+  /** Present for a pending question, to distinguish a paused turn from other work. */
+  hasBackgroundWork?: boolean;
 }
 
 export type ThreadShelf = "active" | "parked" | "snoozed" | "settled";
@@ -55,7 +59,8 @@ export function resolveWakeReason(
   }
 
   const wokeOnAttention =
-    signals.hasPendingInteraction || (row.snoozedAt !== null && signals.latestAttentionAt > row.snoozedAt);
+    (signals.hasPendingInteraction && !row.snoozedPendingInteraction) ||
+    (row.snoozedAt !== null && signals.latestAttentionAt > row.snoozedAt);
   if (wokeOnAttention) return "attention";
   return row.snoozedUntil <= now ? "timer" : null;
 }
@@ -74,7 +79,18 @@ export function canPark(signals: ParkSignals): boolean {
   return parkBlocker(signals) === null;
 }
 
-type ParkSignals = Pick<ThreadActivitySignals, "hasPendingInteraction" | "hasQueuedWork" | "isWorking">;
+/** Snooze defers an existing question, but never hides busy or queued work. */
+export function canSnooze(signals: ParkSignals): boolean {
+  return (
+    !signals.hasQueuedWork &&
+    (!signals.isWorking || (signals.hasPendingInteraction && signals.hasBackgroundWork === false))
+  );
+}
+
+type ParkSignals = Pick<
+  ThreadActivitySignals,
+  "hasPendingInteraction" | "hasQueuedWork" | "isWorking" | "hasBackgroundWork"
+>;
 export type ParkBlocker = "working" | "question" | "queued";
 
 /** Why `canPark` refuses a thread, or null when it allows it. */
@@ -142,6 +158,9 @@ export function rowParkSignals(thread: ThreadRowWork): ParkSignals {
     hasPendingInteraction: thread.hasPendingInteraction,
     hasQueuedWork: thread.queuedWork !== "none",
     isWorking: hasLiveWork(rowActivity(thread.activity), isTurnInFlight(thread.status)),
+    ...(thread.hasPendingInteraction
+      ? { hasBackgroundWork: hasLiveWork(rowActivity(thread.activity), false) || thread.status === "stopping" }
+      : {}),
   };
 }
 
@@ -161,6 +180,9 @@ export function sidebarThreadSignals(thread: PluginSidebarThread): ThreadActivit
     isWorking: isThreadWorking(thread),
     isUnread: thread.isUnread,
     latestAttentionAt: thread.latestAttentionAt,
+    ...(thread.hasPendingInteraction
+      ? { hasBackgroundWork: hasLiveWork(thread.activity, false) || thread.status === "stopping" }
+      : {}),
   };
 }
 
@@ -182,6 +204,9 @@ export function resolveShelf(
   now: number,
 ): ThreadShelf {
   if (row === undefined) return "active";
+  if (row.snoozedUntil != null && canSnooze(signals)) {
+    return resolveWakeReason(row, signals, now) === null ? "snoozed" : "active";
+  }
   if (!canPark(signals)) return "active";
 
   if (row.parkedAt != null) {

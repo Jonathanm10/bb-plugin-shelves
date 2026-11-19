@@ -13,7 +13,7 @@ it("settles quiet work and wakes it on activity without changing the selected th
   const now = Date.now();
   const old = now - 8 * 86_400_000;
   const wired = await createWired([
-    thread({ id: "busy", title: "Running task", indicator: "runtime", updatedAt: now }),
+    thread({ id: "busy", title: "Running task", status: "active", indicator: "runtime", updatedAt: now }),
     thread({ id: "recent", title: "Recent result", updatedAt: now }),
     thread({ id: "quiet", title: "Quiet task", createdAt: old, updatedAt: old, latestAttentionAt: old }),
   ]);
@@ -155,4 +155,32 @@ it("puts the latest return first on a new device", async () => {
       .getAllByRole("link")
       .map((link) => link.getAttribute("aria-label")),
   ).toEqual(["Just finished", "Renamed"]);
+});
+
+it("can defer a pending question from its row without stopping the agent", async () => {
+  localStorage.clear();
+  const wired = await createWired([
+    thread({
+      id: "question",
+      title: "Needs a decision",
+      hasPendingInteraction: true,
+      indicator: "waiting-for-input",
+      updatedAt: Date.now(),
+    }),
+  ]);
+  wired.mount();
+  const row = (await screen.findByRole("link", { name: "Needs a decision" })).closest("li")!;
+  expect(within(row).queryByRole("button", { name: "Settle thread" })).toBeNull();
+  fireEvent.keyDown(within(row).getByRole("combobox", { name: "Snooze thread" }), { key: "Enter" });
+  fireEvent.click(await screen.findByRole("option", { name: "1 hour" }));
+  await waitFor(() =>
+    expect(
+      wired.db
+        .prepare("SELECT snoozed_pending_interaction AS pending FROM thread_lifecycle WHERE thread_id = ?")
+        .get("question"),
+    ).toEqual({ pending: 1 }),
+  );
+  await wired.flush();
+  expect(await screen.findByRole("region", { name: "Snoozed" })).toBeDefined();
+  expect(wired.harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
 });
