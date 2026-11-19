@@ -190,10 +190,10 @@ access are checked by `src/storage-keys.test.ts`.
   annotations except in `ports-host.test.ts` (Vitest's `importOriginal`;
   regular imports there still need type-only syntax when used only as types).
 
-## bb versions: daily check and bump pull request
+## BB version checks and bump pull requests
 
-bb ships a stable release about weekly and a nightly daily. Two scheduled
-workflows follow it. Their logic is in `scripts/bb-compat/` (tested by
+Two manually dispatched compatibility workflows are retained from upstream.
+They do not run on a schedule in this repository. Their logic is in `scripts/bb-compat/` (tested by
 `npm run test:scripts`, part of `npm run check`); the YAML only calls it.
 
 - `bb-compat.yml` installs each channel's bb-app with the SDK it ships, in one

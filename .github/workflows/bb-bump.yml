@@ -1,6 +1,6 @@
 name: bb bump
 
-# Daily: when bb-app@latest is newer than the pinned bb-app, set the bb-app,
+# Manual: when bb-app@latest is newer than the pinned bb-app, set the bb-app,
 # SDK and runtime-shim pins on branch bb-bump/bb-app-X.Y.Z, run every check,
 # and open or update a pull request with the results. Never merges, approves,
 # tags, or pushes to main. Logic lives in scripts/bb-compat/; see AGENTS.md.

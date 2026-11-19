@@ -1,6 +1,6 @@
 name: bb compatibility
 
-# Daily: install the minimum bb (floor), the latest stable bb and the nightly,
+# Manual: install the minimum bb (floor), the latest stable bb and the nightly,
 # each with the SDK it ships, and run the sidebar's checks against it.
 # Floor or stable failures open or update one issue (label bb-compat); a
 # nightly failure only warns (label bb-compat-nightly). Logic lives in
