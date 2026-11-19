@@ -15,8 +15,6 @@ import { cn } from "./lib/utils";
 import { relativeTimeLabel } from "./relative-time";
 import { useWorkingSinceContext } from "./useWorkingSince";
 import { statusWithDuration } from "./working-since";
-import { useThreadLimit } from "./RateLimits";
-import { RateLimitRecovery } from "./RateLimitRecovery";
 
 /**
  * The default trailing slot for cards and flat rows: fixed and right-aligned.
@@ -39,28 +37,6 @@ export const STATUS_SLOT_CLASS = "flex w-20 shrink-0 items-center justify-end";
 export const TRAILING_GLYPH_BOX_CLASS = "flex size-3.5 shrink-0 items-center justify-center";
 
 /**
- * A card's status slot while a provider limit shows, and its shelf controls.
- *
- * At rest the limit label ("Scheduled · 6:20pm") takes its own width, so the
- * title truncates before it instead of running under it. Once the shelf
- * controls show (hover, keyboard focus, touch, or an open snooze menu), the
- * label is hidden and steps out of flow, and the controls take its place.
- */
-export function limitSlotClass(part: "slot" | "actions", showParkActions: boolean, holdParkActions: boolean): string {
-  if (part === "actions") {
-    return holdParkActions
-      ? "relative ml-1.5"
-      : "group-hover/card:relative group-hover/card:ml-1.5 group-has-[:focus-visible]/status-slot:relative group-has-[:focus-visible]/status-slot:ml-1.5 [@media(hover:none)]:ml-1.5";
-  }
-  return cn(
-    "[&_[data-limit-control]]:static [&_[role=status]]:right-0",
-    showParkActions &&
-      "group-hover/card:[&_[role=status]]:absolute has-[:focus-visible]:[&_[role=status]]:absolute has-[:focus-visible]:[&_[role=status]]:opacity-0 [@media(hover:none)]:[&_[role=status]]:absolute",
-    holdParkActions && "[&_[role=status]]:absolute",
-  );
-}
-
-/**
  * Status OR age, never both: the glyph already implies the row is current, and
  * the age only earns its place once the thread has nothing to say.
  *
@@ -78,7 +54,6 @@ export function StatusOrTime({
   const thread = useThreadWithDraft(listedThread);
   const workingSince = useWorkingSinceContext();
   const rowStatus = useThreadRowStatus(listedThread);
-  if (useStatusLimit(listedThread)) return <RateLimitRecovery thread={listedThread} />;
   if (rowStatus) {
     // bb's glyph for another plugin's status, in place of the label; the age stays.
     return (
@@ -125,35 +100,23 @@ export function StatusOrTime({
 }
 
 /**
- * The provider limit when it owns the status, on every surface: a pending
- * question wins, then a running turn, then the limit.
- */
-export function useStatusLimit(thread: PluginSidebarThread) {
-  const shown = useThreadWithDraft(thread);
-  const limit = useThreadLimit(thread);
-  return shown.hasPendingInteraction || shown.indicator === "runtime" ? null : limit;
-}
-
-/**
  * A status another plugin set on the row, such as a drafts or sandbox marker.
  * bb's resolver decides where it shows, with this client's draft: in place of
  * every status except live work, a failure, or a raised hand. On top of that,
- * the sidebar's provider limit, a pending interaction, and its failed-send
- * warning replace it too.
+ * a pending interaction and a failed-send warning replace it too.
  */
 export function useThreadRowStatus(thread: PluginSidebarThread): PluginSidebarThreadRowStatus | null {
   const { hasUnsubmittedDraft } = useSidebarThreadDraft(thread.id);
   const rowStatus = useSidebarThreadRowStatus(thread.id);
-  return threadRowStatus(thread, rowStatus, useThreadLimit(thread) !== null, hasUnsubmittedDraft);
+  return threadRowStatus(thread, rowStatus, hasUnsubmittedDraft);
 }
 
 export function threadRowStatus(
   thread: PluginSidebarThread,
   rowStatus: PluginSidebarThreadRowStatus | null,
-  limited: boolean,
   hasUnsubmittedDraft: boolean,
 ): PluginSidebarThreadRowStatus | null {
-  if (!rowStatus || limited || thread.hasPendingInteraction || thread.queuedWork === "failed") return null;
+  if (!rowStatus || thread.hasPendingInteraction || thread.queuedWork === "failed") return null;
   return resolveThreadStatus({ thread, hiddenThreads: [], hasUnsubmittedDraft, rowStatus }).rowStatus;
 }
 

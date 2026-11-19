@@ -5,10 +5,6 @@ import { openPortSchema, threadPullRequestSchema } from "./contract";
 const rootSchema = z.object({ environmentId: z.string(), path: z.string().min(1) });
 export type PortRoot = z.infer<typeof rootSchema>;
 export const portScanContract = defineRpcContract({
-  timeZone: {
-    input: z.object({}).strict(),
-    output: z.object({ timeZone: z.string().nullable() }),
-  },
   // The plugin's only host entry, so it also runs `gh` where the thread's
   // workspace (and its GitHub sign-in) lives.
   pullRequests: {

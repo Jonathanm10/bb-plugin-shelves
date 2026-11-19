@@ -16,7 +16,6 @@ import { createServerProjectManagement } from "./server-project-management";
 import { createServerSettleActions } from "./server-settle-actions";
 import { createServerPolicy } from "./server-policy";
 import { createServerHandlers } from "./server-handlers";
-import { createServerRateLimits } from "./server-rate-limits";
 import { createServerCli } from "./server-cli";
 
 export type { StoredLifecycleRow } from "./server-lifecycle";
@@ -173,9 +172,8 @@ export default async function plugin(bb: BbPluginApi) {
   ctx.bb.background.schedule("auto-settle", "*/5 * * * *", async () => {
     await policy.evaluatePolicies();
   });
-  const rateLimits = createServerRateLimits(ctx, lifecycle);
-  ctx.bb.rpc.register(bbSidebarRpcContract, { ...handlers, ...rateLimits });
-  ctx.bb.cli.register(createServerCli(lifecycle, handlers, rateLimits.getThreadLimits));
+  ctx.bb.rpc.register(bbSidebarRpcContract, handlers);
+  ctx.bb.cli.register(createServerCli(lifecycle, handlers));
   // New or resumed child work reopens the ancestor path, keeping its existing
   // sidebar nesting reachable. Siblings retain their own settled state.
   ctx.bb.events.on("thread.created", async ({ thread }) => {

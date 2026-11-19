@@ -8,7 +8,7 @@ import { threadDisplayTitle } from "./inbox";
 import { Icon, type IconName } from "./components/Icon";
 import { ProviderGlyph } from "./ProviderGlyph";
 import { StatusGlyph } from "./StatusGlyph";
-import { useStatusLimit, useThreadRowStatus, useThreadWithDraft } from "./StatusSlot";
+import { useThreadRowStatus, useThreadWithDraft } from "./StatusSlot";
 import { StillThreadStatusGlyph } from "./StillThreadStatusGlyph";
 import { ProjectFavicon } from "./ProjectFavicon";
 import { projectIconUrl } from "./project-icons";
@@ -16,8 +16,6 @@ import { OpenPortDetails, useLookUpOpenPorts } from "./OpenPorts";
 import { ThreadPullRequestDetails } from "./ThreadPullRequests";
 import { compareChildThreads, useChildThreadDisplay } from "./ChildThreadDisplay";
 import { cn } from "./lib/utils";
-import { useLimitActions, useThreadLimit } from "./RateLimits";
-import { limitDescription, limitStatus } from "./rate-limit-labels";
 
 export function ThreadDetailsTooltip({
   thread,
@@ -87,14 +85,12 @@ export function ThreadDetailsTooltip({
   // A settled thread is skipped by the recurring lookups, so looking at it
   // asks once. Keyed on the open state alone: a context update mid-open must
   // not ask again. Live threads make this a no-op.
-  const lookUpLimit = useLimitActions()?.lookUp;
   const lookUpPorts = useLookUpOpenPorts();
-  const lookUps = useRef({ lookUpLimit, lookUpPorts, environmentId: thread.environment?.id });
-  lookUps.current = { lookUpLimit, lookUpPorts, environmentId: thread.environment?.id };
+  const lookUps = useRef({ lookUpPorts, environmentId: thread.environment?.id });
+  lookUps.current = { lookUpPorts, environmentId: thread.environment?.id };
   const lookUp = useCallback(
     (looking: boolean) => {
       if (!looking) return;
-      lookUps.current.lookUpLimit?.(thread.id);
       lookUps.current.lookUpPorts(lookUps.current.environmentId ?? undefined);
     },
     [thread.id],
@@ -107,7 +103,6 @@ export function ThreadDetailsTooltip({
   const { sort: childSort } = useChildThreadDisplay();
   const status = useCardStatus(thread);
   const rowStatus = useThreadRowStatus(thread);
-  const limit = useThreadLimit(thread);
   const project = projects.find((entry) => entry.id === thread.projectId);
   const isWorktree = thread.environment?.isWorktree === true;
   const subthreads = visible
@@ -164,7 +159,6 @@ export function ThreadDetailsTooltip({
           </span>
         </div>
         <span className="sr-only">Status: {status.label}</span>
-        {limit ? <DetailRow icon="Clock" label="Provider limit" value={limitDescription(limit)} /> : null}
         {rowStatus ? (
           // Another plugin's row status, spelled out: the row only has room for its glyph.
           <div className="flex items-center gap-2">
@@ -225,9 +219,8 @@ export function ThreadDetailsTooltip({
 /** The status of the card and of each subthread, worded once so its glyph and its text agree. */
 function useCardStatus(thread: PluginSidebarThread) {
   const shown = useThreadWithDraft(thread);
-  const limit = useStatusLimit(thread);
   if (thread.hasPendingInteraction) return { label: "Needs you", indicator: "waiting-for-input" } as const;
-  return { label: limit ? limitStatus(limit) : (shown.indicatorLabel ?? "Idle"), indicator: shown.indicator };
+  return { label: shown.indicatorLabel ?? "Idle", indicator: shown.indicator };
 }
 
 /** bb's link routing opens the subthread; `onOpen` only closes the card. */

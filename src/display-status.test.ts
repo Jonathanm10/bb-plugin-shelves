@@ -109,7 +109,7 @@ function slot(
   rowStatus: PluginSidebarThreadRowStatus | null,
   limited: boolean,
 ): string {
-  return drawSlot(threadWithDraft(listed, hasDraft), threadRowStatus(listed, rowStatus, limited, hasDraft), limited);
+  return drawSlot(threadWithDraft(listed, hasDraft), threadRowStatus(listed, rowStatus, hasDraft), limited);
 }
 
 /** The sidebar's own priorities, which sit above bb's indicator. */
@@ -269,7 +269,7 @@ function differences() {
     }
     for (const hasDraft of [false, true])
       for (const rowStatus of Object.values(ROW_STATUSES))
-        for (const limited of [false, true]) {
+        for (const limited of [false]) {
           const before = OLD.slot(thread, hasDraft, rowStatus, limited);
           const after = slot(thread, hasDraft, rowStatus, limited);
           if (before === after) continue;

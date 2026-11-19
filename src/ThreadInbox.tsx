@@ -22,7 +22,6 @@ import {
 } from "./inbox-layout";
 import type { ThreadReorderControls } from "./ThreadCard";
 import { InboxProvider, useInboxContextValues } from "./InboxContext";
-import { RateLimitsProvider } from "./RateLimits";
 import { createInboxThreadRenderer } from "./InboxThreadRenderer";
 import { childThreadsByParent, collapsedChildThreads } from "./ChildThreadList";
 import { useChildThreadDisplayValue } from "./ChildThreadDisplay";
@@ -63,15 +62,9 @@ type ActiveShelfKind = "pinned" | "inbox";
  */
 export function ThreadInbox(props: PluginThreadListProps) {
   const snapshot = useSidebarThreads();
-  // Read above the limit provider: it skips settled threads, and the inbox
-  // below reads its limit rows to place snoozed ones.
   const lifecycleRows = useLifecycleRows();
-  const { settled, portScope } = useLiveThreads(snapshot.threads, lifecycleRows);
-  return (
-    <RateLimitsProvider threads={snapshot.threads} settledThreadIds={settled}>
-      <ThreadInboxContent {...props} snapshot={snapshot} lifecycleRows={lifecycleRows} portScope={portScope} />
-    </RateLimitsProvider>
-  );
+  const { portScope } = useLiveThreads(snapshot.threads, lifecycleRows);
+  return <ThreadInboxContent {...props} snapshot={snapshot} lifecycleRows={lifecycleRows} portScope={portScope} />;
 }
 
 function ThreadInboxContent({

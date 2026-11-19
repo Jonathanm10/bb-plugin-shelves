@@ -124,7 +124,7 @@ describe("bb clean-sidebar list places children on their parent's shelf", () => 
     ]);
   });
 
-  it("keeps a snooze that waits on the sidebar's scheduled Continue on Snoozed", async () => {
+  it("keeps queued work Active even for a formerly scheduled Continue", async () => {
     const wake = Date.now() + HOUR_MS;
     const continueAt = (sendAt: number, originPluginId = "bb-sidebar-clean") =>
       makeQueueEntry({ sendAt, originPluginId, content: [{ type: "text", text: "Continue", mentions: [] }] });
@@ -141,10 +141,10 @@ describe("bb clean-sidebar list places children on their parent's shelf", () => 
         "someone-else": [continueAt(wake, "another-plugin")],
       },
     );
-    expect(await shelves()).toEqual({ scheduled: "snoozed", "other-time": "active", "someone-else": "active" });
+    expect(await shelves()).toEqual({ scheduled: "active", "other-time": "active", "someone-else": "active" });
   });
 
-  it("lists a snoozed thread as Active when its limit lookup fails", async () => {
+  it("keeps queued work Active without depending on provider-limit lookups", async () => {
     const wake = Date.now() + HOUR_MS;
     const threads = [projectThread({ id: "waiting", status: "error", queuedWork: "waiting", latestAttentionAt: 50 })];
     const { harness, shelves } = await loadWith(threads, { waiting: { snoozedUntil: wake, snoozedAt: 60 } });

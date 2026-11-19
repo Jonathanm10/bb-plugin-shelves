@@ -11,12 +11,9 @@ import {
   STATUS_SLOT_CLASS,
   StatusOrTime,
   threadStatusLabel,
-  useStatusLimit,
   useThreadWithDraft,
   useWorkingForDisplay,
 } from "./StatusSlot";
-import { RateLimitRecovery } from "./RateLimitRecovery";
-import { limitStatus } from "./rate-limit-labels";
 import { useWorkingSinceContext } from "./useWorkingSince";
 import { threadDisplayTitle } from "./inbox";
 import { canParkThread } from "./lifecycle";
@@ -355,10 +352,7 @@ function ChildThreadRow({
   const effectiveNow = now ?? Date.now();
   const workingSince = useWorkingSinceContext();
   const statusThread = useThreadWithDraft(thread);
-  const limit = useStatusLimit(thread);
-  const visibleStatus = limit
-    ? limitStatus(limit)
-    : threadStatusLabel(statusThread, workingSince.get(thread.id), effectiveNow);
+  const visibleStatus = threadStatusLabel(statusThread, workingSince.get(thread.id), effectiveNow);
   const [isRenaming, setIsRenaming] = useState(false);
   const { splitProps } = useSidebarThreadSplit(thread.id);
   const RowAction = isRenaming ? "div" : "a";
@@ -419,7 +413,7 @@ function ChildThreadRow({
             </span>
             {foreignProject ? <ForeignProjectMark project={foreignProject} /> : null}
             <OpenPortsIndicator thread={thread} />
-            {!limit ? (
+            {
               // Match parent cards: a recognized status owns the trailing
               // slot; an idle or future unknown status leaves it to the age.
               //
@@ -434,14 +428,9 @@ function ChildThreadRow({
               <span className={cn(STATUS_SLOT_CLASS, "w-auto max-w-28 pr-2")}>
                 <StatusOrTime thread={thread} now={effectiveNow} />
               </span>
-            ) : null}
+            }
           </RowAction>
         </ThreadDetailsTooltip>
-        {limit ? (
-          <span className="shrink-0 pr-2">
-            <RateLimitRecovery thread={thread} />
-          </span>
-        ) : null}
         {disclosure ? <GrandchildDisclosureButton title={title} {...disclosure} /> : null}
       </div>
     </RowContextMenu>

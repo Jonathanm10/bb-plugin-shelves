@@ -27,9 +27,9 @@ live again). Snoozed, Parked and Inactive-shelf threads stay live.
   it is null until lifecycle rows load, so start nothing before then.
   On-demand lookups use `useOnDemandLookups`, fired from
   `ThreadDetailsTooltip.tsx`.
-- `ThreadInbox` reads rows with `useLifecycleRows` above `RateLimitsProvider`;
+- `ThreadInbox` reads rows with `useLifecycleRows`;
   `useLifecycle(threads, lifecycleRows)` classifies.
-- `RateLimitsProvider` and `OpenPortsProvider` poll live threads only. Ports
+- `OpenPortsProvider` polls live threads only. Ports
   go by workspace: one shared with a live thread is still polled.
 - `getOpenPorts` takes `{ environmentIds }` (1-500, strict) and rejects `{}`;
   the app sends live workspaces and splits longer lists.
@@ -138,8 +138,6 @@ Wired tests deliver invalidations through `flush()`; app tests use
 - `server-project-management`: project names, paths, and removal.
 - `server-settle-actions`: tree settle, return to Active, and Undo snapshots.
 - `server-policy`: automatic settle passes and settings revisions.
-- `server-rate-limits`: provider-limit reads and scheduled Continue queue actions.
-- `server-rate-limit-details`: failed-turn classification and provider reset times.
 - `server-handlers`: RPC handlers assembled from the modules.
 - `server-cli`: the `bb sidebar` agent command over those handlers. Keep it to
   a few subcommands; each one adds a line to the `plugin-commands` skill.

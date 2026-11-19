@@ -12,10 +12,6 @@ import { threadsWithAskingDescendants } from "./child-status";
  * `bb sidebar list`. Rows are placed over every unarchived thread, not the
  * project scope, so changing the picker never changes what is looked up.
  *
- * This needs no limit rows: they only keep a snooze waiting on its scheduled
- * Continue (`waitsForScheduledContinue` requires a snooze), and a snoozed row
- * is never settled. That is what lets the rate-limit provider sit above the
- * hook that reads limit rows to place snoozed threads.
  */
 export function settledThreadIds(
   threads: readonly PluginSidebarThread[],

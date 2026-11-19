@@ -14,7 +14,6 @@ import { MAX_AUTO_SETTLE_AFTER_DAYS, MIN_AUTO_SETTLE_AFTER_DAYS } from "./auto-s
 export {
   SIDEBAR_SETTINGS_CHANNEL,
   PROJECT_ICONS_CHANNEL,
-  RATE_LIMITS_CHANNEL,
 } from "./realtime-channels";
 
 export const openPortSchema = z.object({
@@ -51,14 +50,6 @@ export const threadPullRequestSchema = z
 export type ThreadPullRequest = z.infer<typeof threadPullRequestSchema>;
 
 const threadIdSchema = z.object({ threadId: z.string().trim().min(1) });
-const threadLimitStateSchema = z.object({
-  message: z.string(),
-  resetsAt: z.number().nullable(),
-  timeZone: z.string().nullable(),
-  scheduled: z.object({ id: z.string(), sendAt: z.number(), failed: z.boolean() }).nullable(),
-});
-export type ThreadLimitState = z.infer<typeof threadLimitStateSchema>;
-
 /**
  * What parking a thread released. These counts are what the toast reminds the
  * user about, so they travel back with the acknowledgement rather than on the
@@ -136,18 +127,6 @@ const iconBase64Schema = z
   .max(1_400_000)
   .regex(/^[A-Za-z0-9+/]*={0,2}$/, "Invalid image data");
 export const bbSidebarRpcContract = defineRpcContract({
-  getThreadLimits: {
-    input: z.object({ keys: z.array(z.string().trim().min(1)).max(1000) }).strict(),
-    output: z.record(z.string(), threadLimitStateSchema.nullable()),
-  },
-  scheduleLimitContinue: {
-    input: threadIdSchema.extend({ sendAt: z.number().int().positive().optional() }).strict(),
-    output: threadLimitStateSchema,
-  },
-  cancelLimitContinue: {
-    input: threadIdSchema.extend({ queuedMessageId: z.string().trim().min(1) }).strict(),
-    output: z.object({ ok: z.literal(true) }),
-  },
   // The app names the workspaces to scan: those of live threads on its poll,
   // or one settled thread's when the user looks at it, 500 per call (the app
   // splits longer lists), each id at most 255 characters, since answers are

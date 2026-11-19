@@ -20,12 +20,10 @@ import {
   resolveWakeReason,
   sidebarThreadSignals,
   type ThreadShelf,
-  waitsForScheduledContinue,
 } from "./lifecycle";
 import { threadsWithAskingDescendants } from "./child-status";
 import { resolveThreadTitlesIn, threadDisplayTitle } from "./inbox";
 import { threadTreeIds } from "./thread-tree";
-import { useLimitActions } from "./RateLimits";
 import type { LifecycleRows } from "./useLifecycleRows";
 
 export interface LifecycleApi {
@@ -119,7 +117,6 @@ function runningRowStatusThread(
  * clock during render would make the classification unstable.
  */
 export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleRows: LifecycleRows): LifecycleApi {
-  const recovery = useLimitActions();
   const rpc = useRpc<typeof bbSidebarRpcContract>();
   const { rows } = lifecycleRows;
   const [now, setNow] = useState(() => Date.now());
@@ -160,10 +157,6 @@ export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleR
     // back from any shelf, ends a snooze, and blocks parking it again.
     const signalsFor = (thread: PluginSidebarThread) => {
       const signals = sidebarThreadSignals(thread);
-      const scheduled = recovery?.rows[thread.id]?.scheduled;
-      if (waitsForScheduledContinue(rows.get(thread.id), scheduled, thread.queuedWork, now)) {
-        signals.hasQueuedWork = false;
-      }
       return askingParentIds.has(thread.id) ? { ...signals, hasPendingInteraction: true } : signals;
     };
     // One mutation per thread at a time. The write publishes on the realtime
@@ -307,5 +300,5 @@ export function useLifecycle(threads: readonly PluginSidebarThread[], lifecycleR
       unsnooze: (threadId) => mutate({ method: "unsnooze", threadId }),
       snooze: (threadId, snoozedUntil) => mutate({ method: "snooze", threadId, snoozedUntil }),
     };
-  }, [askingParentIds, now, rows, rpc, recovery]);
+  }, [askingParentIds, now, rows, rpc]);
 }
