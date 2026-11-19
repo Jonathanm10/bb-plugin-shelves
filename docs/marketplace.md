@@ -31,7 +31,7 @@ moving to 0.2.0.
 ## Registry entry
 
 The package, runtime, and marketplace share the `bb-thread-inbox` identity.
-The minimum range excludes the initial release's superseded identity.
+The first marketplace release is 0.1.1.
 
 ```json
 {
