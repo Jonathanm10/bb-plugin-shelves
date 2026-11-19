@@ -29,7 +29,6 @@ import { InlineThreadTitle } from "./InlineThreadTitle";
 import { isWorkingTree } from "./working-tree";
 import { ProjectFavicon, ProjectStripe } from "./ProjectFavicon";
 import { useProjectColor } from "./ProjectColors";
-import { OpenPortsIndicator } from "./OpenPorts";
 import { useInboxEnvironment, useInboxActions, useInboxActivity } from "./InboxContext";
 import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings";
 import { useRowStatusRuns } from "./useLifecycle";
@@ -301,7 +300,6 @@ export function ThreadCard({
               fadeContent
               trailing={
                 <span className="pointer-events-none relative flex shrink-0 items-center gap-1.5">
-                  <OpenPortsIndicator thread={thread} />
                   {childThreads.length > 0 ? (
                     <ChildThreadBadge
                       threads={childThreads}
@@ -321,7 +319,12 @@ export function ThreadCard({
                     </>
                   )}
                   {showParkActions ? (
-                    <span className="pointer-events-auto flex items-center gap-0.5 opacity-0 group-hover/card:opacity-100 group-focus-within/card:opacity-100 [@media(hover:none)]:opacity-100">
+                    <span
+                      className={cn(
+                        "pointer-events-auto items-center gap-0.5 group-hover/card:flex group-focus-within/card:flex [@media(hover:none)]:flex",
+                        holdParkActions ? "flex" : "hidden",
+                      )}
+                    >
                       <ThreadFilingActions
                         snoozePresets={snoozePresets}
                         onOpenChange={setIsSnoozeOpen}
@@ -484,7 +487,6 @@ export function ThreadCard({
                     "pointer-events-none relative ml-auto flex shrink-0 items-center gap-1.5 text-2xs text-muted-foreground",
                   )}
                 >
-                  <OpenPortsIndicator thread={thread} />
                   {childThreads.length > 0 ? (
                     <ChildThreadBadge
                       threads={childThreads}

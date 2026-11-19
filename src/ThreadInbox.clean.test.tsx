@@ -62,7 +62,7 @@ it("shows auto-settle controls first and persists the PR protection switch", asy
     "value",
     "7",
   );
-  expect(screen.getByRole("switch", { name: "Inactive shelf" }).closest("details")!.open).toBe(false);
+  expect(screen.queryByRole("switch", { name: "Inactive shelf" })).toBeNull();
   expect(screen.getByText("Advanced settings").closest("details")!.open).toBe(false);
   expect(screen.queryByText("Project appearance")).toBeNull();
   expect(screen.queryByText("Project management")).toBeNull();

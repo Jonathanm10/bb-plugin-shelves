@@ -1,7 +1,6 @@
 import { z } from "zod";
 import type { ServerContext } from "./server-context";
 import type { createServerLifecycle, StoredLifecycleRow } from "./server-lifecycle";
-import type { createThreadPortActions } from "./thread-ports";
 import type { createServerSettings } from "./server-settings";
 import {
   autoSettleNeedsPullRequest,
@@ -36,7 +35,6 @@ export function createServerPolicy(
   ctx: ServerContext,
   lifecycle: ReturnType<typeof createServerLifecycle>,
   settings: Awaited<ReturnType<typeof createServerSettings>>,
-  threadPortActions: ReturnType<typeof createThreadPortActions>,
 ) {
   const { readSidebarSettings } = settings;
   const {
@@ -169,10 +167,9 @@ export function createServerPolicy(
       ];
       const pullRequests = await loadPullRequests(environmentIds);
       const now = Date.now();
-      const decide = (keepThreadIds: ReadonlySet<string>) => {
+      const decide = () => {
         return threads.flatMap((thread) => {
-          if (keepThreadIds.has(thread.id) || (thread.visibility === "hidden" && thread.parentThreadId === null))
-            return [];
+          if (thread.visibility === "hidden" && thread.parentThreadId === null) return [];
           // Re-read after every lookup so a concurrent Park action wins.
           const row = readOne(thread.id);
           // Decided per thread: PR rows are keyed by environment, so a settled
@@ -190,21 +187,14 @@ export function createServerPolicy(
           return decision === "keep" ? [] : [{ decision, row, threadId: thread.id }];
         });
       };
-      let changes = decide(new Set());
-      // Keep serving workspaces visible conservatively, including commands
-      // a provider has not reported through bb's activity counters.
-      const settling = new Set(changes.flatMap((change) => (change.decision === "settle" ? [change.threadId] : [])));
-      if (settling.size > 0) {
-        const servingPorts = await threadPortActions.threadsServingPorts(
-          threads.filter((thread) => settling.has(thread.id)),
-          threads,
-        );
-        // A child may have been created or restarted during the lookups.
-        // Recheck the tree before settling, using only scanned candidates.
+      let changes = decide();
+      const candidates = new Set(
+        changes.filter((change) => change.decision === "settle").map((change) => change.threadId),
+      );
+      if (candidates.size > 0) {
+        // PR lookups can take time. Re-read live work and children before filing.
         threads = await loadPolicyThreads(true);
-        changes = decide(servingPorts).filter(
-          (change) => change.decision !== "settle" || settling.has(change.threadId),
-        );
+        changes = decide().filter((change) => change.decision !== "settle" || candidates.has(change.threadId));
       }
       // A parent can only leave the inbox once its whole tree is settled.
       // Descendants keep their own PR, inactivity, pin, and live-work rules.

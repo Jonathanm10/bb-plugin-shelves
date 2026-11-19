@@ -1,4 +1,4 @@
-import { test, fixture, rpc, shelf, link, expand, reset, open, menu } from "./helpers.mjs";
+import { test, fixture, rpc, shelf, link, expand, reset, open, menu, cli } from "./helpers.mjs";
 import { expect } from "@playwright/test";
 
 for (const theme of ["light", "dark"]) {
@@ -39,6 +39,7 @@ for (const threadDisplay of ["full", "compact-all"]) {
     const first = fixture.threads[0];
     const selectedUrl = page.url();
     let row = link(page, first.title).locator("xpath=..");
+    await link(page, first.title).focus();
     await row.getByRole("combobox", { name: "Snooze thread" }).press("Enter");
     await page.getByRole("option", { name: "1 hour", exact: true }).click();
     await expect(shelf(page, "Snoozed")).toBeVisible();
@@ -47,6 +48,7 @@ for (const threadDisplay of ["full", "compact-all"]) {
     await shelf(page, "Snoozed").getByRole("button", { name: "Wake thread now" }).click();
     await expect(link(page, first.title)).toBeVisible();
     row = link(page, first.title).locator("xpath=..");
+    await link(page, first.title).focus();
     await row.getByRole("button", { name: "Settle thread" }).press("Enter");
     await expect(link(page, first.title)).toHaveCount(0);
     const toast = page.locator("[data-sonner-toast]").filter({ hasText: "Thread settled" }).last();
@@ -90,14 +92,75 @@ test("core sidebar keeps filed threads in native search", async ({ page, request
   await reset(request);
   const first = fixture.threads[0];
   await rpc(request, "settle", { threadId: first.id });
+  await cli(["settings", "ui", "set", "sidebar.visiblePluginPanels", "[]"]);
   await open(page, { core: true });
-  await page.keyboard.press("ControlOrMeta+K");
+  const trigger = page.getByRole("button", { name: "Search threads", exact: true });
+  await expect(trigger).toBeVisible();
+  await expect(trigger.locator("svg")).toBeVisible();
+  await trigger.click();
   const palette = page.getByRole("dialog");
   await expect(palette).toBeVisible();
   const search = palette.getByRole("combobox");
   await search.fill(first.title);
   await palette.getByRole("option").filter({ hasText: first.title }).first().click();
   await expect(page).toHaveURL(new RegExp(first.id));
+  await cli(["settings", "ui", "reset", "sidebar.visiblePluginPanels"]);
+});
+
+for (const theme of ["light", "dark"]) {
+  test(`core sidebar settings layout ${theme}`, async ({ page, request }) => {
+    await reset(request);
+    await page.setViewportSize({ width: 1100, height: 1050 });
+    await open(page, { core: true, theme });
+    await page.getByRole("button", { name: /^Settings \(/ }).click();
+    await page.getByRole("link", { name: "Thread Inbox", exact: true }).click();
+    const behavior = page.locator("#settings-thread-behavior");
+    const sidebar = page.locator("#settings-sidebar");
+    await expect(behavior.getByRole("switch", { name: "Keep threads with a PR" })).toBeVisible();
+    const snooze = behavior.locator("summary");
+    const help = sidebar.locator("p").last();
+    for (const [card, content] of [
+      [behavior, snooze],
+      [sidebar, help],
+    ]) {
+      const outer = await card.boundingBox();
+      const inner = await content.evaluate((element) => {
+        const text = document.createRange();
+        text.selectNodeContents(element);
+        const bounds = text.getBoundingClientRect();
+        return { x: bounds.x, width: bounds.width };
+      });
+      expect(inner.x - outer.x).toBeGreaterThanOrEqual(16);
+      expect(inner.x + inner.width).toBeLessThanOrEqual(outer.x + outer.width - 15);
+    }
+    await snooze.click();
+    await expect(page.getByRole("textbox", { name: "Snooze shortcuts" })).toBeVisible();
+    await snooze.click();
+    const advanced = page.getByText("Advanced settings", { exact: true });
+    await advanced.click();
+    await expect(page.getByRole("combobox", { name: "Thread display" })).toBeVisible();
+    await expect(page.getByRole("switch", { name: "Inactive shelf" })).toHaveCount(0);
+    await advanced.click();
+    await page.screenshot({ path: `docs/screenshots/settings-${theme}.png`, animations: "disabled" });
+  });
+}
+
+test("core sidebar compact titles keep space until actions are needed", async ({ page, request }) => {
+  await reset(request);
+  await rpc(request, "updateSidebarSettings", { threadDisplay: "compact-all" });
+  await open(page, { core: true });
+  await page.mouse.move(1000, 750);
+  const row = link(page, fixture.threads[0].title).locator("xpath=..");
+  expect((await row.locator("[data-settle-fade]").boundingBox()).width).toBeGreaterThan(160);
+  const settle = row.getByRole("button", { name: "Settle thread" });
+  await expect(settle).toBeHidden();
+  await link(page, fixture.threads[0].title).focus();
+  await expect(settle).toBeVisible();
+  const snooze = row.getByRole("combobox", { name: "Snooze thread" });
+  const trigger = await snooze.elementHandle();
+  await snooze.press("Enter");
+  await expect(page.getByRole("option", { name: "1 hour", exact: true })).toBeVisible();
+  expect(await trigger.isVisible()).toBe(true);
 });
 
 test.describe("core sidebar touch", () => {

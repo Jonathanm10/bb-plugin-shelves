@@ -41,7 +41,7 @@ describe("ThreadInbox", () => {
     expect(within(activeShelf).queryByText("Other active")).toBeNull();
   });
 
-  it("moves stale unpinned threads to a collapsed Inactive shelf", () => {
+  it("keeps quiet threads Active even when legacy Inactive preferences are enabled", () => {
     const storedSettings = {
       ...DEFAULT_SIDEBAR_SETTINGS,
       ...{
@@ -79,16 +79,11 @@ describe("ThreadInbox", () => {
     });
 
     const active = screen.getByRole("region", { name: "Active" });
-    const inactive = screen.getByRole("region", { name: "Inactive" });
     const pinned = screen.getByRole("region", { name: "Pinned" });
     expect(within(active).getByText("Recent work")).toBeDefined();
-    expect(within(active).queryByText("Stale work")).toBeNull();
-    expect(within(inactive).getByText("Inactive (1)")).toBeDefined();
-    expect(within(inactive).queryByText("Stale work")).toBeNull();
+    expect(within(active).getByText("Stale work")).toBeDefined();
     expect(within(pinned).getByText("Pinned old work")).toBeDefined();
-
-    fireEvent.click(within(inactive).getByRole("button", { expanded: false }));
-    expect(within(inactive).getByText("Stale work")).toBeDefined();
+    expect(screen.queryByRole("region", { name: "Inactive" })).toBeNull();
   });
 
   it("keeps stale threads Active when the feature is disabled", () => {
@@ -118,41 +113,6 @@ describe("ThreadInbox", () => {
 
     expect(within(screen.getByRole("region", { name: "Active" })).getByText("Still active")).toBeDefined();
     expect(screen.queryByRole("region", { name: "Inactive" })).toBeNull();
-  });
-
-  it("uses the configured inactivity threshold", () => {
-    const storedSettings = {
-      ...DEFAULT_SIDEBAR_SETTINGS,
-      ...{
-        inactiveThreadsEnabled: true,
-        inactiveAfterHours: 8,
-      },
-    };
-    localStorage.setItem("bb-sidebar-clean:settings-cache:v1", JSON.stringify(storedSettings));
-
-    const now = Date.now();
-    renderSlot(inbox, listProps, {
-      sidebarThreads: {
-        status: "ready",
-        threads: [
-          thread({
-            id: "seven-hours",
-            title: "Seven hours old",
-            updatedAt: now - 7 * 60 * 60 * 1_000,
-          }),
-          thread({
-            id: "nine-hours",
-            title: "Nine hours old",
-            updatedAt: now - 9 * 60 * 60 * 1_000,
-          }),
-        ],
-        projects: [{ id: "proj_1", name: "bb", isPersonal: false, href: "", settingsHref: "" }],
-      },
-      rpc: { getSidebarSettings: () => storedSettings, listLifecycle: () => ({ rows: [] }) },
-    });
-
-    expect(within(screen.getByRole("region", { name: "Active" })).getByText("Seven hours old")).toBeDefined();
-    expect(within(screen.getByRole("region", { name: "Inactive" })).getByText("Inactive (1)")).toBeDefined();
   });
 
   it("sorts active threads from the subtle header menu", async () => {

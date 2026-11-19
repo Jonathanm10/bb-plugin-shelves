@@ -64,10 +64,8 @@ test("the guard rejects any change outside devDependencies", () => {
       `package.json changed outside devDependencies: ${key}`,
     ]);
   }
-  const reformatted = bumped.replace(
-    '"keywords": ["bb-plugin", "sidebar", "threads", "inbox", "productivity"]',
-    '"keywords": [\n    "bb-plugin",\n    "sidebar",\n    "threads",\n    "inbox",\n    "productivity"\n  ]',
-  );
+  const reformatted = bumped.replace('\n  "description":', '\n   "description":');
+  assert.notEqual(reformatted, bumped);
   assert.deepEqual(guardPackageJson(original, reformatted, allowed), [
     "package.json changed outside devDependencies (formatting or key order)",
   ]);

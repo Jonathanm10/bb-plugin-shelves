@@ -2,170 +2,84 @@ import { describe, expect, it } from "vitest";
 import plugin from "./server";
 import { createFakePluginHost, disposers, standardProject } from "./test-server";
 
-describe("project icons", () => {
-  it("serves an automatically discovered favicon through the local route", async () => {
-    const project = standardProject();
-    const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar-clean",
-      sdk: {
-        projects: {
-          get: async () => project,
-          fileContent: async ({ path }) => {
-            if (path !== "favicon.svg") throw new Error("not found");
-            return {
-              content: '<svg xmlns="http://www.w3.org/2000/svg"/>',
-              contentEncoding: "utf8" as const,
-              mimeType: "image/svg+xml",
-              sizeBytes: 46,
-            };
-          },
+async function setup() {
+  let connected = true;
+  const { bb, harness } = createFakePluginHost({
+    pluginId: "bb-sidebar-clean",
+    sdk: {
+      projects: {
+        get: async () => standardProject(),
+        files: async () => ({ files: [], truncated: false }),
+        fileContent: async () => {
+          if (!connected) throw new Error("Host is not connected");
+          return { content: "<svg/>", contentEncoding: "utf8" as const, mimeType: "image/svg+xml", sizeBytes: 6 };
         },
       },
-    });
-    await plugin(bb);
-    disposers.push(() => harness.lifecycle.dispose());
-
-    const [response, concurrentResponse] = await Promise.all([
-      harness.behavior.fetchHttp("GET", "/project-icon?projectId=proj_1"),
-      harness.behavior.fetchHttp("GET", "/project-icon?projectId=proj_1"),
-    ]);
-    expect(response.status).toBe(200);
-    expect(concurrentResponse.status).toBe(200);
-    expect(response.headers.get("content-type")).toBe("image/svg+xml");
-    await expect(response.text()).resolves.toContain("<svg");
-    expect(harness.inspection.sdk.callsTo("projects.fileContent")).toEqual([
-      [{ projectId: "proj_1", hostId: "host_1", path: "package.json" }],
-      [{ projectId: "proj_1", hostId: "host_1", path: "favicon.svg" }],
-    ]);
+    },
   });
+  await plugin(bb);
+  disposers.push(() => harness.lifecycle.dispose());
+  const db = bb.storage.database();
+  return {
+    harness,
+    db,
+    connect: (value: boolean) => {
+      connected = value;
+    },
+    fetch: () => harness.behavior.fetchHttp("GET", "/project-icon?projectId=proj_1"),
+    savePath: (path: string) => db.prepare("INSERT INTO project_icons VALUES (?, ?, ?)").run("proj_1", path, 1),
+  };
+}
 
-  it("finds icons outside the conventional paths through project file search", async () => {
-    const project = standardProject();
-    const svg = '<svg xmlns="http://www.w3.org/2000/svg"/>';
-    const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar-clean",
-      sdk: {
-        projects: {
-          get: async () => project,
-          files: async ({ query }) => ({
-            files:
-              query === "icon"
-                ? [
-                    { name: "favicon.svg", path: "node_modules/pkg/favicon.svg" },
-                    { name: "icon-picker.png", path: "docs/icon-picker.png" },
-                    { name: "favicon.ico", path: "apps/frontend/src/assets/img/favicon.ico" },
-                  ]
-                : [{ name: "logo.svg", path: "app/frontend/public/pictures/logo.svg" }],
-            truncated: false,
-          }),
-          fileContent: async ({ path }) => {
-            if (path !== "apps/frontend/src/assets/img/favicon.ico") throw new Error("not found");
-            return { content: svg, contentEncoding: "utf8" as const, mimeType: "image/x-icon", sizeBytes: 46 };
-          },
-        },
-      },
-    });
-    await plugin(bb);
-    disposers.push(() => harness.lifecycle.dispose());
-
-    const response = await harness.behavior.fetchHttp("GET", "/project-icon?projectId=proj_1");
-    expect(response.status).toBe(200);
-    expect(response.headers.get("content-type")).toBe("image/x-icon");
-    expect(harness.inspection.sdk.callsTo("projects.files")).toEqual([
-      [{ projectId: "proj_1", hostId: "host_1", query: "icon", limit: "100" }],
-      [{ projectId: "proj_1", hostId: "host_1", query: "logo", limit: "100" }],
-    ]);
-    const reads = harness.inspection.sdk
-      .callsTo("projects.fileContent")
-      .map(([args]) => (args as { path: string }).path);
-    expect(reads.at(-1)).toBe("apps/frontend/src/assets/img/favicon.ico");
-    expect(reads).not.toContain("node_modules/pkg/favicon.svg");
-    expect(reads).not.toContain("docs/icon-picker.png");
-  });
-
-  it("prefers the image declared in package.json bb.branding", async () => {
-    const project = standardProject();
-    const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar-clean",
-      sdk: {
-        projects: {
-          get: async () => project,
-          fileContent: async ({ path }) => {
-            if (path === "package.json") {
-              const content = JSON.stringify({ bb: { branding: { icon: "brand/mark.png" } } });
-              return { content, contentEncoding: "utf8" as const, mimeType: "application/json", sizeBytes: 40 };
-            }
-            if (path === "brand/mark.png" || path === "favicon.svg") {
-              return { content: path, contentEncoding: "utf8" as const, mimeType: "image/png", sizeBytes: 10 };
-            }
-            throw new Error("not found");
-          },
-        },
-      },
-    });
-    await plugin(bb);
-    disposers.push(() => harness.lifecycle.dispose());
-
-    const response = await harness.behavior.fetchHttp("GET", "/project-icon?projectId=proj_1");
-    expect(response.status).toBe(200);
-    await expect(response.text()).resolves.toBe("brand/mark.png");
-  });
-
-  it("keeps a missing icon a miss when the search finds nothing", async () => {
-    const project = standardProject();
-    const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar-clean",
-      sdk: {
-        projects: {
-          get: async () => project,
-          files: async () => ({ files: [], truncated: false }),
-          fileContent: async () => {
-            throw new Error("not found");
-          },
-        },
-      },
-    });
-    await plugin(bb);
-    disposers.push(() => harness.lifecycle.dispose());
-
-    const response = await harness.behavior.fetchHttp("GET", "/project-icon?projectId=proj_1");
+describe("saved project icons", () => {
+  it("uses a monogram fallback without searching or reading an unconfigured project", async () => {
+    const state = await setup();
+    const response = await state.fetch();
     expect(response.status).toBe(404);
-    // The app waits an hour before asking again only when the 404 carries this mark.
     expect(response.headers.get("x-bb-sidebar-icon-missing")).toBe("1");
+    expect(state.harness.inspection.sdk.callsTo("projects.files")).toEqual([]);
+    expect(state.harness.inspection.sdk.callsTo("projects.fileContent")).toEqual([]);
+    expect(state.harness.inspection.sdk.callsTo("projects.get")).toEqual([]);
   });
 
-  it("does not cache a failed icon read as a missing icon", async () => {
-    const project = standardProject();
-    let hostReady = false;
-    const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-sidebar-clean",
-      sdk: {
-        projects: {
-          get: async () => project,
-          fileContent: async ({ path }) => {
-            if (!hostReady) throw new Error("Host host_1 is not connected");
-            if (path !== "icon.svg") throw new Error("not found");
-            return {
-              content: '<svg xmlns="http://www.w3.org/2000/svg"/>',
-              contentEncoding: "utf8" as const,
-              mimeType: "image/svg+xml",
-              sizeBytes: 46,
-            };
-          },
-        },
-      },
-    });
-    await plugin(bb);
-    disposers.push(() => harness.lifecycle.dispose());
+  it("preserves an explicitly saved icon and coalesces concurrent requests", async () => {
+    const state = await setup();
+    state.savePath("assets/logo.svg");
+    const responses = await Promise.all([state.fetch(), state.fetch()]);
+    expect(responses.map((response) => response.status)).toEqual([200, 200]);
+    expect(responses[0]!.headers.get("content-security-policy")).toContain("sandbox");
+    expect(state.harness.inspection.sdk.callsTo("projects.fileContent")).toEqual([
+      [{ projectId: "proj_1", hostId: "host_1", path: "assets/logo.svg" }],
+    ]);
+    expect(state.harness.inspection.sdk.callsTo("projects.files")).toEqual([]);
+  });
 
-    const failed = await harness.behavior.fetchHttp("GET", "/project-icon?projectId=proj_1");
-    expect(failed.status).toBe(503);
-    expect(failed.headers.get("cache-control")).toBe("no-store");
-    expect(failed.headers.get("x-bb-sidebar-icon-missing")).toBeNull();
+  it("does not turn a disconnected saved icon into a permanent miss", async () => {
+    const state = await setup();
+    state.savePath("assets/logo.svg");
+    state.connect(false);
+    expect((await state.fetch()).status).toBe(503);
+    state.connect(true);
+    const response = await state.fetch();
+    expect(response.status).toBe(200);
+    await expect(response.text()).resolves.toBe("<svg/>");
+  });
 
-    hostReady = true;
-    const recovered = await harness.behavior.fetchHttp("GET", "/project-icon?projectId=proj_1");
-    expect(recovered.status).toBe(200);
-    await expect(recovered.text()).resolves.toContain("<svg");
+  it("rejects a saved traversal path without reading project files", async () => {
+    const state = await setup();
+    state.savePath("../private.svg");
+    expect((await state.fetch()).status).toBe(404);
+    expect(state.harness.inspection.sdk.callsTo("projects.fileContent")).toEqual([]);
+  });
+
+  it("keeps a previously uploaded image without host access", async () => {
+    const state = await setup();
+    state.db
+      .prepare("INSERT INTO project_icon_uploads VALUES (?, ?, ?, ?, ?, ?)")
+      .run("proj_1", "logo.svg", "image/svg+xml", Buffer.from("<svg/>").toString("base64"), 6, 1);
+    const response = await state.fetch();
+    expect(response.status).toBe(200);
+    await expect(response.text()).resolves.toBe("<svg/>");
+    expect(state.harness.inspection.sdk.callsTo("projects.fileContent")).toEqual([]);
   });
 });

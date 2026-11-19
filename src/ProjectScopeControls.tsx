@@ -1,4 +1,5 @@
-import type { useSidebarThreads } from "./bb-sdk";
+import { useSidebarNavigation, type useSidebarThreads } from "./bb-sdk";
+import { Icon } from "./components/Icon";
 import { useInboxActions, useInboxEnvironment } from "./InboxContext";
 import { ProjectScopeSelect } from "./ProjectScopeSelect";
 import { ProjectFavicon } from "./ProjectFavicon";
@@ -20,6 +21,7 @@ export function ProjectScopeControls({
   status: ReturnType<typeof useSidebarThreads>["status"];
 }) {
   const { projects } = useInboxEnvironment();
+  const navigation = useSidebarNavigation();
   const { setScope } = useInboxActions();
   const { pinnedProjects, toggleProjectPin, moveProjectPin } = usePinnedProjects({ projects, status });
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -34,6 +36,14 @@ export function ProjectScopeControls({
   });
   return (
     <div className="shrink-0 px-2 pb-1">
+      <button
+        type="button"
+        onClick={() => navigation.actions.activate("__bb__/search-threads", { target: "current" })}
+        className="mb-1 flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Icon name="Search" aria-hidden className="size-4 shrink-0" />
+        <span>Search threads</span>
+      </button>
       <ProjectScopeSelect
         scope={scope}
         projects={projects}

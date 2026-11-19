@@ -1,15 +1,5 @@
 import type { ServerContext } from "./server-context";
-import {
-  PROJECT_ICON_CANDIDATES,
-  extractProjectIconHref,
-  iconPathsForHref,
-  normalizeProjectIconPath,
-} from "./project-icons";
-import {
-  manifestProjectIconPath,
-  PROJECT_ICON_SEARCH_QUERIES,
-  rankDiscoveredProjectIcons,
-} from "./project-icon-discovery";
+import { normalizeProjectIconPath } from "./project-icons";
 interface StoredProjectIconRow {
   project_id: string;
   path: string;
@@ -32,16 +22,6 @@ interface ResolvedProjectIcon {
   path: string;
   sizeBytes: number;
 }
-
-const PROJECT_ICON_SOURCE_FILES = [
-  "index.html",
-  "public/index.html",
-  "app/routes/__root.tsx",
-  "src/routes/__root.tsx",
-  "app/root.tsx",
-  "src/root.tsx",
-  "src/index.html",
-] as const;
 
 const PROJECT_ICON_MAX_BYTES = 1_000_000;
 
@@ -129,29 +109,6 @@ export function createServerProjectIcons(ctx: ServerContext) {
       : ctx.bb.sdk.projects.fileContent({ projectId, path });
   };
 
-  const listProjectFiles = async (projectId: string, environmentId: string | null, query: string) => {
-    const request = { projectId, query, limit: "100" };
-    if (environmentId) return ctx.bb.sdk.projects.files({ ...request, environmentId });
-    const hostId = await defaultProjectHostId(projectId);
-    return hostId ? ctx.bb.sdk.projects.files({ ...request, hostId }) : ctx.bb.sdk.projects.files(request);
-  };
-
-  const readManifestIconPath = async (projectId: string, environmentId: string | null): Promise<string | null> => {
-    try {
-      return manifestProjectIconPath(await readProjectFile(projectId, environmentId, "package.json"));
-    } catch (error) {
-      if (isMissingFileError(error)) return null;
-      throw error;
-    }
-  };
-
-  const searchProjectIcons = async (projectId: string, environmentId: string | null): Promise<string[]> => {
-    const results = await Promise.all(
-      PROJECT_ICON_SEARCH_QUERIES.map((query) => listProjectFiles(projectId, environmentId, query)),
-    );
-    return rankDiscoveredProjectIcons(results.flatMap((result) => result.files.map((file) => file.path)));
-  };
-
   const tryProjectIcon = async (
     projectId: string,
     environmentId: string | null,
@@ -194,66 +151,8 @@ export function createServerProjectIcons(ctx: ServerContext) {
       });
       return icon;
     }
-    const candidates: string[] = [];
     const customPath = readProjectIconOverride(projectId);
-    if (customPath) candidates.push(customPath);
-    let icon: ResolvedProjectIcon | null = null;
-    let unavailable = false;
-    try {
-      const manifestPath = await readManifestIconPath(projectId, environmentId);
-      if (manifestPath) candidates.push(manifestPath);
-    } catch {
-      unavailable = true;
-    }
-    candidates.push(...PROJECT_ICON_CANDIDATES);
-    for (const candidate of new Set(candidates)) {
-      try {
-        icon = await tryProjectIcon(projectId, environmentId, candidate);
-      } catch {
-        unavailable = true;
-        continue;
-      }
-      if (icon) break;
-    }
-    if (!icon) {
-      for (const sourcePath of PROJECT_ICON_SOURCE_FILES) {
-        try {
-          const source = await readProjectFile(projectId, environmentId, sourcePath);
-          if (source.contentEncoding !== "utf8" || source.sizeBytes > PROJECT_ICON_MAX_BYTES) {
-            continue;
-          }
-          const href = extractProjectIconHref(source.content);
-          if (!href) continue;
-          for (const path of iconPathsForHref(href)) {
-            icon = await tryProjectIcon(projectId, environmentId, path);
-            if (icon) break;
-          }
-          if (icon) break;
-        } catch (error) {
-          // Each source file is optional.
-          if (!isMissingFileError(error)) unavailable = true;
-        }
-      }
-    }
-    if (!icon) {
-      try {
-        for (const path of await searchProjectIcons(projectId, environmentId)) {
-          if (candidates.includes(path)) continue;
-          try {
-            icon = await tryProjectIcon(projectId, environmentId, path);
-          } catch {
-            unavailable = true;
-            continue;
-          }
-          if (icon) break;
-        }
-      } catch {
-        unavailable = true;
-      }
-    }
-    if (!icon && unavailable) {
-      throw new Error(`Project icon files for ${projectId} could not be read`);
-    }
+    const icon = customPath ? await tryProjectIcon(projectId, environmentId, customPath) : null;
 
     projectIconCache.set(cacheKey, {
       expiresAt: Date.now() + (icon ? PROJECT_ICON_CACHE_MS : PROJECT_ICON_MISS_CACHE_MS),

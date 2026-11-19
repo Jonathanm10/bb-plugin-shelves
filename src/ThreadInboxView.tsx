@@ -35,7 +35,7 @@ interface ShelfThreads {
 }
 
 interface ThreadInboxViewProps {
-  shelves: Record<"pinned" | "inbox" | "working" | "inactive" | "snoozed" | "parked" | "settled", ShelfThreads>;
+  shelves: Record<"pinned" | "inbox" | "working" | "snoozed" | "parked" | "settled", ShelfThreads>;
   scope: readonly string[];
   reorderAnnouncement: string;
   attachScrollFadeRef: (node: HTMLDivElement | null) => void;
@@ -51,7 +51,7 @@ interface ThreadInboxViewProps {
     reorderable?: boolean,
     showProject?: boolean,
     compact?: boolean,
-    renameShelf?: "active" | "working" | "inactive",
+    renameShelf?: "active" | "working",
   ) => ReactNode;
   activeSortMode: ActiveSortMode;
   inboxProjectView: readonly ProjectViewUnit[];
@@ -88,7 +88,7 @@ export function ThreadInboxView({
   settledLimit,
 }: ThreadInboxViewProps) {
   const { setExpandedShelves, setActiveSortMode, setSettledLimit } = useInboxActions();
-  const { pinned, inbox, working, inactive, snoozed, parked, settled } = shelves;
+  const { pinned, inbox, working, snoozed, parked, settled } = shelves;
   return (
     <div data-bb-sidebar-root="" className="flex min-h-0 flex-1 flex-col">
       {/* Project scope is plugin-owned; New thread lives in bb's chrome. */}
@@ -175,16 +175,10 @@ export function ThreadInboxView({
                     ) : null}
                   </CollapsibleShelf>
                 ) : null}
-                {pinned.threads.length === 0 &&
-                inbox.threads.length === 0 &&
-                working.threads.length === 0 &&
-                inactive.threads.length === 0 ? (
+                {pinned.threads.length === 0 && inbox.threads.length === 0 && working.threads.length === 0 ? (
                   <ActiveEmptyState />
                 ) : null}
-                {pinned.threads.length === 0 &&
-                inbox.threads.length === 0 &&
-                working.threads.length > 0 &&
-                inactive.threads.length === 0 ? (
+                {pinned.threads.length === 0 && inbox.threads.length === 0 && working.threads.length > 0 ? (
                   <WorkingEmptyState />
                 ) : null}
               </>
@@ -208,26 +202,6 @@ export function ThreadInboxView({
                       {/* One line, like every shelf after Active. */}
                       {working.visibleThreads.map((thread) =>
                         renderActiveThread(thread, "inbox", false, true, false, "working"),
-                      )}
-                    </Shelf>
-                  </CollapsibleShelf>
-                ) : null}
-                {inactive.threads.length > 0 ? (
-                  <CollapsibleShelf
-                    label="Inactive"
-                    icon="PauseCircle"
-                    count={inactive.threads.length}
-                    expanded={expandedShelves.inactive}
-                    onToggle={() =>
-                      setExpandedShelves((current) => ({
-                        ...current,
-                        inactive: !current.inactive,
-                      }))
-                    }
-                  >
-                    <Shelf label={null}>
-                      {inactive.visibleThreads.map((thread) =>
-                        renderActiveThread(thread, "inbox", false, true, false, "inactive"),
                       )}
                     </Shelf>
                   </CollapsibleShelf>

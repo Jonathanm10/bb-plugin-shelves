@@ -12,9 +12,7 @@ import {
 import { SidebarLayoutSettings } from "./SidebarLayoutSettings";
 import { ThreadBehaviorSettings } from "./ThreadBehaviorSettings";
 import { ChildThreadSettings } from "./ChildThreadSettings";
-import { DeviceSettings } from "./DeviceSettings";
 import { configuredSnoozePresetError, parseConfiguredSnoozePresets } from "./lifecycle";
-import { isValidInactiveAfterHours } from "./inactive";
 import { isValidAutoSettleAfterDays } from "./auto-settle";
 import { SettingsSection, SwitchRow, type SaveStatus } from "./settings-ui";
 
@@ -49,7 +47,6 @@ const SECTION_BY_SETTING: Record<keyof SidebarSettingsValues, string> = {
 
 const validDraft = (value: SidebarSettingsValues) =>
   configuredSnoozePresetError(value.snoozePresets) === null &&
-  (!value.inactiveThreadsEnabled || isValidInactiveAfterHours(value.inactiveAfterHours)) &&
   (!value.autoSettleInactive || isValidAutoSettleAfterDays(value.autoSettleAfterDays));
 
 /**
@@ -122,7 +119,6 @@ export function SidebarSettings() {
   });
 
   const dirty = dirtyFields.current.size > 0;
-  const inactiveHoursValid = isValidInactiveAfterHours(draft.inactiveAfterHours);
   const autoSettleDaysValid = isValidAutoSettleAfterDays(draft.autoSettleAfterDays);
   const snoozePresetsError = configuredSnoozePresetError(draft.snoozePresets);
   const hasValidationError = !validDraft(draft);
@@ -149,8 +145,6 @@ export function SidebarSettings() {
       while (dirtyFields.current.size && validDraft(draftRef.current)) {
         const sentVersions = new Map(dirtyFields.current);
         const sent = { ...draftRef.current };
-        if (!isValidInactiveAfterHours(sent.inactiveAfterHours))
-          sent.inactiveAfterHours = DEFAULT_SIDEBAR_SETTINGS.inactiveAfterHours;
         if (!isValidAutoSettleAfterDays(sent.autoSettleAfterDays))
           sent.autoSettleAfterDays = DEFAULT_SIDEBAR_SETTINGS.autoSettleAfterDays;
         const patch = Object.fromEntries([...sentVersions.keys()].map((key) => [key, sent[key]]));
@@ -231,27 +225,19 @@ export function SidebarSettings() {
           checked={draft.workingShelf}
           onChange={(checked) => update("workingShelf", checked)}
         />
-        <p className="text-xs text-muted-foreground">
-          Search threads with Cmd/Ctrl+K. Create projects from BB's project picker. Completion, error, and input alerts
-          use BB's Push notifications settings.
+        <p className="border-t border-border px-4 py-3 text-xs leading-5 text-muted-foreground">
+          Use Search threads at the top of the inbox, or Cmd/Ctrl+K. BB's project picker creates projects, and its Push
+          notifications settings control completion and input alerts.
         </p>
       </SettingsSection>
 
-      <details className="space-y-8">
-        <summary className="cursor-pointer text-sm text-muted-foreground">Advanced settings</summary>
-        <SidebarLayoutSettings
-          draft={draft}
-          update={update}
-          status={statusFor("Sidebar layout")}
-          inactiveHoursValid={inactiveHoursValid}
-        />
+      <details className="space-y-4 rounded-lg border border-border p-4">
+        <summary className="cursor-pointer rounded py-1 text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          Advanced settings
+        </summary>
+        <SidebarLayoutSettings draft={draft} update={update} status={statusFor("Sidebar layout")} />
 
         <ChildThreadSettings draft={draft} update={update} status={statusFor("Child threads")} />
-
-        <DeviceSettings
-          status={statusFor("This device")}
-          onSaved={() => setSaveFeedback({ section: "This device", status: "saved" })}
-        />
       </details>
     </div>
   );

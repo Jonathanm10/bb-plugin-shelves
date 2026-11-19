@@ -7,7 +7,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { createIsolationGuard } from "./isolation.mjs";
 import { createScratchKeychain } from "./keychain.mjs";
 
-export async function startScratchServer() {
+export async function startScratchServer({ projectName = "Sidebar smoke" } = {}) {
   const args = process.argv.slice(2);
   const appIndex = args.indexOf("--app-dir");
   const sourceAppDir = resolve(appIndex < 0 ? "node_modules/bb-app" : args[appIndex + 1]);
@@ -267,7 +267,7 @@ trace_exporter = "none"
       "-m",
       "Scratch smoke fixture",
     ]);
-    const projectResult = await run(bb, ["project", "create", "--name", "Sidebar smoke", "--root", repo, "--json"]);
+    const projectResult = await run(bb, ["project", "create", "--name", projectName, "--root", repo, "--json"]);
     const project = JSON.parse(projectResult.stdout);
     const projectId = project.id ?? project.project?.id;
     if (!projectId) throw new Error(`No project id: ${projectResult.stdout}`);

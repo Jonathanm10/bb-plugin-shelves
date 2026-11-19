@@ -165,24 +165,6 @@ describe("sidebar settings", () => {
     expect(document.querySelector(".bb-sidebar-project-monogram")).toBeNull();
   });
 
-  it("lists device hosts in settings and saves the local port-link choice", async () => {
-    renderSlot(
-      sidebarSettings,
-      {},
-      {
-        sidebarThreads: {
-          status: "ready",
-          projects: [],
-          threads: [thread({ host: { id: "host_local", name: "Local Mac" } })],
-        },
-        rpc: { getSidebarSettings: () => defaultSidebarSettings, listProjectIconSettings: () => ({ projects: [] }) },
-      },
-    );
-    const select = await screen.findByLabelText("Open port links on");
-    expect(within(select).getByRole("option", { name: "Local Mac" })).toBeDefined();
-    fireEvent.change(select, { target: { value: "host_local" } });
-    expect(localStorage.getItem("bb-sidebar-clean:port-link-host:v1")).toBe("host_local");
-  });
   it("groups related controls and saves changes without a save button", async () => {
     let saved: typeof defaultSidebarSettings | null = null;
     renderSlot(
@@ -214,7 +196,6 @@ describe("sidebar settings", () => {
       "Sidebar",
       "Sidebar layout",
       "Child threads",
-      "This device",
     ]);
     expect(screen.queryByRole("navigation", { name: "Settings sections" })).toBeNull();
     const layout = screen.getByRole("region", { name: "Sidebar layout" });
@@ -226,12 +207,12 @@ describe("sidebar settings", () => {
     ).toBeDefined();
     expect(within(layout).queryByRole("switch", { name: "Archived shelf" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Project appearance" })).toBeNull();
+    expect(screen.queryByLabelText("Open port links on")).toBeNull();
+    expect(screen.queryByRole("region", { name: "This device" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Archiving" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Archive all settled threads" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();
-    expect(screen.getByRole("switch", { name: "Inactive shelf" }).querySelector("span")?.className).toContain(
-      "left-0.5",
-    );
+    expect(screen.queryByRole("switch", { name: "Inactive shelf" })).toBeNull();
     expect(screen.getByRole("switch", { name: "Show children that need attention" }).getAttribute("aria-checked")).toBe(
       "true",
     );
@@ -308,24 +289,13 @@ describe("sidebar settings", () => {
     fireEvent.change(snoozeInput, { target: { value: "Morning=tomorrow@08:30" } });
     expect(preview()).toEqual(["Morning"]);
 
-    const inactiveHours = screen.getByLabelText("Hours before inactive");
-    fireEvent.change(inactiveHours, { target: { value: "0" } });
-    expect(inactiveHours.getAttribute("aria-invalid")).toBe("true");
-    expect(screen.getByText("Enter a whole number from 1 to 720.")).toBeDefined();
-    // Past the save delay, nothing invalid has been sent.
+    fireEvent.change(snoozeInput, { target: { value: "later" } });
     await act(async () => vi.advanceTimersByTimeAsync(700));
     expect(saves).toEqual([]);
-
-    // Turning the rule off hides the value it no longer uses.
-    fireEvent.click(screen.getByRole("switch", { name: "Inactive shelf" }));
-    expect(screen.queryByLabelText("Hours before inactive")).toBeNull();
+    fireEvent.change(snoozeInput, { target: { value: "Morning=tomorrow@08:30" } });
     await act(async () => vi.advanceTimersByTimeAsync(500));
     expect(saves).toHaveLength(1);
-    expect(saves[0]).toMatchObject({
-      inactiveThreadsEnabled: false,
-      inactiveAfterHours: defaultSidebarSettings.inactiveAfterHours,
-      snoozePresets: "Morning=tomorrow@08:30",
-    });
+    expect(saves[0]).toMatchObject({ snoozePresets: "Morning=tomorrow@08:30" });
   });
 
   it("keeps a settings cache written before the child-thread settings", () => {
@@ -352,7 +322,7 @@ describe("sidebar settings", () => {
 
     expect(screen.queryByText("Loading settings...")).toBeNull();
     expect(screen.queryByRole("combobox", { name: "Show project stripes in" })).toBeNull();
-    expect((screen.getByLabelText("Hours before inactive") as HTMLInputElement).value).toBe("12");
+    expect(screen.queryByLabelText("Hours before inactive")).toBeNull();
     expect((screen.getByLabelText("Child threads sort field") as HTMLSelectElement).value).toBe("created");
     expect((screen.getByLabelText("Child thread icon") as HTMLSelectElement).value).toBe("disc");
   });

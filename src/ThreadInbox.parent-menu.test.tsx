@@ -68,7 +68,7 @@ describe("parent thread menu", () => {
         }),
       },
     });
-    await screen.findByRole("region", { name: "Inactive" });
+    await screen.findByRole("region", { name: "Active" });
     await screen.findByRole("region", { name: "Settled" });
     fireEvent.contextMenu(await screen.findByText("Choose my parent"));
     fireEvent.keyDown(screen.getByRole("menuitem", { name: "Parent" }), { key: "ArrowRight" });

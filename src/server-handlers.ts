@@ -4,9 +4,6 @@ import type { createServerProjectColors } from "./server-project-colors";
 import type { createServerSettleActions } from "./server-settle-actions";
 import type { createServerSettings } from "./server-settings";
 import type { createServerPolicy } from "./server-policy";
-import type { createPortDiscovery } from "./port-discovery";
-import type { createThreadPullRequests } from "./thread-pull-requests";
-import type { createTitleRegenerator } from "./regenerate-title";
 import { SIDEBAR_SETTINGS_CHANNEL } from "./contract";
 import { INBOX_ORDER_TAG, SIDEBAR_SETTINGS_TAG } from "./rpc-tags";
 import { canSnooze } from "./lifecycle";
@@ -19,9 +16,6 @@ export function createServerHandlers(
   lifecycle: ReturnType<typeof createServerLifecycle>,
   settings: Awaited<ReturnType<typeof createServerSettings>>,
   policy: ReturnType<typeof createServerPolicy>,
-  getOpenPorts: ReturnType<typeof createPortDiscovery>,
-  threadPullRequests: ReturnType<typeof createThreadPullRequests>,
-  regenerateTitle: ReturnType<typeof createTitleRegenerator>,
   modules: {
     colors: ReturnType<typeof createServerProjectColors>;
     settle: ReturnType<typeof createServerSettleActions>;
@@ -51,8 +45,6 @@ export function createServerHandlers(
   };
 
   const handlers = {
-    getOpenPorts,
-    getThreadPullRequests: threadPullRequests.getThreadPullRequests,
     async getThreadExecutionDetails({ threadId }) {
       const options = await ctx.bb.sdk.threads.defaultExecutionOptions({ threadId });
       if (!options) return null;
@@ -115,7 +107,6 @@ export function createServerHandlers(
       await ctx.bb.sdk.threads.delete({ threadId, childThreadsConfirmed });
       return { ok: true };
     },
-    regenerateTitle: ({ threadId }) => regenerateTitle(threadId),
     async getSidebarSettings() {
       return readSidebarSettings();
     },
@@ -237,12 +228,9 @@ export function createServerHandlers(
     },
   } satisfies Pick<
     ServerHandlers,
-    | "getOpenPorts"
-    | "getThreadPullRequests"
     | "getThreadExecutionDetails"
     | "setThreadParent"
     | "deleteThread"
-    | "regenerateTitle"
     | "getSidebarSettings"
     | "updateSidebarSettings"
     | "listLifecycle"

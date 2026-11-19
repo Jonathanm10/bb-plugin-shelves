@@ -40,7 +40,6 @@ const LOOPING = /\banimate-(?:spin|pulse|ping|bounce|shine[\w-]*)\b|\binfinite\b
 
 /** Uses that end on their own, with the count expected in each file. */
 const ALLOWED: Record<string, { count: number; reason: string }> = {
-  "src/ThreadTitle.tsx": { count: 1, reason: "spinner while a title is generated" },
   "src/ThreadInboxEmptyStates.tsx": { count: 1, reason: '"Loading threads…" while the list first loads' },
   "src/settings-ui.tsx": { count: 1, reason: "spinner while a setting saves" },
   "src/settle-button.css": { count: 1, reason: "star shimmer only while the settle button is hovered or focused" },

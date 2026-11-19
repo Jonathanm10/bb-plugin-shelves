@@ -12,39 +12,6 @@ import { MAX_INACTIVE_AFTER_HOURS, MIN_INACTIVE_AFTER_HOURS } from "./inactive";
 import { MAX_AUTO_SETTLE_AFTER_DAYS, MIN_AUTO_SETTLE_AFTER_DAYS } from "./auto-settle";
 export { SIDEBAR_SETTINGS_CHANNEL } from "./realtime-channels";
 
-export const openPortSchema = z.object({
-  port: z.number().int().min(1).max(65535),
-  processName: z.string().optional(),
-  pid: z.number().int().optional(),
-  address: z.string().optional(),
-  source: z.enum(["process", "docker"]).optional(),
-  container: z.string().optional(),
-  service: z.string().optional(),
-  ownerThreadId: z.string().optional(),
-});
-export type OpenPort = z.infer<typeof openPortSchema>;
-
-const portSnapshotSchema = z.object({
-  groups: z.array(
-    z.object({
-      environmentId: z.string(),
-      ports: z.array(openPortSchema),
-    }),
-  ),
-});
-
-export type PortSnapshot = z.infer<typeof portSnapshotSchema>;
-
-export const threadPullRequestSchema = z
-  .object({
-    url: z.string(),
-    number: z.number().int(),
-    title: z.string().nullable(),
-    state: z.enum(["open", "draft", "merged", "closed"]).nullable(),
-  })
-  .strict();
-export type ThreadPullRequest = z.infer<typeof threadPullRequestSchema>;
-
 const threadIdSchema = z.object({ threadId: z.string().trim().min(1) });
 /**
  * Legacy acknowledgement shape retained for installed clients. Current actions
@@ -99,20 +66,6 @@ export const sidebarSettingsSchema = z
   })
   .strict();
 export const bbSidebarRpcContract = defineRpcContract({
-  // The app names the workspaces to scan: those of live threads on its poll,
-  // or one settled thread's when the user looks at it, 500 per call (the app
-  // splits longer lists), each id at most 255 characters, since answers are
-  // cached by id. An app bundle older than the backend still sends
-  // `{}`; that is rejected like any bad input, and its catch clears the port
-  // badges until the new bundle loads.
-  getOpenPorts: {
-    input: z.object({ environmentIds: z.array(z.string().trim().min(1).max(255)).min(1).max(500) }).strict(),
-    output: portSnapshotSchema,
-  },
-  getThreadPullRequests: {
-    input: threadIdSchema.strict(),
-    output: z.object({ pullRequests: z.array(threadPullRequestSchema) }).strict(),
-  },
   getThreadExecutionDetails: {
     input: threadIdSchema.strict(),
     output: z
@@ -132,10 +85,6 @@ export const bbSidebarRpcContract = defineRpcContract({
   deleteThread: {
     input: threadIdSchema.extend({ childThreadsConfirmed: z.boolean() }).strict(),
     output: z.object({ ok: z.boolean() }),
-  },
-  regenerateTitle: {
-    input: threadIdSchema.strict(),
-    output: z.object({ title: z.string().min(1), changed: z.boolean() }).strict(),
   },
   getProjectColors: {
     input: z.object({}).strict(),

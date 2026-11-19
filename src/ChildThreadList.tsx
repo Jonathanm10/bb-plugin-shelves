@@ -20,7 +20,6 @@ import { canParkThread } from "./lifecycle";
 import { RowContextMenu } from "./RowContextMenu";
 import { InlineThreadTitle } from "./InlineThreadTitle";
 import { ThreadDetailsTooltip } from "./ThreadDetailsTooltip";
-import { OpenPortsIndicator } from "./OpenPorts";
 import {
   childStatusIndicator,
   childStatusKind,
@@ -411,7 +410,6 @@ function ChildThreadRow({
               />
             </span>
             {foreignProject ? <ForeignProjectMark project={foreignProject} /> : null}
-            <OpenPortsIndicator thread={thread} />
             {
               // Match parent cards: a recognized status owns the trailing
               // slot; an idle or future unknown status leaves it to the age.

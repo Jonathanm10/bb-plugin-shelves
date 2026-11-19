@@ -26,8 +26,6 @@ import { childThreadsByParent, collapsedChildThreads } from "./ChildThreadList";
 import { useChildThreadDisplayValue } from "./ChildThreadDisplay";
 import { useLifecycle } from "./useLifecycle";
 import { useLifecycleRows, type LifecycleRows } from "./useLifecycleRows";
-import { useLiveThreads } from "./useLiveThreads";
-import type { PortScanScope } from "./OpenPorts";
 import type { createDragPreview } from "./drag-preview";
 import { usePinnedReorder } from "./usePinnedReorder";
 import { useCollapseChildrenOnSettle } from "./useCollapseChildrenOnSettle";
@@ -40,7 +38,6 @@ import { useProjectScope } from "./useProjectScope";
 import { threadDisplayTitle } from "./inbox";
 import { movePinnedIdByOffset, orderPinnedThreads, rebaseMovedId } from "./pinned-order";
 import { parseConfiguredSnoozePresets } from "./lifecycle";
-import { parseInactiveAfterHours } from "./inactive";
 import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings";
 import { useWorkingForDisplay } from "./StatusSlot";
 import { useScrollFade } from "./useScrollFade";
@@ -62,8 +59,7 @@ type ActiveShelfKind = "pinned" | "inbox";
 export function ThreadInbox(props: PluginThreadListProps) {
   const snapshot = useSidebarThreads();
   const lifecycleRows = useLifecycleRows();
-  const { portScope } = useLiveThreads(snapshot.threads, lifecycleRows);
-  return <ThreadInboxContent {...props} snapshot={snapshot} lifecycleRows={lifecycleRows} portScope={portScope} />;
+  return <ThreadInboxContent {...props} snapshot={snapshot} lifecycleRows={lifecycleRows} />;
 }
 
 function ThreadInboxContent({
@@ -72,11 +68,9 @@ function ThreadInboxContent({
   isCompactViewport,
   snapshot,
   lifecycleRows,
-  portScope,
 }: PluginThreadListProps & {
   snapshot: ReturnType<typeof useSidebarThreads>;
   lifecycleRows: LifecycleRows;
-  portScope: PortScanScope;
 }) {
   const { status, threads, projects } = snapshot;
   const workingSince = useWorkingSince(threads, status);
@@ -89,11 +83,6 @@ function ThreadInboxContent({
   const attachScrollFadeRef = useScrollFade<HTMLDivElement>();
   const configuredSnoozePresets = sidebarSettings?.snoozePresets ?? DEFAULT_SIDEBAR_SETTINGS.snoozePresets;
   const snoozePresets = useMemo(() => parseConfiguredSnoozePresets(configuredSnoozePresets), [configuredSnoozePresets]);
-  const inactiveAfterHours = parseInactiveAfterHours(
-    // Keep the loading view active until saved or cached settings are available.
-    sidebarSettings?.inactiveThreadsEnabled ?? false,
-    String(sidebarSettings?.inactiveAfterHours ?? DEFAULT_SIDEBAR_SETTINGS.inactiveAfterHours),
-  );
   const dockShelvesEnabled = sidebarSettings?.dockShelves ?? DEFAULT_SIDEBAR_SETTINGS.dockShelves;
   const workingShelfEnabled = sidebarSettings?.workingShelf ?? DEFAULT_SIDEBAR_SETTINGS.workingShelf;
   const [scope, setScope] = useProjectScope({ projects, status });
@@ -136,7 +125,6 @@ function ThreadInboxContent({
     pinnedBase,
     inboxBase,
     workingBase,
-    inactiveBase,
     allPinnedBase,
     allInboxBase,
     parked,
@@ -145,9 +133,7 @@ function ThreadInboxContent({
   } = useInboxShelfThreads({
     activeThreadId,
     childrenByParentId,
-    inactiveAfterHours,
     lifecycle,
-    now,
     renamingShelfLocks,
     scope,
     threads,
@@ -189,10 +175,7 @@ function ThreadInboxContent({
     return orderPinnedThreads(ordered, dragOrder?.shelf === "pinned" ? dragOrder.ids : null);
   }, [dragOrder, pinnedBase, pinnedReorder.ids]);
   const orderedInbox = useMemo(() => orderPinnedThreads(inboxBase, inboxReorder.ids), [inboxBase, inboxReorder.ids]);
-  // Working and Inactive keep Active's manual order, so a thread that leaves
-  // for either comes back to the slot it left.
   const working = useMemo(() => sortWorkingThreads(workingBase, workingSince), [workingBase, workingSince]);
-  const inactive = useMemo(() => orderPinnedThreads(inactiveBase, inboxReorder.ids), [inactiveBase, inboxReorder.ids]);
   // Keep the root of an attention path reachable when its shelf is folded.
   const isWorking = useWorkingForDisplay();
   const attentionParentIds = useMemo(() => {
@@ -202,7 +185,7 @@ function ThreadInboxContent({
     ) {
       return ids;
     }
-    for (const thread of [...pinnedBase, ...inboxBase, ...inactiveBase]) {
+    for (const thread of [...pinnedBase, ...inboxBase]) {
       if (
         collapsedChildThreads(childrenByParentId.get(thread.id) ?? [], childrenByParentId, null, true, isWorking)
           .length > 0
@@ -211,14 +194,7 @@ function ThreadInboxContent({
       }
     }
     return ids;
-  }, [
-    childrenByParentId,
-    inactiveBase,
-    inboxBase,
-    isWorking,
-    pinnedBase,
-    sidebarSettings?.showRunningChildrenWhenCollapsed,
-  ]);
+  }, [childrenByParentId, inboxBase, isWorking, pinnedBase, sidebarSettings?.showRunningChildrenWhenCollapsed]);
   const visiblePinned = useMemo(
     () => visibleShelfThreads(pinned, expandedShelves.pinned, activeListThreadId, undefined, attentionParentIds),
     [attentionParentIds, activeListThreadId, expandedShelves.pinned, pinned],
@@ -245,10 +221,6 @@ function ThreadInboxContent({
   const visibleWorking = useMemo(
     () => visibleShelfThreads(working, expandedShelves.working, activeListThreadId),
     [activeListThreadId, expandedShelves.working, working],
-  );
-  const visibleInactive = useMemo(
-    () => visibleShelfThreads(inactive, expandedShelves.inactive, activeListThreadId, undefined, attentionParentIds),
-    [attentionParentIds, activeListThreadId, expandedShelves.inactive, inactive],
   );
   const sortedVisibleInbox = useMemo(
     () => sortActiveThreads(visibleInbox, activeSortMode),
@@ -386,11 +358,9 @@ function ThreadInboxContent({
   const wokeThreadIds = useMemo(
     () =>
       new Set(
-        [...pinned, ...inbox, ...working, ...inactive]
-          .filter((thread) => lifecycle.wokeFor(thread))
-          .map((thread) => thread.id),
+        [...pinned, ...inbox, ...working].filter((thread) => lifecycle.wokeFor(thread)).map((thread) => thread.id),
       ),
-    [inactive, inbox, lifecycle, pinned, working],
+    [inbox, lifecycle, pinned, working],
   );
 
   const { settleThread, snoozeThread } = useShelveActions({
@@ -435,14 +405,12 @@ function ThreadInboxContent({
       listAnimationController={listAnimationController}
       workingSince={workingSince}
       childDisplay={childDisplay}
-      portScope={portScope}
     >
       <ThreadInboxView
         shelves={{
           pinned: { threads: pinned, visibleThreads: visiblePinned },
           inbox: { threads: inbox, visibleThreads: visibleInbox },
           working: { threads: working, visibleThreads: visibleWorking },
-          inactive: { threads: inactive, visibleThreads: visibleInactive },
           snoozed: { threads: snoozed, visibleThreads: visibleSnoozed },
           parked: { threads: parked, visibleThreads: visibleParked },
           settled: { threads: settled, visibleThreads: visibleSettled },

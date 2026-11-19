@@ -12,7 +12,6 @@ import { Icon, type IconName } from "./components/Icon";
 import { cn } from "./lib/utils";
 import { usePortalScopeProps } from "./lib/portal-scope";
 import { formatSnoozeWakeTime, resolveConfiguredSnoozePreset, type ConfiguredSnoozePreset } from "./lifecycle";
-import { beginTitleGeneration, finishTitleGeneration, useTitleGenerating } from "./title-generation-state";
 
 type RowContextMenuProps = {
   thread: PluginSidebarThread;
@@ -79,24 +78,12 @@ function RowMenuContents({
   const project = projects.find((project) => project.id === thread.projectId);
   const portalScope = usePortalScopeProps();
   const rpc = useRpc<typeof bbSidebarRpcContract>();
-  const regenerating = useTitleGenerating(thread.id);
   const renameAfterClose = useRef(false);
   const leavingForSettings = useRef(false);
   // Outlives the portaled submenu, which unmounts when a choice closes the menu.
   const pendingNotificationSave = useRef<Promise<void> | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [pickingSnooze, setPickingSnooze] = useState(false);
-  const regenerate = async () => {
-    if (!beginTitleGeneration(thread.id)) return;
-    try {
-      const { changed } = await rpc.call("regenerateTitle", { threadId: thread.id });
-      toast.success(changed ? "Thread title regenerated" : "The current title still fits");
-    } catch (error) {
-      toast.error("Could not regenerate title", { description: errorDetail(error) });
-    } finally {
-      finishTitleGeneration(thread.id);
-    }
-  };
   const hasPinLifecycleItems = !!(
     thread.isPinned ||
     thread.parentThreadId == null ||
@@ -211,9 +198,6 @@ function RowMenuContents({
               Rename
             </Item>
           ) : null}
-          <Item disabled={regenerating} onSelect={() => void regenerate()}>
-            {regenerating ? "Regenerating title…" : "Regenerate title"}
-          </Item>
           <Item onSelect={() => void run("read")}>{thread.isUnread ? "Mark read" : "Mark unread"}</Item>
           <Separator />
           <CopySubmenu thread={thread} onCopyLink={() => void run("copyLink")} />

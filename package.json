@@ -24,8 +24,7 @@
       "icon": "PanelLeft"
     },
     "app": "./app.tsx",
-    "server": "./src/server.ts",
-    "host": "./src/ports-host.ts"
+    "server": "./src/server.ts"
   },
   "keywords": ["bb-plugin", "sidebar", "threads", "inbox", "productivity"],
   "files": [
@@ -43,7 +42,7 @@
     "build": "bb plugin build",
     "check": "npm run lint && npm run format:check && npm run knip && npm run typecheck && npm test && npm run test:scripts && npm run build && node scripts/check-app-bundle.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "test:scripts": "node --test scripts/bb-compat/*.test.mjs",
+    "test:scripts": "node --test scripts/bb-compat/*.test.mjs scripts/release/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint . && node scripts/check-import-boundaries.mjs && node scripts/check-file-sizes.mjs",
     "format": "biome format --write .",
