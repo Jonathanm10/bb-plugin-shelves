@@ -2,18 +2,27 @@
 
 ## [Unreleased]
 
-### Added
-
-- Independent BB Sidebar Clean identity, storage, and `bb clean-sidebar` command.
-- Keep threads with a PR setting, matching T3's inactivity exemption.
-
 ### Changed
 
-- Compact rows and Working enabled by default, with no Inactive shelf.
-- Park and Snooze actions hidden in the default compact menus.
-- Auto-settle controls shown first; other preferences under Advanced settings.
-- Quiet threads settle after seven days by default; merged-PR settling is on.
-- Closed PRs settle independently of the merged-PR switch.
+- Use readable two-line rows in Active and Working, with metadata in hover details.
+- Start new devices with Recent returns ordering, collapsed Working, bottom docking, and folded child rows. Preserve saved ordering and expansion choices.
+- Keep Snooze/Settle and Wake/Un-settle available in every density, including keyboard and touch access.
+- Put Working and auto-settle controls on the main settings surface; retain optional preferences under Advanced settings.
+- Keep native BB search, project creation, and notification delivery.
+- Remove normal Park creation and post-Settle port-cleanup prompts while retaining legacy rows and explicit cleanup compatibility.
+
+### Fixed
+
+- Snooze existing questions without answering them or stopping runtimes. Persist the pending-question snapshot across reloads; retain queued/background-work guards.
+- Keep auto-settled conversations filed across rule changes and restarts. Skip their recurring PR lookups and retain attention/work wakeups.
+- Make manual and automatic Settle organization-only actions without runtime or terminal cleanup.
+- Preserve open thread menus when loaded settings change bottom docking.
+
+## [0.1.0] - Initial preview
+
+- Independent BB Sidebar Clean identity and storage, based on BB Sidebar v0.3.12.
+- Seven-day inactivity rules, merged/closed PR rules, and PR inactivity protection.
+- Compact Working/Active/Settled layout. Superseded by the readable core workflow above.
 
 The history below is inherited from BB Sidebar; its version numbers refer to upstream releases.
 

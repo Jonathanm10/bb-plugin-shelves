@@ -1,8 +1,8 @@
 {
   "name": "bb-plugin-bb-sidebar-clean",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "description": "A compact BB sidebar with Working, Active, Settled, and automatic settling.",
+  "description": "A readable BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
   "license": "MIT",
   "author": "YSS Krishna",
   "repository": {
@@ -19,7 +19,7 @@
   },
   "bb": {
     "name": "BB Sidebar Clean",
-    "description": "A compact BB sidebar with Working, Active, Settled, and automatic settling.",
+    "description": "A readable BB sidebar with Working, Active, Settled, snooze, and automatic settling.",
     "branding": {
       "icon": "PanelLeft"
     },

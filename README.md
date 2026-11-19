@@ -1,40 +1,56 @@
 # BB Sidebar Clean
 
-A compact BB sidebar with three everyday sections:
+A BB sidebar for keeping work in three everyday sections:
 
-- **Active** - completed results, questions, errors, and conversations ready for you.
-- **Working** - agents still running or waiting on work. They return to Active automatically.
-- **Settled** - quiet and finished work, collapsed and available when you need it. New agent activity brings it back.
+- **Active** - results, questions, and errors ready for you, newest returns first.
+- **Working** - continuing work, folded at the bottom by default. Finished or blocked work returns to Active automatically.
+- **Settled** - filed conversations, collapsed and available when you need them.
 
-Threads use one line by default. Reading a conversation does not file it. You do not need to settle every completed thread manually.
+Rows show project/status above the title. Snooze and Settle work on hover, keyboard focus, touch, and the row menu. Reading a conversation does not file it.
 
-The proposed [product specification](SPEC.md) covers the complete sidebar behavior, defaults, BB integration boundaries, advanced capabilities, and acceptance scenarios.
+| Light | Dark |
+| --- | --- |
+| ![Readable sidebar](docs/screenshots/after-light-320.png) | ![Row actions](docs/screenshots/actions-dark-320.png) |
+
+## Filing and snoozing
+
+**Settle** files finished work. **Un-settle** restores it to Active and prevents automatic settlement until new activity. **Undo** restores the previous shelves. Busy thread trees remain protected.
+
+**Snooze** defers a thread until a chosen time. The Snoozed section appears only while used. **Wake** brings it back immediately; new attention can wake it early. An existing question can be snoozed without answering it. Queued work and continuing background activity remain protected.
+
+Snooze and Settle leave runtimes and terminals running. Resource cleanup is a separate explicit action. Legacy Parked rows can still be resumed; normal menus do not create new Parked rows.
 
 ## Automatic settling
 
 | Rule | Default |
 | --- | --- |
-| Auto-settle inactive threads | On, after 7 days |
-| Auto-settle merged threads | On |
-| Closed pull requests | Settle automatically, independently of the merge switch |
-| Keep threads with a PR | Off; enable to exempt PR threads from inactivity settling |
+| Inactive threads | Settle after 7 days |
+| Merged pull requests | Settle automatically |
+| Closed pull requests | Settle independently of the merge switch |
+| Keep threads with a PR | Off; enable to exempt known PR threads from inactivity |
 
-Rules run when the sidebar opens and every five minutes on the BB server. They continue with the browser closed while BB is running. A completed result stays Active until a rule applies. Settings save automatically.
+Rules run when the sidebar opens and every five minutes on the BB server, including while the browser is closed. Completed results stay Active until a rule applies. Settings changes and server restarts leave settled conversations filed; new activity can bring them back.
 
-Running work, queued messages, pending questions, pinned threads, and live descendants prevent settling. Missing PR data keeps a thread visible until it can be checked. PR rules use BB's GitHub PR Status plugin. Automatic settling never archives or deletes a conversation.
+Running work, queued messages, pending questions, pinned threads, and live descendants prevent automatic settlement. Unknown PR data preserves the current state. PR rules use BB's GitHub PR Status plugin. Automatic settling never archives or deletes a conversation.
 
-Appearance, grouping, child-thread controls, and project management are under **Advanced settings**. Compact menus hide Park and Snooze; the inherited full-card layout retains those optional actions. Pinning and legacy shelves remain compatible. The extra Inactive shelf is off by default.
+## Native BB features
+
+- Search all threads, including filed ones, with **Cmd/Ctrl+K**.
+- Use BB's **New thread** action and **Project picker > New project**.
+- Use **Push notifications** for completion, question, and error alerts. Clicking a thread notification opens that thread. Enable completion delivery with `bb plugin config push-notifications set defaultLevel all`; per-thread and child overrides still apply. Each browser needs notification permission.
+
+The plugin adds no second search index, project backend, or notification delivery service. Appearance, grouping, and compatibility preferences remain under Advanced settings or their existing menus. Inactive is off by default. Saved manual ordering and section expansion choices survive upgrades; choose **Recent returns** in Active's sort menu to adopt the new order on an existing device.
 
 ## Install the review branch
 
-Requires BB 0.49.0 or newer.
+Requires BB 0.49.0 or newer. This branch is available for trial; it is not merged into main.
 
 ```sh
 bb plugin install git:github.com/ysskrishna/bb-sidebar-clean@feature/t3-clean-sidebar --yes
 bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
-Disable other sidebar plugins' automatic policies before trying this one. Selecting a different visual provider alone does not stop its background jobs.
+Disable other sidebar plugins' automatic policies before trying this one. Selecting a visual provider alone does not stop background jobs. This plugin uses its own database, browser-storage namespace, and `bb clean-sidebar` command; it does not import or overwrite Beside or BB Sidebar data.
 
 For development:
 
@@ -48,18 +64,15 @@ bb plugin install .
 bb settings ui set sidebar.threadListProvider bb-sidebar-clean/inbox
 ```
 
-The plugin has its own database, browser-storage namespace, and `bb clean-sidebar` command. It does not import or overwrite Beside or BB Sidebar settings. Disable this plugin to stop its background policy before switching back.
+## Scope and verification
 
-## Implementation and checks
+See the approved [core specification](SPEC.md). This independent repository starts from [BB Sidebar v0.3.12](https://github.com/yusuf8834/bb-sidebar/tree/a2f65687517cc5e3513d71017cea5a3306c11313); its license and notices are preserved. The [T3 thread-sidebar guide](https://github.com/pingdotgg/t3code/blob/470ca63499293f7f680f8ad2e77381a6752f1348/docs/user/thread-sidebar.md) informed the behavior. No model or decision API is used.
 
-This independent repository starts from [BB Sidebar v0.3.12](https://github.com/yusuf8834/bb-sidebar/tree/a2f65687517cc5e3513d71017cea5a3306c11313). Its original license and notices are preserved. [T3 Code's settlement service](https://github.com/pingdotgg/t3code/blob/475ae52ac279152dd2c13a86a59227d3e1441e3d/apps/server/src/orchestration-v2/ThreadSettlementService.ts) and [thread behavior documentation](https://github.com/pingdotgg/t3code/blob/475ae52ac279152dd2c13a86a59227d3e1441e3d/docs/user/thread-sidebar.md) informed the lifecycle rules. No model or decision API is used.
-
-This is a BB adaptation. BB exposes different activity and PR signals: terminal PR eligibility compares the PR update time with the latest thread activity, and background commands or serving ports conservatively keep a thread visible. It does not reproduce every T3 lifecycle detail.
+This is a BB adaptation. Working order uses observed run starts because BB's sidebar API exposes no submission timestamp; unseen starts fall back to thread activity. PR eligibility uses the PR update time and available thread timestamps. Background commands and serving ports conservatively keep work visible. Pin protection is retained. Exact T3 monitor, PR-watch, and user-message semantics are outside this release.
 
 ```sh
 npm run check
-npm test -- src/auto-settle-t3.test.ts src/ThreadInbox.clean.test.tsx
-env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --grep 'clean sidebar'
+env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --grep 'core sidebar'
 ```
 
-The browser runner uses a disposable BB server and test threads. It does not operate on your live conversations. See [browser test isolation](e2e/README.md).
+Core browser acceptance covers light/dark layouts at 280/320px, keyboard and touch filing, Undo, Wake/Un-settle, persisted settings, and native search. The runner uses disposable BB threads and checks isolation from the real BB home. See [browser test isolation](e2e/README.md). Native notification broadcast/source checks cannot prove that an operating system displayed a banner.

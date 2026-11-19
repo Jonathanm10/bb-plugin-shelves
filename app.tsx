@@ -1,6 +1,5 @@
-// BB Sidebar: a shelved, manually ordered replacement for bb's thread list.
-// Manual order stays fixed until the user moves a row. Optional views can sort
-// by activity, creation date, or project without changing the saved order.
+// A readable Working, Active, and Settled sidebar. Native BB owns search,
+// project creation, and notifications; this plugin owns filing and presentation.
 import { definePluginApp } from "@get-bb/plugin-sdk/app";
 import "./src/theme.css";
 import { ThreadInbox } from "./src/ThreadInbox";
@@ -18,7 +17,7 @@ export default definePluginApp((app) => {
   app.slots.experimental_threadList({
     id: "inbox",
     title: "BB Sidebar Clean",
-    description: "Working, Active, and Settled with automatic cleanup.",
+    description: "Readable Working, Active, and Settled with snooze and automatic filing.",
     component: ThreadInbox,
   });
 
