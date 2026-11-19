@@ -2,9 +2,6 @@ import type { BbPluginApi } from "@get-bb/plugin-sdk";
 import type { ServerContext } from "./server-context";
 import { bbSidebarRpcContract } from "./contract";
 import { INBOX_ORDER_TAG } from "./rpc-tags";
-import { createThreadPullRequests } from "./thread-pull-requests";
-import { createTitleRegenerator } from "./regenerate-title";
-import { AUTO_TITLE_RECOVERY_MIGRATION, createAutoTitleRecovery } from "./auto-title";
 import { createServerSettings, INSTALL_DEFAULTS_MIGRATIONS } from "./server-settings";
 import { createServerLifecycle, LIFECYCLE_BACKFILLS_MIGRATION } from "./server-lifecycle";
 import { createServerProjectIcons } from "./server-project-icons";
@@ -71,7 +68,9 @@ const migrations = [
      ADD COLUMN working_shelf INTEGER NOT NULL DEFAULT 0`,
   `ALTER TABLE sidebar_settings
      ADD COLUMN dock_shelves INTEGER NOT NULL DEFAULT 0`,
-  AUTO_TITLE_RECOVERY_MIGRATION,
+  `CREATE TABLE IF NOT EXISTS title_recovery_attempts (
+  thread_id TEXT PRIMARY KEY
+)`,
   `ALTER TABLE sidebar_settings ADD COLUMN project_colors_enabled INTEGER NOT NULL DEFAULT 0`,
   // Retained to preserve migration indices for installations of the archive preview.
   `ALTER TABLE sidebar_settings ADD COLUMN archived_shelf_enabled INTEGER NOT NULL DEFAULT 0`,
@@ -114,18 +113,15 @@ const migrations = [
 
 export default async function plugin(bb: BbPluginApi) {
   const ctx: ServerContext = { bb, db: bb.storage.database() };
-  const threadPullRequests = createThreadPullRequests(ctx.bb);
 
-  const regenerateTitle = createTitleRegenerator(ctx.bb);
   ctx.bb.storage.migrate(ctx.db, migrations);
-  createAutoTitleRecovery(ctx.bb, regenerateTitle);
   const settings = await createServerSettings(ctx);
   const icons = createServerProjectIcons(ctx);
   const colors = createServerProjectColors(ctx);
   const lifecycle = createServerLifecycle(ctx);
   const settle = createServerSettleActions(ctx, lifecycle);
   const policy = createServerPolicy(ctx, lifecycle, settings);
-  const handlers = createServerHandlers(ctx, lifecycle, settings, policy, threadPullRequests, regenerateTitle, {
+  const handlers = createServerHandlers(ctx, lifecycle, settings, policy, {
     colors,
     settle,
   });
@@ -181,7 +177,6 @@ export default async function plugin(bb: BbPluginApi) {
   // thread reusing the id, and stale rows accumulate otherwise.
   ctx.bb.events.on("thread.deleted", ({ thread }) => {
     clear(thread.id);
-    threadPullRequests.forgetThread(thread.id);
     const removed = ctx.db.prepare(`DELETE FROM inbox_order WHERE thread_id = ?`).run(thread.id);
     if (removed.changes > 0) {
       ctx.bb.rpc.experimental_invalidate([INBOX_ORDER_TAG]);

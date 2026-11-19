@@ -7,7 +7,6 @@ const config: KnipConfig = {
   entry: [
     "app.tsx",
     "src/server.ts",
-    "src/pr-host.ts",
     "src/test-setup.ts",
     "e2e/*.spec.mjs",
     "e2e/playwright.config.mjs",

@@ -55,7 +55,6 @@ describe("row context menu", () => {
       "Snooze",
       "Settle",
       "Rename",
-      "Regenerate title",
       "Mark unread",
       "Copy",
       "Archive",

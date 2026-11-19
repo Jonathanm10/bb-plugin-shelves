@@ -3,6 +3,8 @@ import { loadPlugin } from "./test-server";
 
 it.each([
   ["getOpenPorts", { environmentIds: ["env_1"] }],
+  ["regenerateTitle", { threadId: "thr_1" }],
+  ["getThreadPullRequests", { threadId: "thr_1" }],
   ["getThreadLimits", { keys: [] }],
   ["scheduleLimitContinue", { threadId: "thr_1" }],
   ["cancelLimitContinue", { threadId: "thr_1", queuedMessageId: "queued_1" }],

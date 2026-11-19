@@ -11,7 +11,6 @@ import { useThreadRowStatus, useThreadWithDraft } from "./StatusSlot";
 import { StillThreadStatusGlyph } from "./StillThreadStatusGlyph";
 import { ProjectFavicon } from "./ProjectFavicon";
 import { projectIconUrl } from "./project-icons";
-import { ThreadPullRequestDetails } from "./ThreadPullRequests";
 import { compareChildThreads, useChildThreadDisplay } from "./ChildThreadDisplay";
 import { cn } from "./lib/utils";
 
@@ -179,7 +178,6 @@ export function ThreadDetailsTooltip({
             ) : null}
           </div>
         ) : null}
-        <ThreadPullRequestDetails thread={thread} />
       </div>
     </div>
   );

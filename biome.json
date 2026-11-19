@@ -62,7 +62,6 @@
         "src/lib/**",
         "src/use*.ts",
         "src/project-colors.ts",
-        "src/title-generation-state.ts",
         "src/sidebar-settings.ts",
         "src/working-since.ts",
         "src/working-tree.ts",
@@ -80,7 +79,7 @@
               "options": {
                 "patterns": [
                   {
-                    "group": ["**/server", "**/server.*", "**/pr-host", "**/pr-host.*", "**/server-*"],
+                    "group": ["**/server", "**/server.*", "**/server-*"],
                     "message": "Browser/shared modules must not import Node entries, even for types."
                   }
                 ]
@@ -98,13 +97,8 @@
         "!src/test-*.ts",
         "!src/use*.ts",
         "!src/server.ts",
-        "!src/pr-host.ts",
-        "!src/auto-title.ts",
-        "!src/regenerate-title.ts",
-        "!src/thread-pull-requests.ts",
         "!src/thread-tasks.ts",
         "!src/project-colors.ts",
-        "!src/title-generation-state.ts",
         "!src/sidebar-settings.ts",
         "!src/working-since.ts",
         "!src/working-tree.ts",
@@ -127,7 +121,7 @@
                     "message": "Shared modules must stay independent of React and Node."
                   },
                   {
-                    "group": ["**/server", "**/server.*", "**/pr-host", "**/pr-host.*", "**/server-*"],
+                    "group": ["**/server", "**/server.*", "**/server-*"],
                     "message": "Browser/shared modules must not import Node entries, even for types."
                   },
                   {
@@ -157,15 +151,7 @@
       }
     },
     {
-      "includes": [
-        "src/pr-host.ts",
-        "src/auto-title.ts",
-        "src/regenerate-title.ts",
-        "src/thread-pull-requests.ts",
-        "src/thread-tasks.ts",
-        "src/server.ts",
-        "src/server-*.ts"
-      ],
+      "includes": ["src/thread-tasks.ts", "src/server.ts", "src/server-*.ts"],
       "linter": {
         "rules": {
           "style": {

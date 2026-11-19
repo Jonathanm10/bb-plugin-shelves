@@ -12,16 +12,6 @@ import { MAX_INACTIVE_AFTER_HOURS, MIN_INACTIVE_AFTER_HOURS } from "./inactive";
 import { MAX_AUTO_SETTLE_AFTER_DAYS, MIN_AUTO_SETTLE_AFTER_DAYS } from "./auto-settle";
 export { SIDEBAR_SETTINGS_CHANNEL } from "./realtime-channels";
 
-export const threadPullRequestSchema = z
-  .object({
-    url: z.string(),
-    number: z.number().int(),
-    title: z.string().nullable(),
-    state: z.enum(["open", "draft", "merged", "closed"]).nullable(),
-  })
-  .strict();
-export type ThreadPullRequest = z.infer<typeof threadPullRequestSchema>;
-
 const threadIdSchema = z.object({ threadId: z.string().trim().min(1) });
 /**
  * Legacy acknowledgement shape retained for installed clients. Current actions
@@ -76,10 +66,6 @@ export const sidebarSettingsSchema = z
   })
   .strict();
 export const bbSidebarRpcContract = defineRpcContract({
-  getThreadPullRequests: {
-    input: threadIdSchema.strict(),
-    output: z.object({ pullRequests: z.array(threadPullRequestSchema) }).strict(),
-  },
   getThreadExecutionDetails: {
     input: threadIdSchema.strict(),
     output: z
@@ -99,10 +85,6 @@ export const bbSidebarRpcContract = defineRpcContract({
   deleteThread: {
     input: threadIdSchema.extend({ childThreadsConfirmed: z.boolean() }).strict(),
     output: z.object({ ok: z.boolean() }),
-  },
-  regenerateTitle: {
-    input: threadIdSchema.strict(),
-    output: z.object({ title: z.string().min(1), changed: z.boolean() }).strict(),
   },
   getProjectColors: {
     input: z.object({}).strict(),

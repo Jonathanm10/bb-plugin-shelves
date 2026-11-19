@@ -1,10 +1,8 @@
-import type { ThreadPullRequest } from "./contract";
-import type { EnvironmentPullRequest, PullRequestAttention, PullRequestState } from "./github-pr-status";
+import type { PullRequestAttention, PullRequestState } from "./github-pr-status";
 
 /**
  * A PR as the sidebar draws it. Only the live branch PR from GitHub PR Status
- * carries `attention`; PRs found in the thread's history have just a state,
- * and none when `gh` could not look them up.
+ * carries the attention state as well as the PR state.
  */
 type DisplayPullRequest = {
   number: number;
@@ -68,23 +66,4 @@ export function pullRequestToneClass(pullRequest: DisplayPullRequest): string {
     return "text-[color:var(--bb-sidebar-pr-open)]";
   }
   return "text-muted-foreground";
-}
-
-/**
- * The thread's PRs newest first. The live branch PR from GitHub PR Status has
- * the richer status, so it replaces its history entry. It is reported per
- * workspace, so in a shared checkout it may belong to another thread; it
- * leads the list only when the workspace is the thread's own worktree (a PR
- * opened outside `gh pr create`).
- */
-export function mergeThreadPullRequests(
-  current: EnvironmentPullRequest | null,
-  history: readonly ThreadPullRequest[],
-  ownsWorkspace: boolean,
-): DisplayPullRequest[] {
-  if (!current) return [...history];
-  if (!history.some((pullRequest) => pullRequest.url === current.url)) {
-    return ownsWorkspace ? [current, ...history] : [...history];
-  }
-  return history.map((pullRequest) => (pullRequest.url === current.url ? current : pullRequest));
 }
