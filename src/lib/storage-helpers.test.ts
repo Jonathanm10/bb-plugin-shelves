@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { BROWSER_EVENTS } from "./browser-events";
 import { createCachedRpcState } from "./cached-rpc-state";
 import { lifecycleRowsCodec } from "./lifecycle-cache-codec";
 import { STORAGE_KEYS } from "./storage-keys";
@@ -139,13 +138,13 @@ describe("persisted preference", () => {
       ...codec,
       subscribe: (listener) => {
         window.addEventListener("storage", listener);
-        window.addEventListener(BROWSER_EVENTS.portLinkHostChanged, listener);
+        window.addEventListener("test:preference-changed", listener);
         return () => {
           window.removeEventListener("storage", listener);
-          window.removeEventListener(BROWSER_EVENTS.portLinkHostChanged, listener);
+          window.removeEventListener("test:preference-changed", listener);
         };
       },
-      notify: () => window.dispatchEvent(new Event(BROWSER_EVENTS.portLinkHostChanged)),
+      notify: () => window.dispatchEvent(new Event("test:preference-changed")),
     };
     const writes = vi.spyOn(Storage.prototype, "setItem");
     const first = renderHook(() => usePersistedPreference(key, external));
@@ -172,7 +171,7 @@ describe("persisted preference", () => {
     first.unmount();
     second.unmount();
     expect(unsubscribe.mock.calls.filter(([event]) => event === "storage")).toHaveLength(2);
-    expect(unsubscribe.mock.calls.filter(([event]) => event === BROWSER_EVENTS.portLinkHostChanged)).toHaveLength(2);
+    expect(unsubscribe.mock.calls.filter(([event]) => event === "test:preference-changed")).toHaveLength(2);
   });
 });
 

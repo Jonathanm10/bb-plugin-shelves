@@ -6,7 +6,7 @@
 // prints the PR URL. This module finds those URLs and asks the thread's host
 // for their status via `gh`.
 import type { BbPluginApi } from "@get-bb/plugin-sdk";
-import { portScanContract } from "./port-scan-contract";
+import { pullRequestHostContract } from "./pr-host-contract";
 import { createdPullRequestUrls, pullRequestNumber } from "./pull-requests";
 import type { ThreadPullRequest } from "./contract";
 
@@ -15,7 +15,7 @@ const EVENT_PAGE_SIZE = 100;
 const OPEN_STATUS_TTL_MS = 60_000;
 
 export function createThreadPullRequests(bb: BbPluginApi) {
-  const host = bb.hosts.experimental_client({ contract: portScanContract });
+  const host = bb.hosts.experimental_client({ contract: pullRequestHostContract });
   const controller = new AbortController();
   bb.onDispose(() => controller.abort());
   // Event logs only grow, so each thread is scanned once and then from its

@@ -12,7 +12,6 @@ import {
 import { SidebarLayoutSettings } from "./SidebarLayoutSettings";
 import { ThreadBehaviorSettings } from "./ThreadBehaviorSettings";
 import { ChildThreadSettings } from "./ChildThreadSettings";
-import { DeviceSettings } from "./DeviceSettings";
 import { configuredSnoozePresetError, parseConfiguredSnoozePresets } from "./lifecycle";
 import { isValidInactiveAfterHours } from "./inactive";
 import { isValidAutoSettleAfterDays } from "./auto-settle";
@@ -247,11 +246,6 @@ export function SidebarSettings() {
         />
 
         <ChildThreadSettings draft={draft} update={update} status={statusFor("Child threads")} />
-
-        <DeviceSettings
-          status={statusFor("This device")}
-          onSaved={() => setSaveFeedback({ section: "This device", status: "saved" })}
-        />
       </details>
     </div>
   );

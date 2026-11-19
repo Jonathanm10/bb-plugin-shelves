@@ -15,7 +15,7 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 ## Architecture
 
 - Browser entry: `app.tsx`. Server entry: `src/server.ts`. Host entry:
-  `src/ports-host.ts`. Keep browser, Node, and shared modules separate;
+  `src/pr-host.ts`. Keep browser, Node, and shared modules separate;
   `biome.json` and `scripts/check-import-boundaries.mjs` enforce the boundaries.
 - Experimental app SDK hooks go through `src/bb-sdk.ts`.
 - Use BB's status resolver for display through `src/working-tree.ts` and
@@ -32,10 +32,8 @@ Legacy Parked rows retain Resume. Normal controls do not create Parked rows.
 ## State and background work
 
 - A settled thread is filed. Recurring scans and PR lookups skip settled work;
-  read it on demand when opened, hovered, or returned to Active. Start port
-  polling only after lifecycle rows load. Shared live workspaces remain live.
-- Read-only port detection protects serving work from automatic settlement.
-  Unknown host/PR results preserve the thread's place. Filing never stops a
+  read it on demand when opened, hovered, or returned to Active.
+- Unknown PR results preserve the thread's place. Filing never stops a
   runtime, closes a terminal, archives, or deletes a conversation.
 - Settings changes and restart do not reopen already auto-settled work. New
   work or attention can return it. Preserve queue, pin, question, and child guards.

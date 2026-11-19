@@ -25,7 +25,7 @@
     },
     "app": "./app.tsx",
     "server": "./src/server.ts",
-    "host": "./src/ports-host.ts"
+    "host": "./src/pr-host.ts"
   },
   "keywords": ["bb-plugin", "sidebar", "threads", "inbox", "productivity"],
   "files": [

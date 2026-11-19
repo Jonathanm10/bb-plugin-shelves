@@ -29,7 +29,6 @@ import { InlineThreadTitle } from "./InlineThreadTitle";
 import { isWorkingTree } from "./working-tree";
 import { ProjectFavicon, ProjectStripe } from "./ProjectFavicon";
 import { useProjectColor } from "./ProjectColors";
-import { OpenPortsIndicator } from "./OpenPorts";
 import { useInboxEnvironment, useInboxActions, useInboxActivity } from "./InboxContext";
 import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings";
 import { useRowStatusRuns } from "./useLifecycle";
@@ -301,7 +300,6 @@ export function ThreadCard({
               fadeContent
               trailing={
                 <span className="pointer-events-none relative flex shrink-0 items-center gap-1.5">
-                  <OpenPortsIndicator thread={thread} />
                   {childThreads.length > 0 ? (
                     <ChildThreadBadge
                       threads={childThreads}
@@ -484,7 +482,6 @@ export function ThreadCard({
                     "pointer-events-none relative ml-auto flex shrink-0 items-center gap-1.5 text-2xs text-muted-foreground",
                   )}
                 >
-                  <OpenPortsIndicator thread={thread} />
                   {childThreads.length > 0 ? (
                     <ChildThreadBadge
                       threads={childThreads}

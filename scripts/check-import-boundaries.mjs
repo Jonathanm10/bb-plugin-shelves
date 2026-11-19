@@ -21,7 +21,7 @@ function findOverride(marker) {
 const typeImportsOverride = findOverride("src/**/*.ts");
 const appOverride = findOverride("src/components/**");
 const sharedOverride = findOverride("src/*.ts");
-const nodeOverride = findOverride("src/ports-host.ts");
+const nodeOverride = findOverride("src/pr-host.ts");
 if (!nodeOverride.includes.includes("src/server-*.ts") || !sharedOverride.includes.includes("!src/server-*.ts")) {
   configError("Server modules must be classified as Node with src/server-*.ts.");
 }
@@ -109,7 +109,7 @@ for (const input of files) {
       );
     } else if (!browser && !shared) {
       return;
-    } else if (/(^|\/)(server(?:-[^/]+)?|ports-host)(\.[cm]?[jt]sx?)?$/.test(normalized)) {
+    } else if (/(^|\/)(server(?:-[^/]+)?|pr-host)(\.[cm]?[jt]sx?)?$/.test(normalized)) {
       report(file, source, specifier, `Browser/shared code must not import ${name}, even for types.`);
     } else if (shared && normalized.startsWith("node:")) {
       report(file, source, specifier, `Shared modules must not import Node built-in ${name}, even for types.`);
@@ -122,7 +122,7 @@ for (const input of files) {
   }
   function visit(node) {
     // Preserve consistent-type-imports' annotation ban, including its sole Vitest exception.
-    if (ts.isImportTypeNode(node) && file !== "src/ports-host.test.ts") {
+    if (ts.isImportTypeNode(node) && file !== "src/pr-host.test.ts") {
       report(file, source, node, "Use a top-level import type instead of an import() type annotation.");
     }
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {

@@ -165,24 +165,6 @@ describe("sidebar settings", () => {
     expect(document.querySelector(".bb-sidebar-project-monogram")).toBeNull();
   });
 
-  it("lists device hosts in settings and saves the local port-link choice", async () => {
-    renderSlot(
-      sidebarSettings,
-      {},
-      {
-        sidebarThreads: {
-          status: "ready",
-          projects: [],
-          threads: [thread({ host: { id: "host_local", name: "Local Mac" } })],
-        },
-        rpc: { getSidebarSettings: () => defaultSidebarSettings, listProjectIconSettings: () => ({ projects: [] }) },
-      },
-    );
-    const select = await screen.findByLabelText("Open port links on");
-    expect(within(select).getByRole("option", { name: "Local Mac" })).toBeDefined();
-    fireEvent.change(select, { target: { value: "host_local" } });
-    expect(localStorage.getItem("bb-sidebar-clean:port-link-host:v1")).toBe("host_local");
-  });
   it("groups related controls and saves changes without a save button", async () => {
     let saved: typeof defaultSidebarSettings | null = null;
     renderSlot(
@@ -214,7 +196,6 @@ describe("sidebar settings", () => {
       "Sidebar",
       "Sidebar layout",
       "Child threads",
-      "This device",
     ]);
     expect(screen.queryByRole("navigation", { name: "Settings sections" })).toBeNull();
     const layout = screen.getByRole("region", { name: "Sidebar layout" });
@@ -226,6 +207,8 @@ describe("sidebar settings", () => {
     ).toBeDefined();
     expect(within(layout).queryByRole("switch", { name: "Archived shelf" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Project appearance" })).toBeNull();
+    expect(screen.queryByLabelText("Open port links on")).toBeNull();
+    expect(screen.queryByRole("region", { name: "This device" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Archiving" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Archive all settled threads" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();

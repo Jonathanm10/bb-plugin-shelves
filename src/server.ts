@@ -2,8 +2,6 @@ import type { BbPluginApi } from "@get-bb/plugin-sdk";
 import type { ServerContext } from "./server-context";
 import { bbSidebarRpcContract } from "./contract";
 import { INBOX_ORDER_TAG } from "./rpc-tags";
-import { createPortDiscovery } from "./port-discovery";
-import { createThreadPortActions } from "./thread-ports";
 import { createThreadPullRequests } from "./thread-pull-requests";
 import { createTitleRegenerator } from "./regenerate-title";
 import { AUTO_TITLE_RECOVERY_MIGRATION, createAutoTitleRecovery } from "./auto-title";
@@ -116,10 +114,6 @@ const migrations = [
 
 export default async function plugin(bb: BbPluginApi) {
   const ctx: ServerContext = { bb, db: bb.storage.database() };
-  const getOpenPorts = createPortDiscovery(ctx.bb);
-
-  const threadPortActions = createThreadPortActions(ctx.bb);
-
   const threadPullRequests = createThreadPullRequests(ctx.bb);
 
   const regenerateTitle = createTitleRegenerator(ctx.bb);
@@ -130,17 +124,11 @@ export default async function plugin(bb: BbPluginApi) {
   const colors = createServerProjectColors(ctx);
   const lifecycle = createServerLifecycle(ctx);
   const settle = createServerSettleActions(ctx, lifecycle);
-  const policy = createServerPolicy(ctx, lifecycle, settings, threadPortActions);
-  const handlers = createServerHandlers(
-    ctx,
-    lifecycle,
-    settings,
-    policy,
-    getOpenPorts,
-    threadPullRequests,
-    regenerateTitle,
-    { colors, settle },
-  );
+  const policy = createServerPolicy(ctx, lifecycle, settings);
+  const handlers = createServerHandlers(ctx, lifecycle, settings, policy, threadPullRequests, regenerateTitle, {
+    colors,
+    settle,
+  });
   const { resolveProjectIcon } = icons;
   const { wakeAncestors, clearSettlingState, clear, settleUnarchivedTree } = lifecycle;
   ctx.bb.http.route("GET", "/project-icon", async (context) => {

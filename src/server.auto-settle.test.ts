@@ -347,7 +347,7 @@ describe("automatic settle evaluation", () => {
     expect(harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
   });
 
-  it("never settles a thread still serving a port, or one whose host cannot be scanned", async () => {
+  it("settles inactive conversations without scanning workspace ports or requiring an online host", async () => {
     const old = Date.now() - 4 * 24 * 60 * 60 * 1_000;
     const inWorkspace = (id: string, environmentId: string, hostId = "host_1") =>
       projectThread({
@@ -401,9 +401,17 @@ describe("automatic settle evaluation", () => {
     disposers.push(() => harness.lifecycle.dispose());
 
     await expect(harness.behavior.callRpc("evaluateAutoSettle", {})).resolves.toEqual({
-      changedThreadIds: ["thr_shared_a", "thr_shared_b", "thr_docker", "thr_gone"],
+      changedThreadIds: [
+        "thr_owned",
+        "thr_solo",
+        "thr_shared_a",
+        "thr_shared_b",
+        "thr_docker",
+        "thr_offline",
+        "thr_gone",
+      ],
     });
-    expect(scans.map((scan) => scan.hostId).sort()).toEqual(["host_1", "host_offline"]);
+    expect(scans).toEqual([]);
     expect(harness.inspection.sdk.callsTo("threads.stop")).toHaveLength(0);
   });
 

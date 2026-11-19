@@ -1,5 +1,5 @@
 import { useProviders, useSidebarThreadSplit, useSidebarThreads } from "./bb-sdk";
-import { useCallback, useEffect, useId, useRef, useState, type ReactElement } from "react";
+import { useEffect, useId, useState, type ReactElement } from "react";
 import { useRpc, type PluginSidebarThread } from "@get-bb/plugin-sdk/app";
 import type { bbSidebarRpcContract } from "./contract";
 import { ThreadHoverCard } from "./components/ThreadHoverCard";
@@ -11,7 +11,6 @@ import { useThreadRowStatus, useThreadWithDraft } from "./StatusSlot";
 import { StillThreadStatusGlyph } from "./StillThreadStatusGlyph";
 import { ProjectFavicon } from "./ProjectFavicon";
 import { projectIconUrl } from "./project-icons";
-import { OpenPortDetails, useLookUpOpenPorts } from "./OpenPorts";
 import { ThreadPullRequestDetails } from "./ThreadPullRequests";
 import { compareChildThreads, useChildThreadDisplay } from "./ChildThreadDisplay";
 import { cn } from "./lib/utils";
@@ -76,24 +75,6 @@ export function ThreadDetailsTooltip({
       cancelled = true;
     };
   }, [call, thread.id, visible]);
-
-  // A settled thread is skipped by the recurring lookups, so looking at it
-  // asks once. Keyed on the open state alone: a context update mid-open must
-  // not ask again. Live threads make this a no-op.
-  const lookUpPorts = useLookUpOpenPorts();
-  const lookUps = useRef({ lookUpPorts, environmentId: thread.environment?.id });
-  lookUps.current = { lookUpPorts, environmentId: thread.environment?.id };
-  const lookUp = useCallback(
-    (looking: boolean) => {
-      if (!looking) return;
-      lookUps.current.lookUpPorts(lookUps.current.environmentId ?? undefined);
-    },
-    [thread.id],
-  );
-  // Each trigger on its own: hovering the open thread still asks again once
-  // the last answer is older than 30s.
-  useEffect(() => lookUp(visible), [lookUp, visible]);
-  useEffect(() => lookUp(isOpen), [lookUp, isOpen]);
 
   const { sort: childSort } = useChildThreadDisplay();
   const status = useCardStatus(thread);
@@ -199,7 +180,6 @@ export function ThreadDetailsTooltip({
           </div>
         ) : null}
         <ThreadPullRequestDetails thread={thread} />
-        <OpenPortDetails thread={thread} />
       </div>
     </div>
   );

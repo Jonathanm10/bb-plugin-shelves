@@ -316,7 +316,7 @@ it.each(snapshots)(
     assertSettingsControls(settingsSlot.container, settings);
     expect(inboxSlot.container.querySelector("[data-project-stripe]") !== null).toBe(settings.projectColorsEnabled);
     expect(screen.getByText("Working · 5m")).toBeDefined();
-    expect(screen.getByRole("combobox", { name: "Open port links on" })).toHaveProperty("value", "host_1");
+    expect(screen.queryByRole("combobox", { name: "Open port links on" })).toBeNull();
     expect(
       Object.keys(fixture)
         .map((key) => key.replace("bb-sidebar:", "bb-sidebar-clean:"))

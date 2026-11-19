@@ -26,8 +26,6 @@ import { childThreadsByParent, collapsedChildThreads } from "./ChildThreadList";
 import { useChildThreadDisplayValue } from "./ChildThreadDisplay";
 import { useLifecycle } from "./useLifecycle";
 import { useLifecycleRows, type LifecycleRows } from "./useLifecycleRows";
-import { useLiveThreads } from "./useLiveThreads";
-import type { PortScanScope } from "./OpenPorts";
 import type { createDragPreview } from "./drag-preview";
 import { usePinnedReorder } from "./usePinnedReorder";
 import { useCollapseChildrenOnSettle } from "./useCollapseChildrenOnSettle";
@@ -62,8 +60,7 @@ type ActiveShelfKind = "pinned" | "inbox";
 export function ThreadInbox(props: PluginThreadListProps) {
   const snapshot = useSidebarThreads();
   const lifecycleRows = useLifecycleRows();
-  const { portScope } = useLiveThreads(snapshot.threads, lifecycleRows);
-  return <ThreadInboxContent {...props} snapshot={snapshot} lifecycleRows={lifecycleRows} portScope={portScope} />;
+  return <ThreadInboxContent {...props} snapshot={snapshot} lifecycleRows={lifecycleRows} />;
 }
 
 function ThreadInboxContent({
@@ -72,11 +69,9 @@ function ThreadInboxContent({
   isCompactViewport,
   snapshot,
   lifecycleRows,
-  portScope,
 }: PluginThreadListProps & {
   snapshot: ReturnType<typeof useSidebarThreads>;
   lifecycleRows: LifecycleRows;
-  portScope: PortScanScope;
 }) {
   const { status, threads, projects } = snapshot;
   const workingSince = useWorkingSince(threads, status);
@@ -435,7 +430,6 @@ function ThreadInboxContent({
       listAnimationController={listAnimationController}
       workingSince={workingSince}
       childDisplay={childDisplay}
-      portScope={portScope}
     >
       <ThreadInboxView
         shelves={{

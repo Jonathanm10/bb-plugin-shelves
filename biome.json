@@ -80,7 +80,7 @@
               "options": {
                 "patterns": [
                   {
-                    "group": ["**/server", "**/server.*", "**/ports-host", "**/ports-host.*", "**/server-*"],
+                    "group": ["**/server", "**/server.*", "**/pr-host", "**/pr-host.*", "**/server-*"],
                     "message": "Browser/shared modules must not import Node entries, even for types."
                   }
                 ]
@@ -98,12 +98,9 @@
         "!src/test-*.ts",
         "!src/use*.ts",
         "!src/server.ts",
-        "!src/ports-host.ts",
-        "!src/port-scan.ts",
+        "!src/pr-host.ts",
         "!src/auto-title.ts",
         "!src/regenerate-title.ts",
-        "!src/port-discovery.ts",
-        "!src/thread-ports.ts",
         "!src/thread-pull-requests.ts",
         "!src/thread-tasks.ts",
         "!src/project-colors.ts",
@@ -130,7 +127,7 @@
                     "message": "Shared modules must stay independent of React and Node."
                   },
                   {
-                    "group": ["**/server", "**/server.*", "**/ports-host", "**/ports-host.*", "**/server-*"],
+                    "group": ["**/server", "**/server.*", "**/pr-host", "**/pr-host.*", "**/server-*"],
                     "message": "Browser/shared modules must not import Node entries, even for types."
                   },
                   {
@@ -161,12 +158,9 @@
     },
     {
       "includes": [
-        "src/ports-host.ts",
-        "src/port-scan.ts",
+        "src/pr-host.ts",
         "src/auto-title.ts",
         "src/regenerate-title.ts",
-        "src/port-discovery.ts",
-        "src/thread-ports.ts",
         "src/thread-pull-requests.ts",
         "src/thread-tasks.ts",
         "src/server.ts",

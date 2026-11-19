@@ -59,7 +59,7 @@ See [browser test setup](e2e/README.md) for Chromium, fixture-provider requireme
 
 ## Inspiration
 
-Based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar), with inspiration from [Sidebar Pro](https://github.com/kr3t3n/bb-plugin-sidebar-pro) and [T3 Code](https://github.com/pingdotgg/t3code). Inherited port parsing comes from [bb-plugin-worktree-ports](https://github.com/xlightxyearx/bb-plugin-worktree-ports).
+Based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar), with inspiration from [Sidebar Pro](https://github.com/kr3t3n/bb-plugin-sidebar-pro) and [T3 Code](https://github.com/pingdotgg/t3code).
 
 ## Built and maintained by
 

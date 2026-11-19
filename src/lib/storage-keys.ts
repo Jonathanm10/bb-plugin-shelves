@@ -28,8 +28,6 @@ export const STORAGE_KEYS = {
   settings: { key: "bb-sidebar-clean:settings-cache:v1", evictionPriority: 80 },
   // Read-only legacy project grouping migration.
   activeGrouping: { key: "bb-sidebar-clean:active-grouping:v1", evictionPriority: 65 },
-  // Machine selected for port links on this device.
-  portLinkHost: { key: "bb-sidebar-clean:port-link-host:v1", evictionPriority: 75 },
 } as const;
 
 export const PLUGIN_STORAGE_KEYS = Object.values(STORAGE_KEYS)
