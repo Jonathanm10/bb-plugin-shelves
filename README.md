@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/ysskrishna/bb-thread-inbox/actions/workflows/ci.yml/badge.svg)](https://github.com/ysskrishna/bb-thread-inbox/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/ysskrishna/bb-thread-inbox?label=release)](https://github.com/ysskrishna/bb-thread-inbox/releases)
+[![BB Marketplace](https://img.shields.io/badge/BB-Marketplace-181717)](https://getbb.app/marketplace/bb-thread-inbox)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 [![Author site](https://img.shields.io/badge/author-ysskrishna.space-informational)](https://ysskrishna.space)
 
@@ -31,7 +32,14 @@ Search, project and thread creation, notifications, and retries use BB's native 
 
 Requires **BB 0.49.0 or newer**. The release badge above reflects published GitHub Releases.
 
-<details open>
+Install from [BB Marketplace](https://getbb.app/marketplace/bb-thread-inbox):
+
+```sh
+bb plugin install bb-thread-inbox
+bb settings ui set sidebar.threadListProvider bb-thread-inbox/inbox
+```
+
+<details>
 <summary><b>Install v0.1.1</b></summary>
 
 Install the stable release from [Releases](https://github.com/ysskrishna/bb-thread-inbox/releases).
@@ -140,7 +148,7 @@ Check **Settings > Push notifications** in the main BB window. The desktop switc
 - [Releases](https://github.com/ysskrishna/bb-thread-inbox/releases) and [issues](https://github.com/ysskrishna/bb-thread-inbox/issues)
 - [Security policy](SECURITY.md)
 - [Remaining scope review](docs/scope-review.md), with priorities and confidence scores
-- [BB Community submission plan](docs/marketplace.md). The plugin is not listed yet.
+- [BB Marketplace](https://getbb.app/marketplace/bb-thread-inbox) and [listing maintenance](docs/marketplace.md)
 
 ## Inspiration
 

@@ -1,18 +1,22 @@
-# BB Community submission
+# BB Community listing
 
 The public registry is [get-bb/marketplace](https://github.com/get-bb/marketplace#submit-a-plugin).
 A reviewed pull request adds the plugin to BB Community. BB Official is bundled
 with BB and is a separate BB team decision. The
-[community submission](https://github.com/get-bb/marketplace/pull/1006) is awaiting
-maintainer review; it is not a live store listing yet.
+[community submission](https://github.com/get-bb/marketplace/pull/1006) was merged
+on 2026-11-20. Thread Inbox is live on
+[BB Marketplace](https://getbb.app/marketplace/bb-thread-inbox).
 
-## Order of work
+Install from the listing with `bb plugin install bb-thread-inbox`.
+
+## Updating the listing
 
 1. Merge and verify the plugin PR.
 2. Publish the stable version using [tag-based releases](../AGENTS.md#tag-based-releases).
 3. Verify a fresh install from that exact public tag on a compatible BB version.
    Recheck current marketplace requirements and SDK/host dependency placement.
-4. Fork `get-bb/marketplace`, then add the entry below as `entries/bb-thread-inbox.json`.
+4. Update `entries/bb-thread-inbox.json` in a fork of `get-bb/marketplace` when
+   the source, name, or branding changes. The current entry is shown below.
 5. Copy `PLUGIN_OVERVIEW.md` to `overview/bb-thread-inbox.md`. It must be plain
    supported Markdown, under 4,000 characters, with absolute HTTPS links.
 6. Copy `docs/screenshots/marketplace-overview.png` to
@@ -20,8 +24,8 @@ maintainer review; it is not a live store listing yet.
    PNG/JPEG/WebP images at least 1,200 px wide and no larger than 2 MiB; up to six.
 7. In the registry checkout run `npm ci`, `npm run build`, `npm test`,
    `npm run gate:v1`, and `npm run check`. The last check validates the remote source.
-8. Open the registry PR and address maintainer review. Do not advertise a store
-   install command or marketplace badge until the entry is merged and visible.
+8. Open a registry PR for the changes and address maintainer review. Verify
+   updates on the live listing after the PR is merged.
 
 A `range` source discovers stable version tags, so later compatible releases do
 not require editing the registry entry. Source, name, and branding changes do.
@@ -57,4 +61,4 @@ The first marketplace release is 0.1.1.
 }
 ```
 
-Update the existing submission after publishing and testing the new tag.
+Compatible releases are discovered from stable tags after publication.
