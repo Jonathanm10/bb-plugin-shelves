@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- A weekly "BB compat" workflow that runs the type check and scratch smoke test against any newer BB outside `engines.bb` and reports in a `bb-compat` issue.
+
 ### Changed
 
 - Added the live BB Marketplace badge and installation command, and updated the listing documentation.
