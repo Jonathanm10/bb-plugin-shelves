@@ -25,6 +25,6 @@ jobs:
     with:
       bb-version: ${{ inputs.bb-version }}
       always-test: true
-      codex-version: 0.162.1
+      codex-version: latest
       apt-packages: lsof procps
       setup: npx --no-install playwright install --with-deps chromium

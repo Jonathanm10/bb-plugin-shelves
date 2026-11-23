@@ -8,6 +8,7 @@
 
 ### Changed
 
+- CI installs the latest Codex CLI for the scratch e2e and BB compat runs instead of a pinned version, and the e2e error text no longer names a version.
 - Added the live BB Marketplace badge and installation command, and updated the listing documentation.
 
 ### Removed

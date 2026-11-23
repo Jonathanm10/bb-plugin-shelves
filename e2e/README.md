@@ -3,7 +3,7 @@
 Install dependencies with `npm ci`, the fixture provider CLI, and Chromium:
 
 ```sh
-npm install --global @openai/codex@0.162.1
+npm install --global @openai/codex
 npx --no-install playwright install chromium
 # On Linux, install the browser's OS dependencies too:
 npx --no-install playwright install --with-deps chromium
@@ -89,7 +89,7 @@ It supplies idle rows without completed agent output. The quick smoke keeps
 the original seven-day scheduled fixture.
 
 The launcher checks `codex --version` before starting the scratch server. CI
-installs the pinned CLI above; no login or credentials are needed. Without the
+installs the latest CLI; no login or credentials are needed. Without the
 executable, provider startup can fail before cancellation reaches the thread,
 leaving it in `error`. On suite failure, the runner saves server output and
 thread state/event logs in `e2e-artifacts/` before deleting scratch data.
@@ -155,7 +155,7 @@ env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --update-snapshots
 Only macOS has reviewed baselines, so Linux skips the five visual comparisons
 and runs the behavior tests. This avoids treating font/rendering
 differences as product regressions. The manual Ubuntu workflow installs
-Chromium's Linux dependencies, the pinned Codex CLI, `lsof`, and `procps`.
+Chromium's Linux dependencies, the latest Codex CLI, `lsof`, and `procps`.
 It uploads screenshots, traces, reports, thread/server diagnostics, and isolation
 evidence on failure. Use this workflow to verify Ubuntu execution and native
 addon installation; macOS checks do not cover them. Linux snapshots should be added only after
