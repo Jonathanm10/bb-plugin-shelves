@@ -8,6 +8,7 @@
 
 ### Changed
 
+- The e2e seeds tolerate any provider notification that BB does not map (`provider/unhandled`), so a newer Codex CLI cannot fail them. Agent output and provider errors still fail them.
 - CI installs the latest Codex CLI for the Browser e2e and BB compat runs instead of a pinned version. The e2e error text and `e2e/README.md` no longer name a version.
 - Added the live BB Marketplace badge and installation command, and updated the listing documentation.
 

@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { expect } from "@playwright/test";
+import { unexpectedSeedEvents } from "../scripts/e2e/seed-events.mjs";
 import { test, fixture, cli } from "./helpers.mjs";
 
 export async function seed(title, { projectId = fixture.projectId, root } = {}) {
@@ -30,15 +31,7 @@ export async function seed(title, { projectId = fixture.projectId, root } = {}) 
     expect(thread.environmentId).toBeTruthy();
     expect(thread.queuedMessageCount).toBe(0);
     const events = await cli(["thread", "log", id]);
-    expect(
-      events.filter(
-        (event) =>
-          event.type.startsWith("item/") ||
-          (event.type.startsWith("provider/") &&
-            event.type !== "provider/warning" &&
-            !(event.type === "provider/unhandled" && event.data.rawType === "account/updated")),
-      ),
-    ).toEqual([]);
+    expect(unexpectedSeedEvents(events)).toEqual([]);
     return { id, title };
   } catch (error) {
     await cli(["thread", "delete", id, "--yes"]);
