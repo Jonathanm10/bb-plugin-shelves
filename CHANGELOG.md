@@ -8,6 +8,7 @@
 
 ### Changed
 
+- CI installs the latest Codex CLI for the Browser e2e and BB compat runs instead of a pinned version. The e2e error text and `e2e/README.md` no longer name a version.
 - Added the live BB Marketplace badge and installation command, and updated the listing documentation.
 
 ### Removed
