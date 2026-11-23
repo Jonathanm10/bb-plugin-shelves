@@ -4,7 +4,7 @@
 
 ### Added
 
-- A weekly "BB compat" workflow that runs the type check and scratch smoke test against any newer BB outside `engines.bb` and reports in a `bb-compat` issue. Because `engines.bb` here has no upper bound, a scheduled run finds every stable BB in range and tests nothing; dispatch it with `bb-version: nightly` to run the checks.
+- A "BB compat" workflow that runs the type check and scratch smoke test daily against BB nightly and reports a failure in a `bb-compat` issue.
 
 ### Changed
 

@@ -1,17 +1,15 @@
 name: BB compat
 
-# Weekly check that the latest BB still fits engines.bb; see
-# https://github.com/ysskrishna/bb-plugin-ci. Dispatch with a bb-version such
-# as "nightly" to test a newer BB early. engines.bb here has no upper bound,
-# so every stable BB is in range and a scheduled run tests nothing; only a
-# prerelease dispatch runs the checks.
+# Daily check against the BB nightly, so a breaking change shows up before it
+# reaches a stable BB; see https://github.com/ysskrishna/bb-plugin-ci. Dispatch
+# with a bb-version such as "latest" or an exact version to test another BB.
 on:
   schedule:
-    - cron: "37 6 * * 1"
+    - cron: "37 6 * * *"
   workflow_dispatch:
     inputs:
       bb-version:
-        description: bb-app version or dist-tag to test (empty means latest)
+        description: bb-app version or dist-tag to test (empty means nightly)
         default: ""
   pull_request:
     paths:
@@ -25,7 +23,7 @@ jobs:
   compat:
     uses: ysskrishna/bb-plugin-ci/.github/workflows/bb-compat.yml@v1
     with:
-      bb-version: ${{ inputs.bb-version }}
+      bb-version: ${{ inputs.bb-version || 'nightly' }}
       codex-version: 0.162.1
       apt-packages: lsof procps
       setup: npx --no-install playwright install --with-deps chromium
