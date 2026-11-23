@@ -30,7 +30,7 @@ the pinned bb-app (`devDependencies.bb-app`). Neither runs as part of
 Chromium compete with the unit suite for CPU.
 Before releases on macOS: `npm run e2e`; CI: `gh workflow run "Browser e2e"`.
 
-The weekly "BB compat" workflow (from [bb-plugin-ci](https://github.com/ysskrishna/bb-plugin-ci)) runs `typecheck` and `e2e:smoke` against any newer BB outside `engines.bb` and reports the result in a `bb-compat` issue.
+The weekly "BB compat" workflow (from [bb-plugin-ci](https://github.com/ysskrishna/bb-plugin-ci)) runs `typecheck` and `e2e:smoke` against any newer BB outside `engines.bb` and reports the result in a `bb-compat` issue. Because `engines.bb` here has no upper bound, a scheduled run finds every stable BB in range and tests nothing; dispatch it with `bb-version: nightly` to run the checks.
 
 ## Isolation and fixtures
 

@@ -2,7 +2,9 @@ name: BB compat
 
 # Weekly check that the latest BB still fits engines.bb; see
 # https://github.com/ysskrishna/bb-plugin-ci. Dispatch with a bb-version such
-# as "nightly" to test a newer BB early.
+# as "nightly" to test a newer BB early. engines.bb here has no upper bound,
+# so every stable BB is in range and a scheduled run tests nothing; only a
+# prerelease dispatch runs the checks.
 on:
   schedule:
     - cron: "37 6 * * 1"
