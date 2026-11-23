@@ -11,6 +11,7 @@ test("seed events tolerate provider warnings and any unhandled provider notifica
       { type: "provider/unhandled", data: { rawType: "account/updated" } },
       { type: "provider/unhandled", data: { rawType: "some/new-notification" } },
       { type: "turn/started", data: {} },
+      { type: "thread/status", data: {} },
     ]),
     [],
   );
@@ -24,5 +25,16 @@ test("seed events reject agent output and provider errors", () => {
       { type: "provider/warning", data: {} },
     ]),
     ["item/completed", "provider/error"],
+  );
+});
+
+test("seed events reject unmapped notifications that report agent activity", () => {
+  assert.deepEqual(
+    types([
+      { type: "provider/unhandled", data: { rawType: "item/reasoning/summaryPartAdded" } },
+      { type: "provider/unhandled", data: { rawType: "command/exec/outputDelta" } },
+      { type: "provider/unhandled", data: {} },
+    ]),
+    ["provider/unhandled", "provider/unhandled"],
   );
 });
