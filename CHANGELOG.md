@@ -6,6 +6,10 @@
 
 - Added the live BB Marketplace badge and installation command, and updated the listing documentation.
 
+### Removed
+
+- The inherited `scripts/bb-compat` tooling and its never-run `bb compatibility` and `bb bump` workflows. The shared "BB compat" workflow from `ysskrishna/bb-plugin-ci` replaces them.
+
 ## [0.1.1]
 
 ### Changed
