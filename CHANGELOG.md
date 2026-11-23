@@ -4,7 +4,7 @@
 
 ### Added
 
-- A "BB compat" workflow that runs the type check and scratch smoke test daily against BB nightly and reports a failure in a `bb-compat` issue.
+- A "BB compat" workflow that runs the type check and scratch smoke test daily against the latest stable BB and reports a failure in a `bb-compat` issue.
 
 ### Changed
 
