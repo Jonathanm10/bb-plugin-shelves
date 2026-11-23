@@ -82,8 +82,9 @@ The scratch homes contain no developer credentials or copied provider state.
 The suite seeds four fixed-title threads using CLI `thread spawn --prompt ''`
 with Codex and the scratch checkout, immediately followed by `thread stop`.
 Each must reach `idle`, have an environment, have no queued messages, and have
-no item/output/tool events or provider errors. Metadata warnings and account
-announcements are allowed. An empty initial turn can start before stop arrives;
+no item/output/tool events or provider errors. Provider warnings and
+notifications BB does not map (`provider/unhandled`, such as account
+announcements from newer Codex CLIs) are allowed. An empty initial turn can start before stop arrives;
 this is a create-and-cancel fixture, not a guarantee that no turn ever starts.
 It supplies idle rows without completed agent output. The quick smoke keeps
 the original seven-day scheduled fixture.

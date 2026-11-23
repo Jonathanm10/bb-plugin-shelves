@@ -6,6 +6,7 @@ import { join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { createIsolationGuard } from "./isolation.mjs";
 import { createScratchKeychain } from "./keychain.mjs";
+import { unexpectedSeedEvents } from "./seed-events.mjs";
 
 export async function startScratchServer({ projectName = "Sidebar smoke" } = {}) {
   const args = process.argv.slice(2);
@@ -319,14 +320,7 @@ trace_exporter = "none"
         const { thread } = JSON.parse((await cli(["thread", "get", id, "--json"])).stdout);
         if (!thread.environmentId || thread.queuedMessageCount) throw new Error("Idle fixture is not initialized");
         const events = JSON.parse((await cli(["thread", "log", id, "--json"])).stdout);
-        const unexpected = events.filter((event) => {
-          if (event.type.startsWith("item/")) return true;
-          if (!event.type.startsWith("provider/")) return false;
-          return (
-            event.type !== "provider/warning" &&
-            !(event.type === "provider/unhandled" && event.data.rawType === "account/updated")
-          );
-        });
+        const unexpected = unexpectedSeedEvents(events);
         if (unexpected.length) {
           throw new Error(
             `Fixture unexpectedly produced agent output or provider errors: ${unexpected.map((event) => event.type).join(", ")}`,
