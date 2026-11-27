@@ -85,9 +85,27 @@ export async function reset(request) {
   await rpc(request, "reorderInbox", { inboxThreadIds: fixture.threads.map(({ id }) => id) });
 }
 
+// bb's sidebar reserves its rail, a border and the scroller's scrollbar gutter outside the plugin body. macOS
+// overlay scrollbars (the Automatic setting with no mouse attached) reserve no gutter, so measure it once.
+let hostReserve;
+
+async function measureHostReserve(page) {
+  const probe = await page.context().browser().newPage();
+  try {
+    await probe.addInitScript(() => localStorage.setItem("bb.sidebar.width", "380"));
+    await probe.goto(fixture.url);
+    const root = probe.locator("[data-shelves-root]");
+    await expect(root).toBeVisible();
+    return 380 - Math.round((await root.boundingBox()).width);
+  } finally {
+    await probe.close();
+  }
+}
+
 export async function open(page, { theme = "light", width = 320, empty = false, core = false } = {}) {
+  hostReserve ??= await measureHostReserve(page);
   await page.addInitScript(
-    ({ theme, width, core }) => {
+    ({ theme, sidebarWidth, core }) => {
       localStorage.setItem("bb.theme", theme);
       // Historical drag/grouping flows explicitly exercise saved manual order.
       // Core acceptance leaves preferences absent to exercise shipped defaults.
@@ -96,10 +114,9 @@ export async function open(page, { theme = "light", width = 320, empty = false, 
         localStorage.getItem("shelves:shelf-expansion:v1") ??
           localStorage.setItem("shelves:shelf-expansion:v1", JSON.stringify({ working: true }));
       }
-      // The pinned bb 0.49 host reserves 60 px outside the plugin body.
-      localStorage.setItem("bb.sidebar.width", String(width + 60));
+      localStorage.setItem("bb.sidebar.width", String(sidebarWidth));
     },
-    { theme, width, core },
+    { theme, sidebarWidth: width + hostReserve, core },
   );
   await page.goto(fixture.url);
   if (empty) {
