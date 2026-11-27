@@ -1,190 +1,74 @@
-# Thread Inbox
+# Shelves
 
-[![CI](https://github.com/ysskrishna/bb-thread-inbox/actions/workflows/ci.yml/badge.svg)](https://github.com/ysskrishna/bb-thread-inbox/actions/workflows/ci.yml)
-[![GitHub release](https://img.shields.io/github/v/release/ysskrishna/bb-thread-inbox?label=release)](https://github.com/ysskrishna/bb-thread-inbox/releases)
-[![BB Marketplace](https://img.shields.io/badge/BB-Marketplace-181717)](https://getbb.app/marketplace/bb-thread-inbox)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
-[![Author site](https://img.shields.io/badge/author-ysskrishna.space-informational)](https://ysskrishna.space)
+A sidebar for [BB](https://getbb.app) that sorts threads onto shelves: work in progress, results waiting for you, and finished conversations. Its look and behaviour follow [T3 Code](https://github.com/pingdotgg/t3code)'s sidebar.
 
-A community sidebar for [BB](https://getbb.app) that keeps ongoing work, returned results, and finished conversations easy to find.
+![Settle a thread, restore it, snooze it, and wake it in Shelves](docs/demo.gif)
 
-Working stays out of the way while agents run. Active brings back results and questions. Settle completed conversations, or snooze them until you are ready to return.
-
-![Settle a thread, restore it, snooze it, and wake it in Thread Inbox](docs/screenshots/thread-inbox-demo.gif)
-
-The GIF records actual interactions in BB 0.50.1 with disposable demo data: **Settle → Un-settle → Snooze → Wake → Search**. Sidebar images below are cropped browser screenshots. [Capture details](docs/screenshots/README.md).
+The GIF records real interactions in a disposable BB with demo data: Settle, Un-settle, Snooze, Wake, Search.
 
 ## Features
 
-| Section or action | What it does |
+| Shelf or action | What it does |
 | --- | --- |
-| **Working** | Collects continuing work in a collapsible section at the bottom. |
+| **Working** | Collects running work in a collapsible shelf at the bottom. |
 | **Active** | Shows recent results, errors, and questions first. |
-| **Settled** | Holds filed conversations with Un-settle and Undo. |
-| **Snooze / Wake** | Defers a conversation until later or returns it immediately. |
-| **Automatic settling** | Files inactive threads and threads with merged or closed pull requests. |
+| **Settled** | Holds filed conversations, with Un-settle and Undo. |
+| **Snooze / Wake** | Defers a conversation until later, or returns it now. |
+| **Automatic settling** | Files inactive threads and threads whose pull request was merged or closed. |
 
-Filing never archives or deletes a conversation, stops a runtime, or closes a terminal. Running work reported by BB, unanswered questions, queues, pins, and live children protect threads from automatic settling. Reading alone does not settle a thread; new activity can return filed work.
+Filing never archives or deletes a conversation, stops a runtime, or closes a terminal. Running work, unanswered questions, queues, pins, and live children protect a thread from automatic settling, and new activity brings filed work back.
 
-Search, project and thread creation, notifications, and retries use BB's native controls. Click **Search threads** at the top of the inbox, or use **Cmd/Ctrl+K**, to find threads, including settled conversations. The button works even if native Search is hidden in BB's navigation. Use **Project picker > New project** to create a project.
+Search, thread and project creation, notifications, and retries stay BB's own. **Search threads** at the top of the sidebar, or **Cmd/Ctrl+K**, also finds settled conversations.
 
 ## Installation
 
-Requires **BB 0.49.0 or newer**. The release badge above reflects published GitHub Releases.
-
-Install from [BB Marketplace](https://getbb.app/marketplace/bb-thread-inbox):
+Requires **BB 0.49.0 or newer**.
 
 ```sh
-bb plugin install bb-thread-inbox
-bb settings ui set sidebar.threadListProvider bb-thread-inbox/inbox
+bb plugin install git:github.com/Jonathanm10/bb-plugin-shelves@main
+bb settings ui set sidebar.threadListProvider shelves/inbox
 ```
 
-<details>
-<summary><b>Install v0.1.1</b></summary>
+The plugin ID is `shelves` and the CLI is `bb shelves`. Disable other sidebar plugins first, so their background rules do not run alongside this one.
 
-Install the stable release from [Releases](https://github.com/ysskrishna/bb-thread-inbox/releases).
+Settings are under **Settings > Shelves**. The defaults are seven days of inactivity before a thread settles, and settling on a merged or closed pull request. The rules run when the sidebar opens and every five minutes on the server.
+
+### Coming from Thread Inbox
+
+Shelves keeps its own data, so it installs beside Thread Inbox. To bring your settled and snoozed threads and your settings over:
 
 ```sh
-bb plugin install git:github.com/ysskrishna/bb-thread-inbox@v0.1.1
-bb settings ui set sidebar.threadListProvider bb-thread-inbox/inbox
+bb plugin disable shelves
+sqlite3 ~/.bb/plugins/bb-thread-inbox/data.db ".backup '$HOME/.bb/plugins/shelves/data.db'"
+bb plugin enable shelves
+bb plugin disable bb-thread-inbox
 ```
 
-Disable other sidebar plugins before trying this one so their background policies do not run alongside it. The plugin ID is `bb-thread-inbox`. BB shows the source for confirmation before installing it.
+Pinned projects, collapsed shelves, and the sort mode are stored in the BB app per plugin and start fresh.
 
-</details>
+## How it differs from Thread Inbox
 
-<details>
-<summary><b>Track development</b></summary>
-
-```sh
-bb plugin install git:github.com/ysskrishna/bb-thread-inbox@main
-bb settings ui set sidebar.threadListProvider bb-thread-inbox/inbox
-```
-
-Git installs can also track a compatible semver range. See [BB's distribution guide](https://github.com/get-bb/bb/blob/main/plugins/bb-guide/skills/bb-plugin-authoring/references/distribution.md#releasing-a-git-plugin-with-semver-tags).
-
-</details>
-
-## See it in action
-
-<details>
-<summary><b>Active threads in light and dark themes</b></summary>
-
-Returned work stays in Active. Working and Settled can stay folded at the bottom.
-
-![Active threads and a folded Settled section in light mode](docs/screenshots/sidebar-light-320.png)
-
-![The labeled Settle action on a dark thread card](docs/screenshots/actions-dark-320.png)
-
-</details>
-
-<details>
-<summary><b>Settle and restore conversations</b></summary>
-
-Use **Settle** to file a thread, **Undo** to reverse the last action, or expand Settled and choose **Un-settle**.
-
-![Filed conversations in the expanded Settled section](docs/screenshots/settled-threads.png)
-
-</details>
-
-<details>
-<summary><b>Snooze and wake a thread</b></summary>
-
-Choose a shortcut or a date and time. **Wake** returns a snoozed thread immediately.
-
-![Snooze shortcuts and the custom date and time option](docs/screenshots/snooze-options.png)
-
-![A deferred conversation in the expanded Snoozed section](docs/screenshots/snoozed-threads.png)
-
-</details>
-
-<details>
-<summary><b>Search includes settled work</b></summary>
-
-Click **Search threads** in the sidebar. BB's native search opens a filed conversation directly.
-
-![BB's thread search finding a conversation still visible in Settled](docs/screenshots/native-search.png)
-
-</details>
-
-<details>
-<summary><b>Configure automatic settling</b></summary>
-
-Open **Settings > Thread Inbox**. Defaults are seven days of inactivity, merged-PR settling on, and PR inactivity protection off. **Keep threads with a PR** exempts known PR threads from inactivity; merge and close rules still apply. Unknown PR state keeps the thread in place. Rules run when the sidebar opens and every five minutes on the server.
-
-![Thread Inbox preferences in dark mode](docs/screenshots/settings-dark.png)
-
-![Thread Inbox preferences in light mode](docs/screenshots/settings-light.png)
-
-</details>
+- Thread cards follow T3 Code: the title ranks above the project, the machine a thread runs on is named, and the card has T3 Code's size and spacing.
+- Settle acts on the click, and Settle and Snooze have a plain hover.
+- Shelf headers are a label and a rule, without an icon.
+- Settling a thread marks it read.
+- The row menu shows the thread actions that other plugins add.
 
 ## Development
 
-<details>
-<summary><b>Build, check, and capture the demo</b></summary>
-
 ```sh
-git clone https://github.com/ysskrishna/bb-thread-inbox.git
-cd bb-thread-inbox
+git clone https://github.com/Jonathanm10/bb-plugin-shelves.git
+cd bb-plugin-shelves
 npm ci
 npm run check
 ```
 
-The [browser guide](e2e/README.md) covers the isolated scratch server, prerequisites, and reproducible screenshots/GIF. Public captures use disposable data. Working order uses observed run starts with activity fallbacks because BB exposes no sidebar submission timestamp.
+Use Node 22; `mise.toml` pins it, and `mise exec -- npm run check` picks it up. The [browser guide](e2e/README.md) covers the isolated scratch BB that the browser tests and the demo GIF run on. [AGENTS.md](AGENTS.md) holds the working rules, and [CHANGELOG.md](CHANGELOG.md) the changes.
 
-Tag-based releases follow [AGENTS.md](AGENTS.md#tag-based-releases). The workflow validates stable tags and manifest versions, runs checks, and publishes the matching changelog section. Branch pushes and PRs create no release.
+## Credits
 
-</details>
-
-<details>
-<summary><b>Desktop notifications</b></summary>
-
-Check **Settings > Push notifications** in the main BB window. The desktop switch and device permission must both allow notifications. BB suppresses system alerts for a thread already focused on that client. On macOS, also check BB's notification and Focus settings. Mobile delivery is independent.
-
-</details>
-
-## Project links
-
-- [Releases](https://github.com/ysskrishna/bb-thread-inbox/releases) and [issues](https://github.com/ysskrishna/bb-thread-inbox/issues)
-- [Security policy](SECURITY.md)
-- [Remaining scope review](docs/scope-review.md), with priorities and confidence scores
-- [BB Marketplace](https://getbb.app/marketplace/bb-thread-inbox) and [listing maintenance](docs/marketplace.md)
-
-## Inspiration
-
-Based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar), with inspiration from [Sidebar Pro](https://github.com/kr3t3n/bb-plugin-sidebar-pro) and [T3 Code](https://github.com/pingdotgg/t3code).
-
-## Built and maintained by
-
-Thread Inbox is built and maintained by:
-
-| | Name | GitHub | Role |
-| --- | --- | --- | --- |
-| <img src="https://github.com/ysskrishna.png?size=120" width="60" height="60" alt="Y. Siva Sai Krishna"> | **Y. Siva Sai Krishna** | [@ysskrishna](https://github.com/ysskrishna) | Creator |
-
-## Changelog
-
-See [CHANGELOG](CHANGELOG.md) for release history and unreleased changes.
-
-## Support
-
-If you find this project helpful:
-
-- ⭐ Star the repository
-- 🐛 [Report issues](https://github.com/ysskrishna/bb-thread-inbox/issues)
-- 🔀 Submit pull requests
-- 💝 [Sponsor on GitHub](https://github.com/sponsors/ysskrishna)
+Shelves is a fork of [Thread Inbox](https://github.com/ysskrishna/bb-thread-inbox) by [Y. Siva Sai Krishna](https://github.com/ysskrishna), who built the sidebar this plugin started from. Thread Inbox is based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar), with inspiration from [Sidebar Pro](https://github.com/kr3t3n/bb-plugin-sidebar-pro) and [T3 Code](https://github.com/pingdotgg/t3code).
 
 ## License
 
-MIT © [Y. Siva Sai Krishna](https://github.com/ysskrishna) - see [LICENSE](LICENSE) for details.
-
----
-
-<p align="left">
-  <a href="https://github.com/ysskrishna">Author's GitHub</a> •
-  <a href="https://linkedin.com/in/ysskrishna">Author's LinkedIn</a> •
-  <a href="https://ysskrishna.space">Author's site</a> •
-  <a href="https://github.com/ysskrishna/bb-thread-inbox/releases">Releases</a> •
-  <a href="https://github.com/ysskrishna/bb-thread-inbox/issues">Report Issues</a>
-</p>
+MIT. Copyright Y. Siva Sai Krishna and Jonathan M. See [LICENSE](LICENSE).

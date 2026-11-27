@@ -23,6 +23,8 @@ BB 0.49.0 or newer. Merge/close-based settling uses BB's GitHub PR Status plugin
 and its GitHub access; unknown PR state leaves the conversation in place.
 Saved project appearance remains readable.
 
-The plugin ID is `bb-thread-inbox`.
-For installation and release status, see the
-[project README](https://github.com/ysskrishna/bb-thread-inbox#readme).
+The plugin ID is `shelves`. For installation, see the
+[project README](https://github.com/Jonathanm10/bb-plugin-shelves#readme).
+
+Shelves is a fork of [Thread Inbox](https://github.com/ysskrishna/bb-thread-inbox)
+by Y. Siva Sai Krishna.
