@@ -8,7 +8,6 @@ export { default as ArrowUpDownIcon } from "@hugeicons/core-free-icons/ArrowUpDo
 export { default as BrushCleaningIcon } from "@hugeicons/core-free-icons/BrushCleaningIcon";
 export { default as Calendar03Icon } from "@hugeicons/core-free-icons/Calendar03Icon";
 export { default as CancelCircleIcon } from "@hugeicons/core-free-icons/CancelCircleIcon";
-export { default as Car05Icon } from "@hugeicons/core-free-icons/Car05Icon";
 export { default as CheckListIcon } from "@hugeicons/core-free-icons/CheckListIcon";
 export { default as Clock01Icon } from "@hugeicons/core-free-icons/Clock01Icon";
 export { default as ComputerIcon } from "@hugeicons/core-free-icons/ComputerIcon";

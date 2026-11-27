@@ -1,7 +1,7 @@
 import { useListMotion } from "./useListMotion";
 import { useMemo } from "react";
 import type { PluginSidebarThread } from "@get-bb/plugin-sdk/app";
-import { Icon, type IconName } from "./components/Icon";
+import { Icon } from "./components/Icon";
 import { cn } from "./lib/utils";
 import { ProjectFavicon, ProjectStripe } from "./ProjectFavicon";
 import { useProjectColor } from "./ProjectColors";
@@ -24,7 +24,6 @@ export const SETTLED_PAGE_SIZE = 25;
  */
 export function CompactShelf({
   label,
-  icon,
   threads,
   expanded,
   onToggle,
@@ -35,7 +34,6 @@ export function CompactShelf({
   expandedChildParentIds,
 }: {
   label: string;
-  icon: IconName;
   threads: readonly PluginSidebarThread[];
   expanded: boolean;
   onToggle: () => void;
@@ -56,7 +54,6 @@ export function CompactShelf({
     <CollapsibleShelf
       label={label}
       hidden={threads.length === 0}
-      icon={icon}
       count={threads.length}
       expanded={expanded}
       onToggle={onToggle}
@@ -126,7 +123,6 @@ export function DockableShelves({
 
 export function CollapsibleShelf({
   label,
-  icon,
   count,
   expanded,
   onToggle,
@@ -135,7 +131,6 @@ export function CollapsibleShelf({
   hidden = false,
 }: {
   label: string;
-  icon: IconName;
   count: number;
   expanded: boolean;
   onToggle: () => void;
@@ -154,8 +149,7 @@ export function CollapsibleShelf({
           // every row's status and provider glyph.
           className="mt-3 flex w-full items-center gap-2 px-2.5 pb-1 text-left"
         >
-          <span className="flex shrink-0 items-center gap-1.5 text-2xs font-medium text-muted-foreground/70">
-            <Icon name={icon} className="size-3.5 shrink-0" aria-hidden />
+          <span className="shrink-0 text-2xs font-medium text-muted-foreground/70">
             {expanded ? label : `${label} (${count})`}
           </span>
           <span className="h-px flex-1 bg-sidebar-border" />
