@@ -8,6 +8,7 @@ Shelves started as a fork of [Thread Inbox](https://github.com/ysskrishna/bb-thr
 
 - The Snooze button shows the pointer cursor on hover, like Settle.
 - Settle marks the settled thread and its settled children read, so a finished thread you never opened stops showing as unread. Undo makes them unread again unless bb recorded a new read since.
+- A thread that never started (bb's `pending`, before its first message is sent) no longer counts as working. It gets Snooze, Settle and Archive, automatic settling can settle it once inactive, and its working timer stays off.
 
 ### Added
 

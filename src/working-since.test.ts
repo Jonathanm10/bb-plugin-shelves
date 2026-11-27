@@ -69,6 +69,11 @@ describe("reconcileWorkingSince", () => {
     expect(away).toBe(started);
     expect(reconcileWorkingSince(away, [running], NOW + 10 * MINUTE).get("a")).toBe(NOW);
   });
+
+  it("does not start the clock for a thread that never started", () => {
+    const unstarted = thread({ id: "a", status: "pending", runtimeStatus: "pending", indicator: "none" });
+    expect(reconcileWorkingSince(new Map(), [unstarted], NOW).size).toBe(0);
+  });
 });
 
 describe("statusWithDuration", () => {

@@ -77,16 +77,20 @@ describe("automatic settle policy", () => {
     );
   });
 
-  it("keeps a pending thread available", () => {
+  // bb creates every thread pending and starts it with the first message, so
+  // a thread still pending has nothing running.
+  it("settles an inactive thread that never started, as it does an idle one", () => {
+    const unstarted = { ...quietThread, status: "pending" as const };
+    expect(autoSettleNeedsPullRequest(null, unstarted)).toBe(true);
     expect(
       decideAutoSettle({
         lifecycle: null,
         now: NOW,
         pullRequest: { outcome: "absent" },
         settings,
-        thread: { ...quietThread, status: "pending" },
+        thread: unstarted,
       }),
-    ).toBe("keep");
+    ).toBe("settle");
   });
 
   it.each<[string, Partial<AutoSettleThread>]>([
