@@ -26,6 +26,12 @@ export function ThreadPullRequest({ environmentId }: { environmentId: string | n
   );
 }
 
+/**
+ * T3 Code's row metadata tone: project and machine a step below the title.
+ * bb's muted-foreground can match the foreground; 70% keeps 4.5:1 contrast.
+ */
+export const SECONDARY_LABEL_CLASS = "text-foreground/70";
+
 /** bb reports a machine's name but not its kind, so the name picks the icon. */
 export function machineIconName(machineName: string): IconName {
   return /macbook|laptop|notebook/i.test(machineName) ? "Laptop" : "Computer";
@@ -40,7 +46,7 @@ export function ThreadMachine({ host }: { host: NonNullable<PluginSidebarThread[
     <span
       data-thread-machine=""
       data-settle-fade=""
-      className="pointer-events-none relative flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground"
+      className={cn("pointer-events-none relative flex min-w-0 items-center gap-1.5 text-xs", SECONDARY_LABEL_CLASS)}
     >
       <Icon name={machineIconName(host.name)} aria-hidden className="size-3.5 shrink-0" />
       <span className="truncate">

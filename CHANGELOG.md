@@ -9,6 +9,7 @@
 
 ### Changed
 
+- Thread card titles stand out from the project and machine lines, as in T3 Code: the title keeps the full text colour and active or unread titles turn medium weight, while the project and machine drop to 70% of the text colour (4.8:1 contrast in light, 5.3:1 in dark) at one size, with a larger project icon.
 - The scratch e2e server renames its machine to "Scratch MacBook", so captures and visual baselines do not contain the developer's hostname.
 - The e2e seeds tolerate any provider notification that BB does not map (`provider/unhandled`), so a newer Codex CLI cannot fail them. Agent output and provider errors still fail them.
 - CI installs the latest Codex CLI for the Browser e2e and BB compat runs instead of a pinned version. The e2e error text and `e2e/README.md` no longer name a version.

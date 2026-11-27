@@ -1,4 +1,4 @@
-import { ThreadMachine, ThreadPullRequest } from "./ThreadMetadata";
+import { SECONDARY_LABEL_CLASS, ThreadMachine, ThreadPullRequest } from "./ThreadMetadata";
 import { CompactRow } from "./CompactRow";
 import { WokeMarker } from "./WokeMarker";
 import { ShortcutHint, useSidebarThreadSplit, useThreadActions } from "./bb-sdk";
@@ -234,8 +234,15 @@ export function ThreadCard({
         showProject ? "mt-0.5" : "min-w-0 flex-1",
         showProject && thread.host && "col-span-2",
         isRenaming && "pointer-events-auto",
-        emphasis === "read-idle" ? "text-muted-foreground" : "text-foreground",
-        (emphasis === "unread" || emphasis === "woke") && "font-medium",
+        // T3 Code's card: the title keeps the foreground over its project and
+        // machine, and a read idle title recedes by weight alone. bb's dark
+        // foreground is too dim to also drop it to T3's 75%.
+        showProject
+          ? cn("text-foreground", emphasis !== "read-idle" && "font-medium")
+          : cn(
+              emphasis === "read-idle" ? "text-muted-foreground" : "text-foreground",
+              (emphasis === "unread" || emphasis === "woke") && "font-medium",
+            ),
       )}
     >
       <InlineThreadTitle thread={thread} editing={isRenaming} onEditingChange={changeRenaming} />
@@ -395,14 +402,14 @@ export function ThreadCard({
                 {showProject ? (
                   <span
                     data-settle-fade=""
-                    className="flex min-w-0 flex-1 items-center gap-1.5 text-2xs font-medium text-muted-foreground"
+                    className={cn("flex min-w-0 flex-1 items-center gap-1.5 text-xs", SECONDARY_LABEL_CLASS)}
                   >
                     {projectName ? (
                       <ProjectFavicon
                         projectId={thread.projectId}
                         src={projectIconUrl}
                         name={projectName}
-                        className="size-3"
+                        className="size-4"
                       />
                     ) : null}
                     <span

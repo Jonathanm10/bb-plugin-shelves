@@ -163,7 +163,7 @@ describe("card metadata", () => {
     },
   );
 
-  it("reduces read idle emphasis without weakening unread rows", async () => {
+  it("ranks a card title above its project, receding only when read and idle", async () => {
     render([
       thread({ id: "read", title: "Read row", createdAt: 20 }),
       thread({
@@ -176,10 +176,13 @@ describe("card metadata", () => {
     const read = (await screen.findByText("Read row")).closest("[data-row-emphasis]");
     const unread = screen.getByText("Unread row").closest("[data-row-emphasis]");
     expect(read?.getAttribute("data-row-emphasis")).toBe("read-idle");
-    expect(read?.className).toContain("text-muted-foreground");
+    expect(read?.className).toContain("text-foreground");
+    expect(read?.className).not.toContain("font-medium");
     expect(unread?.getAttribute("data-row-emphasis")).toBe("unread");
     expect(unread?.className).toContain("font-medium");
     expect(unread?.className).toContain("text-foreground");
+    const project = screen.getAllByText("bb")[0]?.closest("[data-settle-fade]");
+    expect(project?.className).toContain("text-foreground/70");
   });
 
   it("shows the shared details card on the main thread without an icon tooltip", async () => {
