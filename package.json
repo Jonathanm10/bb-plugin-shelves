@@ -41,7 +41,9 @@
   "scripts": {
     "prebuild": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "build": "bb plugin build",
+    "precheck": "node scripts/check-node.mjs",
     "check": "npm run lint && npm run format:check && npm run knip && npm run typecheck && npm test && npm run test:scripts && npm run build && node scripts/check-app-bundle.mjs",
+    "pretest": "node scripts/check-node.mjs",
     "test": "vitest run --config vitest.config.ts",
     "test:scripts": "node --test scripts/e2e/seed-events.test.mjs",
     "typecheck": "tsc --noEmit",

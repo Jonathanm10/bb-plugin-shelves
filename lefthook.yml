@@ -17,4 +17,4 @@ commit-msg:
 pre-push:
   commands:
     check:
-      run: npm run check
+      run: mise exec -- npm run check
