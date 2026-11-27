@@ -35,14 +35,17 @@ Settings are under **Settings > Shelves**. The defaults are seven days of inacti
 
 ### Coming from Thread Inbox
 
-Shelves keeps its own data, so it installs beside Thread Inbox. To bring your settled and snoozed threads and your settings over:
+Shelves keeps its own data under its own ID. To start it on your settled and snoozed threads and your settings, copy the Thread Inbox database before you install Shelves:
 
 ```sh
-bb plugin disable shelves
-sqlite3 ~/.bb/plugins/bb-thread-inbox/data.db ".backup '$HOME/.bb/plugins/shelves/data.db'"
-bb plugin enable shelves
 bb plugin disable bb-thread-inbox
+mkdir -p ~/.bb/plugins/shelves
+sqlite3 ~/.bb/plugins/bb-thread-inbox/data.db ".backup '$HOME/.bb/plugins/shelves/data.db'"
+bb plugin install git:github.com/Jonathanm10/bb-plugin-shelves@main
+bb settings ui set sidebar.threadListProvider shelves/inbox
 ```
+
+The copy replaces any data Shelves already has, so do it before the first install. `~/.bb` is BB's default data directory; use yours if you moved it. Thread Inbox stays installed and disabled, with its data untouched.
 
 Pinned projects, collapsed shelves, and the sort mode are stored in the BB app per plugin and start fresh.
 
@@ -63,12 +66,12 @@ npm ci
 npm run check
 ```
 
-Use Node 22; `mise.toml` pins it, and `mise exec -- npm run check` picks it up. The [browser guide](e2e/README.md) covers the isolated scratch BB that the browser tests and the demo GIF run on. [AGENTS.md](AGENTS.md) holds the working rules, and [CHANGELOG.md](CHANGELOG.md) the changes.
+Use Node 22; `mise.toml` pins it. If another Node comes first on your `PATH`, run `PATH="$(mise where node)/bin:$PATH" npm run check`. The [browser guide](e2e/README.md) covers the isolated scratch BB that the browser tests and the demo GIF run on. [AGENTS.md](AGENTS.md) holds the working rules, and [CHANGELOG.md](CHANGELOG.md) the changes.
 
 ## Credits
 
-Shelves is a fork of [Thread Inbox](https://github.com/ysskrishna/bb-thread-inbox) by [Y. Siva Sai Krishna](https://github.com/ysskrishna), who built the sidebar this plugin started from. Thread Inbox is based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar), with inspiration from [Sidebar Pro](https://github.com/kr3t3n/bb-plugin-sidebar-pro) and [T3 Code](https://github.com/pingdotgg/t3code).
+Shelves is a fork of [Thread Inbox](https://github.com/ysskrishna/bb-thread-inbox) by [Y. Siva Sai Krishna](https://github.com/ysskrishna), who built the sidebar this plugin started from. Thread Inbox is based on [BB Sidebar](https://github.com/yusuf8834/bb-sidebar) by Yusuf Akbulut, which adapts code from [bb-plugin-t3sidebar](https://github.com/SawyerHood/bb-plugin-t3sidebar), with inspiration from [Sidebar Pro](https://github.com/kr3t3n/bb-plugin-sidebar-pro) and [T3 Code](https://github.com/pingdotgg/t3code).
 
 ## License
 
-MIT. Copyright Y. Siva Sai Krishna and Jonathan M. See [LICENSE](LICENSE).
+MIT. [LICENSE](LICENSE) keeps the copyright notices of the inherited code beside mine.

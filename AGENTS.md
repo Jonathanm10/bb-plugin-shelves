@@ -20,7 +20,8 @@ out what it lacks. Read its source before proposing a design:
   conversations stay as they are.
 - Automatic settling leaves a thread alone while it is running, queued, pinned,
   asking a question, or has a live child, and when its PR state is unknown.
-- Parked is legacy: existing Parked rows keep Resume, and no control creates one.
+- Parked is legacy: existing Parked rows keep Resume, and no sidebar control
+  creates one. Only `bb shelves park` still does.
 
 ## Identity and data
 
@@ -29,8 +30,10 @@ out what it lacks. Read its source before proposing a design:
   `shelves/inbox`.
 - BB stores a plugin's database and settings under its ID, so an ID change needs
   a data transfer.
-- Add a migration for every schema change; installed databases are never reset.
-  A migration that destroys data needs Jonathan's yes.
+- Migrations are append-only: a schema change is a new migration at the end.
+  BB checks each applied migration's SQL by position and refuses to start the
+  plugin if one was edited or moved. Installed databases are never reset, and
+  a migration that destroys data needs Jonathan's yes.
 - `src/fixtures/` holds databases written by earlier formats. They are
   immutable; `sha256.json` guards them.
 
@@ -49,7 +52,8 @@ out what it lacks. Read its source before proposing a design:
 
 ## Checks
 
-- Node 22, pinned in `mise.toml`: run every script as `mise exec -- npm run <script>`.
+- Node 22, pinned in `mise.toml`. An agent shell often has another Node first
+  on `PATH`, so run scripts as `PATH="$(mise where node)/bin:$PATH" npm run <script>`.
   `npm run check` and `npm test` stop at once on another version.
 - `npm ci` once, then `npm run check` before and after a change.
 - Browser tests run only through the scratch launcher (`npm run e2e`, see
@@ -72,4 +76,4 @@ out what it lacks. Read its source before proposing a design:
 
 `git fetch upstream`, then cherry-pick the commit. Upstream's names map to
 ours: `bb-thread-inbox` is `shelves`, `bb thread-inbox` is `bb shelves`, and
-"Thread Inbox" is "Shelves". Keep the upstream copyright line in `LICENSE`.
+"Thread Inbox" is "Shelves". Keep every copyright line in `LICENSE`.

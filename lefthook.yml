@@ -17,4 +17,5 @@ commit-msg:
 pre-push:
   commands:
     check:
-      run: mise exec -- npm run check
+      # Put the pinned Node first when mise is installed; a shim earlier on PATH can hide it.
+      run: node_dir="$(mise where node 2>/dev/null)" && PATH="$node_dir/bin:$PATH"; npm run check
