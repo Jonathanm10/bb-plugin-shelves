@@ -31,13 +31,8 @@
   --bb-thread-inbox-amber-300: var(--color-amber-300, oklch(87.9% 0.169 91.605));
   --bb-thread-inbox-amber-700: var(--color-amber-700, oklch(55.5% 0.163 48.998));
   --bb-thread-inbox-amber-950: var(--color-amber-950, oklch(27.9% 0.077 45.635));
-  --bb-thread-inbox-orange-300: var(--color-orange-300, oklch(83.7% 0.128 66.29));
-  --bb-thread-inbox-orange-600: var(--color-orange-600, oklch(64.6% 0.222 41.116));
   --bb-thread-inbox-emerald-100: var(--color-emerald-100, oklch(95% 0.052 163.051));
-  --bb-thread-inbox-emerald-200: var(--color-emerald-200, oklch(90.5% 0.093 164.15));
   --bb-thread-inbox-emerald-300: var(--color-emerald-300, oklch(84.5% 0.143 164.978));
-  --bb-thread-inbox-emerald-400: var(--color-emerald-400, oklch(76.5% 0.177 163.223));
-  --bb-thread-inbox-emerald-500: var(--color-emerald-500, oklch(69.6% 0.17 162.48));
   --bb-thread-inbox-emerald-600: var(--color-emerald-600, oklch(59.6% 0.145 163.225));
   --bb-thread-inbox-emerald-700: var(--color-emerald-700, oklch(50.8% 0.118 165.612));
   --bb-thread-inbox-emerald-950: var(--color-emerald-950, oklch(26.2% 0.051 172.552));
@@ -106,9 +101,6 @@
   --bb-thread-inbox-needs-you-tint-hover: var(--bb-thread-inbox-amber-50);
   --bb-thread-inbox-needs-you-accent: transparent;
 
-  --bb-thread-inbox-settle-active: var(--bb-thread-inbox-emerald-700);
-  --bb-thread-inbox-snooze-active: var(--bb-thread-inbox-orange-600);
-
   --bb-thread-inbox-pr-merged: var(--bb-thread-inbox-violet-600);
   --bb-thread-inbox-pr-alert: var(--bb-thread-inbox-red-600);
   --bb-thread-inbox-pr-open: var(--bb-thread-inbox-emerald-600);
@@ -168,9 +160,6 @@
   --bb-thread-inbox-needs-you-tint: color-mix(in oklab, var(--bb-thread-inbox-amber-950) 60%, transparent);
   --bb-thread-inbox-needs-you-tint-hover: color-mix(in oklab, var(--bb-thread-inbox-amber-950) 80%, transparent);
   --bb-thread-inbox-needs-you-accent: color-mix(in oklab, var(--bb-thread-inbox-amber-300) 55%, transparent);
-
-  --bb-thread-inbox-settle-active: var(--bb-thread-inbox-emerald-300);
-  --bb-thread-inbox-snooze-active: var(--bb-thread-inbox-orange-300);
 
   --bb-thread-inbox-pr-merged: color-mix(in oklab, var(--bb-thread-inbox-violet-300) 90%, transparent);
   --bb-thread-inbox-pr-alert: color-mix(in oklab, var(--bb-thread-inbox-red-300) 90%, transparent);

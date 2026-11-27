@@ -13,12 +13,10 @@ function SettleButton({ label, onActivate }: { label: string; onActivate: () => 
         event.stopPropagation();
         onActivate();
       }}
-      // The colour change is the whole hover, as on Snooze beside it.
+      // T3 Code's row actions: muted, the text colour on hover, no transition.
       className={cn(
         "flex h-6 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-md px-1.5 text-xs text-muted-foreground",
-        "transition-colors duration-200 ease-out hover:text-[color:var(--bb-thread-inbox-settle-active)]",
-        "focus-visible:text-[color:var(--bb-thread-inbox-settle-active)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
-        "motion-reduce:transition-none",
+        "hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
       )}
     >
       <Icon name="Check" aria-hidden className="size-3.5 shrink-0" />
@@ -44,7 +42,7 @@ export function ThreadFilingActions({
         <SnoozeSelect
           label="Snooze thread"
           snoozePresets={snoozePresets}
-          triggerClassName="h-5 w-5 border-0 px-0.5 py-0 shadow-none duration-200 ease-out hover:bg-transparent hover:duration-200 hover:text-[color:var(--bb-thread-inbox-snooze-active)] focus:ring-0 focus-visible:text-[color:var(--bb-thread-inbox-snooze-active)] data-[state=open]:text-[color:var(--bb-thread-inbox-snooze-active)] motion-reduce:transition-none [&>svg:last-child]:size-3"
+          triggerClassName="h-5 w-5 border-0 px-0.5 py-0 shadow-none transition-none hover:bg-transparent hover:text-foreground focus:ring-0 focus-visible:text-foreground [&>svg:last-child]:size-3"
           onOpenChange={onOpenChange}
           onSnooze={onSnooze}
         />
