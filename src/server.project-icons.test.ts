@@ -5,7 +5,7 @@ import { createFakePluginHost, disposers, standardProject } from "./test-server"
 async function setup() {
   let connected = true;
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-thread-inbox",
+    pluginId: "shelves",
     sdk: {
       projects: {
         get: async () => standardProject(),
@@ -36,7 +36,7 @@ describe("saved project icons", () => {
     const state = await setup();
     const response = await state.fetch();
     expect(response.status).toBe(404);
-    expect(response.headers.get("x-bb-thread-inbox-icon-missing")).toBe("1");
+    expect(response.headers.get("x-shelves-icon-missing")).toBe("1");
     expect(state.harness.inspection.sdk.callsTo("projects.files")).toEqual([]);
     expect(state.harness.inspection.sdk.callsTo("projects.fileContent")).toEqual([]);
     expect(state.harness.inspection.sdk.callsTo("projects.get")).toEqual([]);

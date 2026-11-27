@@ -24,7 +24,7 @@ describe("automatic settle with GitHub PR Status", () => {
     ["a row is malformed", () => ({ outcome: "available", pullRequest: { state: "merged" } }) as never],
   ])("keeps quiet workspace threads in place when %s", async (_, row) => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-thread-inbox",
+      pluginId: "shelves",
       sdk: {
         projects: {
           list: async () =>
@@ -54,7 +54,7 @@ describe("automatic settle with GitHub PR Status", () => {
       projectThread({ id: `thr_${index}`, environmentId: `env_${index}`, ...quiet }),
     );
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-thread-inbox",
+      pluginId: "shelves",
       sdk: {
         projects: { list: async () => projectsWith(threads) },
         plugins: { callRpc: pullRequestStatus(() => ({ outcome: "absent" }), batches) },

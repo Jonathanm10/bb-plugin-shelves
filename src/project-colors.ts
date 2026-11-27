@@ -72,8 +72,8 @@ function textColor(color: string, darkTheme: boolean): string {
 
 export function projectColorStyle(color: string): CSSProperties {
   return {
-    "--bb-thread-inbox-project": color,
-    "--bb-thread-inbox-project-text-light": textColor(color, false),
-    "--bb-thread-inbox-project-text-dark": textColor(color, true),
+    "--shelves-project": color,
+    "--shelves-project-text-light": textColor(color, false),
+    "--shelves-project-text-dark": textColor(color, true),
   } as CSSProperties;
 }

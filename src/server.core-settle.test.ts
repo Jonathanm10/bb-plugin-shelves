@@ -23,7 +23,7 @@ async function setup() {
   });
   const batches: string[][] = [];
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-thread-inbox",
+    pluginId: "shelves",
     sdk: {
       projects: { list: async () => projectsWith([thread]) },
       threads: {
@@ -83,7 +83,7 @@ it("wakes auto-settled work on new attention without a PR lookup", async () => {
 async function settleSetup(lastReadAt: number | null) {
   const thread = projectThread({ id: "done", lastReadAt, latestAttentionAt: 50 });
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-thread-inbox",
+    pluginId: "shelves",
     sdk: {
       projects: { list: async () => projectsWith([thread]) },
       threads: {

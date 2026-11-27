@@ -93,26 +93,26 @@ describe("pull request badge", () => {
   it("colors the badge from the attention state", async () => {
     const failing = withPr("checks_failed");
     expect((await screen.findByRole("link", { name: "#412" })).className).toContain(
-      "text-[color:var(--bb-thread-inbox-pr-alert)]",
+      "text-[color:var(--shelves-pr-alert)]",
     );
     failing.unmount();
 
     withPr("ready_to_merge");
     expect((await screen.findByRole("link", { name: "#412" })).className).toContain(
-      "text-[color:var(--bb-thread-inbox-pr-open)]",
+      "text-[color:var(--shelves-pr-open)]",
     );
   });
 
   it("covers pending, review, draft, closed, and merged states", async () => {
     const pending = withPr("checks_pending");
     expect((await screen.findByRole("link", { name: "#412" })).className).toContain(
-      "text-[color:var(--bb-thread-inbox-pr-open)]",
+      "text-[color:var(--shelves-pr-open)]",
     );
     pending.unmount();
 
     const review = withPr("review_requested");
     expect((await screen.findByRole("link", { name: "#412" })).className).toContain(
-      "text-[color:var(--bb-thread-inbox-pr-open)]",
+      "text-[color:var(--shelves-pr-open)]",
     );
     review.unmount();
 
@@ -122,13 +122,13 @@ describe("pull request badge", () => {
 
     const closed = withPr("closed", "closed");
     expect((await screen.findByRole("link", { name: "#412" })).className).toContain(
-      "text-[color:var(--bb-thread-inbox-pr-alert)]",
+      "text-[color:var(--shelves-pr-alert)]",
     );
     closed.unmount();
 
     withPr("merged", "merged");
     expect((await screen.findByRole("link", { name: "#412" })).className).toContain(
-      "text-[color:var(--bb-thread-inbox-pr-merged)]",
+      "text-[color:var(--shelves-pr-merged)]",
     );
   });
 });

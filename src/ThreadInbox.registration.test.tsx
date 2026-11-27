@@ -8,11 +8,11 @@ vi.mock("sonner", async () => (await import("./test-inbox")).sonnerMock());
 
 await loadInboxApp();
 
-describe("Thread Inbox registration", () => {
+describe("Shelves registration", () => {
   it("registers exactly one thread list", () => {
     expect(app.threadLists).toHaveLength(1);
     expect(inbox.id).toBe("inbox");
-    expect(inbox.title).toBe("Thread Inbox");
+    expect(inbox.title).toBe("Shelves");
   });
 
   it("registers one custom settings page", () => {

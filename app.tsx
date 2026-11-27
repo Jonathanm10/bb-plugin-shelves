@@ -16,7 +16,7 @@ export default definePluginApp((app) => {
 
   app.slots.experimental_threadList({
     id: "inbox",
-    title: "Thread Inbox",
+    title: "Shelves",
     description: "Readable Working, Active, and Settled with snooze and automatic filing.",
     component: ThreadInbox,
   });

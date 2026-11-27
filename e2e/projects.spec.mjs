@@ -98,7 +98,7 @@ test("project filter remembers multiple projects per window and All projects res
   await shortcut.click();
   await expect(shelf(page, "Active").getByRole("link")).toHaveCount(fixture.threads.length + 1);
   await expect(shortcut).toHaveAttribute("aria-pressed", "true");
-  await page.locator("[data-bb-thread-inbox-root]").screenshot({ path: test.info().outputPath("pinned-projects.png") });
+  await page.locator("[data-shelves-root]").screenshot({ path: test.info().outputPath("pinned-projects.png") });
   await page.getByRole("button", { name: "Reset project filter", exact: true }).click();
   await expect(page.getByRole("button", { name: "Project scope: All projects", exact: true })).toBeVisible();
   await expect(shortcut).toHaveAttribute("aria-pressed", "false");

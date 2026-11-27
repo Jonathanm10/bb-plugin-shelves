@@ -23,7 +23,7 @@ async function load(threads: ProjectThread[], rules?: Rules) {
   const missing = new Set<string>();
   const listed = () => threads.filter((thread) => !missing.has(thread.id));
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-thread-inbox",
+    pluginId: "shelves",
     sdk: {
       projects: { list: async () => projectsWith(listed()) },
       threads: {

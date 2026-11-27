@@ -29,7 +29,7 @@ describe("ThreadInbox", () => {
         inactiveAfterHours: 6,
       },
     };
-    localStorage.setItem("bb-thread-inbox:settings-cache:v1", JSON.stringify(storedSettings));
+    localStorage.setItem("shelves:settings-cache:v1", JSON.stringify(storedSettings));
 
     const now = Date.now();
     let storedIds = ["a", "b", "z"];
@@ -116,7 +116,7 @@ describe("ThreadInbox", () => {
     pending.reject(new Error("order conflict"));
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith("Could not reorder pinned thread", {
-        className: "bb-thread-inbox-toast",
+        className: "shelves-toast",
         description: "order conflict",
       }),
     );
@@ -223,7 +223,7 @@ describe("ThreadInbox", () => {
     fireEvent.keyDown(await screen.findByRole("link", { name: "Inbox B" }), { key: "ArrowUp", altKey: true });
     await waitFor(() => expect(reorderInput).toEqual({ inboxThreadIds: ["b", "a"] }));
     expect(screen.getAllByRole("listitem")[0]!.textContent).toContain("Inbox B");
-    expect(JSON.parse(localStorage.getItem("bb-thread-inbox:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+    expect(JSON.parse(localStorage.getItem("shelves:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
   });
 
   it("does not let a stale order refresh overwrite a successful reorder", async () => {
@@ -253,7 +253,7 @@ describe("ThreadInbox", () => {
     await waitFor(() => expect(screen.getAllByRole("listitem")[0]!.textContent).toContain("Inbox B"));
 
     await act(async () => staleRead.resolve({ inboxThreadIds: ["a", "b"] }));
-    expect(JSON.parse(localStorage.getItem("bb-thread-inbox:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+    expect(JSON.parse(localStorage.getItem("shelves:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
     expect(screen.getAllByRole("listitem")[0]!.textContent).toContain("Inbox B");
   });
 
@@ -295,7 +295,7 @@ describe("ThreadInbox", () => {
     preWrite.resolve({ inboxThreadIds: ["a", "b"] });
     await invalidated;
     await waitFor(() => expect(first()).toContain("Inbox B"));
-    expect(JSON.parse(localStorage.getItem("bb-thread-inbox:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+    expect(JSON.parse(localStorage.getItem("shelves:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
   });
 
   it("rolls inbox order back when persistence fails", async () => {
@@ -322,7 +322,7 @@ describe("ThreadInbox", () => {
     pending.reject(new Error("database busy"));
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith("Could not reorder inbox thread", {
-        className: "bb-thread-inbox-toast",
+        className: "shelves-toast",
         description: "database busy",
       }),
     );

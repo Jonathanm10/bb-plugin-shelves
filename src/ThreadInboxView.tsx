@@ -90,7 +90,7 @@ export function ThreadInboxView({
   const { setExpandedShelves, setActiveSortMode, setSettledLimit } = useInboxActions();
   const { pinned, inbox, working, snoozed, parked, settled } = shelves;
   return (
-    <div data-bb-thread-inbox-root="" className="flex min-h-0 flex-1 flex-col">
+    <div data-shelves-root="" className="flex min-h-0 flex-1 flex-col">
       {/* Project scope is plugin-owned; New thread lives in bb's chrome. */}
       <ProjectScopeControls scope={scope} status={status} />
 

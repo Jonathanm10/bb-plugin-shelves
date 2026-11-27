@@ -98,7 +98,7 @@ describe("ThreadInbox", () => {
       name: "3 child threads, 1 failed, 1 done, 1 working",
     });
     expect(badge.getAttribute("data-child-status")).toBe("failed");
-    expect(badge.className).toContain("bg-[color:var(--bb-thread-inbox-badge-failed-bg)]");
+    expect(badge.className).toContain("bg-[color:var(--shelves-badge-failed-bg)]");
     expect(badge.querySelector('[data-icon="CircleX"]')).not.toBeNull();
   });
 
@@ -117,7 +117,7 @@ describe("ThreadInbox", () => {
       name: "1 child thread, 1 working",
     });
     expect(badge.getAttribute("data-child-status")).toBe("working");
-    expect(badge.className).toContain("bg-[color:var(--bb-thread-inbox-badge-working-bg)]");
+    expect(badge.className).toContain("bg-[color:var(--shelves-badge-working-bg)]");
     expect(badge.querySelector('[data-icon="Working"]')).not.toBeNull();
     expect(screen.getByRole("list", { name: "Child threads" })).toBeDefined();
     expect(screen.getByText("Working child")).toBeDefined();
@@ -148,7 +148,7 @@ describe("ThreadInbox", () => {
       name: "2 child threads, 1 need you, 1 working",
     });
     expect(badge.getAttribute("data-child-status")).toBe("needs-you");
-    expect(badge.className).toContain("bg-[color:var(--bb-thread-inbox-badge-needs-you-bg)]");
+    expect(badge.className).toContain("bg-[color:var(--shelves-badge-needs-you-bg)]");
     expect(badge.querySelector('[data-icon="CircleQuestion"]')).not.toBeNull();
     expect(badge.querySelector('[data-icon="Working"]')).toBeNull();
   });

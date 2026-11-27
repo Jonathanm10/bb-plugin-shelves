@@ -51,9 +51,9 @@ export async function createWired(
     });
   };
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-thread-inbox",
+    pluginId: "shelves",
     sdk: {
-      plugins: { getSettings: async () => ({ values: {}, pluginId: "bb-thread-inbox" }) },
+      plugins: { getSettings: async () => ({ values: {}, pluginId: "shelves" }) },
       projects: {
         get: async () => standardProject(),
         list: async () =>

@@ -436,7 +436,7 @@ describe("usePinnedReorder", () => {
     expect(order()).toEqual(["b", "a", "c"]);
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith("Could not reorder pinned thread", {
-        className: "bb-thread-inbox-toast",
+        className: "shelves-toast",
         description: "Thread not found",
       }),
     );

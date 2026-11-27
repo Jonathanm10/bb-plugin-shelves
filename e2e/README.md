@@ -10,7 +10,7 @@ npx --no-install playwright install --with-deps chromium
 
 env -i PATH="$PATH" HOME="$HOME" npm run e2e
 env -i PATH="$PATH" HOME="$HOME" npm run e2e:smoke
-# Drive every `bb thread-inbox` subcommand against the scratch server (no browser):
+# Drive every `bb shelves` subcommand against the scratch server (no browser):
 env -i PATH="$PATH" HOME="$HOME" npm run e2e:cli
 # Run a focused flow through the same scratch launcher:
 env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --grep 'settle moves'
@@ -22,8 +22,8 @@ env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --grep 'toggle sequence'
 
 `@playwright/test` supplies role locators, retrying assertions, PNG comparisons,
 and failure screenshots/traces. `e2e:cli` seeds three idle threads and runs each
-`bb thread-inbox` subcommand through the scratch CLI, checking the result with
-`bb thread-inbox list --json` and the plugin RPC; its command transcript is saved to
+`bb shelves` subcommand through the scratch CLI, checking the result with
+`bb shelves list --json` and the plugin RPC; its command transcript is saved to
 `e2e-artifacts/cli-transcript.log`. All three commands use `scripts/e2e/server.mjs` and
 the pinned bb-app (`devDependencies.bb-app`). Neither runs as part of
 `npm run check`. Run e2e separately from Vitest; the scratch server and
@@ -32,7 +32,7 @@ On CI: `gh workflow run "Browser e2e"`.
 
 ## Isolation and fixtures
 
-The launcher creates its own `/tmp/bb-thread-inbox-smoke-*` data directory, two free
+The launcher creates its own `/tmp/shelves-smoke-*` data directory, two free
 loopback ports, and a Git repository on branch `main`. It strips inherited
 `BB_*` values through the original environment allowlist, rejects an inherited
 `BB_SERVER_URL` on port 38886 before starting anything, and also rejects either
@@ -117,7 +117,7 @@ and live updates across windows and reconnects. It checks native toast styling,
 mobile navigation, grouping, and shelf motion as well as the core flows below.
 Server assertions check native pin/idle/parent state and plugin filing/settings.
 No production test IDs were added. Visual captures use the existing
-`data-bb-thread-inbox-root` marker because the plugin container has no accessible role.
+`data-shelves-root` marker because the plugin container has no accessible role.
 
 `seeds.mjs` creates separate scratch projects/worktrees for filtering and grouping,
 and an idle parent with two idle children for the child-chip flow. Fixtures delete

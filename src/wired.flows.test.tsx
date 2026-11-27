@@ -118,7 +118,7 @@ it("pins from the menu and persists a keyboard manual reorder through server and
     ]),
   );
   await wired.flush();
-  expect(JSON.parse(localStorage.getItem("bb-thread-inbox:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
+  expect(JSON.parse(localStorage.getItem("shelves:inbox-order-cache:v1")!)).toEqual(["b", "a"]);
   await waitFor(() =>
     expect(within(observer.getByRole("region", { name: "Active" })).getAllByRole("listitem")[0]!.textContent).toContain(
       "Work b",
@@ -132,7 +132,7 @@ it("pins from the menu and persists a keyboard manual reorder through server and
     "Work b",
   );
   wired.unmount(slot);
-  localStorage.removeItem("bb-thread-inbox:inbox-order-cache:v1");
+  localStorage.removeItem("shelves:inbox-order-cache:v1");
   wired.mount();
   await waitFor(() =>
     expect(within(screen.getByRole("region", { name: "Active" })).getAllByRole("listitem")[0]!.textContent).toContain(
@@ -179,11 +179,9 @@ it("thread.deleted clears lifecycle and order and publishes both channels to the
   await wired.event("thread.deleted", "a");
   expect(lifecycle(wired)).toBeUndefined();
   expect(wired.db.prepare("SELECT thread_id FROM inbox_order ORDER BY sort_index").all()).toEqual([{ thread_id: "b" }]);
-  await waitFor(() => expect(JSON.parse(localStorage.getItem("bb-thread-inbox:inbox-order-cache:v1")!)).toEqual(["b"]));
+  await waitFor(() => expect(JSON.parse(localStorage.getItem("shelves:inbox-order-cache:v1")!)).toEqual(["b"]));
   expect(
-    JSON.parse(localStorage.getItem("bb-thread-inbox:lifecycle-cache:v1")!).map(
-      (row: { threadId: string }) => row.threadId,
-    ),
+    JSON.parse(localStorage.getItem("shelves:lifecycle-cache:v1")!).map((row: { threadId: string }) => row.threadId),
   ).toEqual(["b"]);
   const remaining = screen.getByRole("region", { name: "Parked" });
   expect(within(remaining).getByText("Work b")).toBeDefined();
@@ -263,7 +261,7 @@ it.each(["Title write unavailable", "HTTP 500: Title write unavailable"])(
     );
     await waitFor(() =>
       expect(toastMocks.error).toHaveBeenCalledWith("Failed to update thread", {
-        className: "bb-thread-inbox-toast",
+        className: "shelves-toast",
         description: "Title write unavailable",
       }),
     );

@@ -4,13 +4,13 @@ import { safeSetItem } from "./safe-storage";
 
 // Least critical first: a lost working-since stamp only restarts a duration
 // label, so it goes before the lifecycle cache.
-const working = "bb-thread-inbox:working-since:v1";
-const order = "bb-thread-inbox:inbox-order-cache:v1";
-const lifecycle = "bb-thread-inbox:lifecycle-cache:v1";
-const children = "bb-thread-inbox:child-expansion:v1";
-const shelves = "bb-thread-inbox:shelf-expansion:v1";
-const sort = "bb-thread-inbox:active-sort:v1";
-const settings = "bb-thread-inbox:settings-cache:v1";
+const working = "shelves:working-since:v1";
+const order = "shelves:inbox-order-cache:v1";
+const lifecycle = "shelves:lifecycle-cache:v1";
+const children = "shelves:child-expansion:v1";
+const shelves = "shelves:shelf-expansion:v1";
+const sort = "shelves:active-sort:v1";
+const settings = "shelves:settings-cache:v1";
 
 function limitStorage(characters: number) {
   const setItem = Storage.prototype.setItem;

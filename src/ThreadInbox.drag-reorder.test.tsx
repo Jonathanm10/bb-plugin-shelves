@@ -21,7 +21,7 @@ await loadInboxApp();
 
 describe("ThreadInbox", () => {
   it("retains attention root across reorder", async () => {
-    window.localStorage.setItem("bb-thread-inbox:shelf-expansion:v1", JSON.stringify({ pinned: true }));
+    window.localStorage.setItem("shelves:shelf-expansion:v1", JSON.stringify({ pinned: true }));
     const pending = deferred<ReturnType<typeof pinnedOrderResponse>>();
     let reorderInput: unknown = null;
     const rendered = renderSlot(

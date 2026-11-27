@@ -93,7 +93,7 @@ describe("machine on the card", () => {
   });
 
   it("leads the metadata line of a card inside a project group", async () => {
-    localStorage.setItem("bb-thread-inbox:active-sort:v1", "project");
+    localStorage.setItem("shelves:active-sort:v1", "project");
     try {
       render([thread({ id: "thr_a", title: "Laptop work", host: laptop })]);
       await screen.findByRole("link", { name: "Laptop work" });
@@ -101,7 +101,7 @@ describe("machine on the card", () => {
       expect(onLaptop.textContent).toBe("Machine: Ada’s MacBook Pro");
       expect(within(onLaptop.parentElement!).getByLabelText("Codex")).toBeDefined();
     } finally {
-      localStorage.removeItem("bb-thread-inbox:active-sort:v1");
+      localStorage.removeItem("shelves:active-sort:v1");
     }
   });
 

@@ -86,7 +86,7 @@ const ERROR_MESSAGE: Record<LifecycleMutation, string> = {
  * Whether another plugin's status on the thread's row runs, such as "Waiting
  * for CI". Rows then offer no Park, Snooze or Settle for it, as for a thread
  * that is working. This guard is the UI's alone: the server, automatic settle
- * and `bb thread-inbox` never see row statuses, and shelves do not move for it.
+ * and `bb shelves` never see row statuses, and shelves do not move for it.
  */
 export function useRowStatusRuns(threadId: string): boolean {
   return useSidebarThreadRowStatus(threadId)?.tone === "running";

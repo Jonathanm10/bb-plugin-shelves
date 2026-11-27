@@ -48,7 +48,7 @@ for (const theme of ["dark", "light"]) {
     await open(page, { theme });
     const thread = fixture.threads[0];
     await (await menu(page, thread.title)).getByRole("menuitem", { name: "Settle", exact: true }).click();
-    const toast = page.locator("[data-sonner-toast].bb-thread-inbox-toast").filter({ hasText: "Thread settled" });
+    const toast = page.locator("[data-sonner-toast].shelves-toast").filter({ hasText: "Thread settled" });
     await expect(toast).toBeVisible();
     const settled = await capture(page, toast, testInfo, theme, "sidebar");
     const undo = toast.getByRole("button", { name: "Undo", exact: true });
@@ -61,7 +61,7 @@ for (const theme of ["dark", "light"]) {
     await (await menu(page, thread.title)).getByRole("menuitem", { name: "Archive", exact: true }).click();
     const native = page.locator("[data-sonner-toast]").filter({ hasText: "Thread archived" });
     await expect(native).toBeVisible();
-    await expect(native).not.toHaveClass(/bb-thread-inbox-toast/);
+    await expect(native).not.toHaveClass(/shelves-toast/);
     const archived = await capture(page, native, testInfo, theme, "native");
     const nativeUndo = native.getByRole("button", { name: "Undo", exact: true });
     await nativeUndo.hover();

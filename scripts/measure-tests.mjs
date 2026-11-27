@@ -15,7 +15,7 @@ function option(name, fallback) {
 }
 const runs = option("--runs", 3);
 const workers = args.includes("--load") ? option("--load-workers", availableParallelism()) : 0;
-const directory = await mkdtemp(join(tmpdir(), "thread-inbox-tests-"));
+const directory = await mkdtemp(join(tmpdir(), "shelves-tests-"));
 const burners = [];
 let activeTest;
 function stop() {

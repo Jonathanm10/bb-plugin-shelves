@@ -20,7 +20,7 @@ describe("parking threads", () => {
   it("keeps Woke beside the current card status and preserves its controls", async () => {
     const acknowledged: string[] = [];
     const now = Math.floor(Date.now() / 60_000) * 60_000;
-    window.localStorage.setItem("bb-thread-inbox:working-since:v1", JSON.stringify({ runtime: now - 5 * 60_000 }));
+    window.localStorage.setItem("shelves:working-since:v1", JSON.stringify({ runtime: now - 5 * 60_000 }));
     const threads = [
       thread({
         id: "pending",

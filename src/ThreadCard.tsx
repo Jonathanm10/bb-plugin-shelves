@@ -121,7 +121,7 @@ export function ThreadCard({
     return () => {
       const focused = document.activeElement;
       if (!(focused instanceof HTMLElement) || !rowRef.current?.contains(focused)) return;
-      const sidebar = rowRef.current.closest<HTMLElement>("[data-bb-thread-inbox-root]");
+      const sidebar = rowRef.current.closest<HTMLElement>("[data-shelves-root]");
       const childId = focused.getAttribute("data-child-thread-id");
       const control = focused.getAttribute("data-thread-control");
       // Moving a row between shelf trees unmounts its focused control.
@@ -374,7 +374,7 @@ export function ThreadCard({
                     ) : null}
                     <span
                       style={projectColor}
-                      className={cn("min-w-0 truncate", projectColor && "bb-thread-inbox-project-name")}
+                      className={cn("min-w-0 truncate", projectColor && "shelves-project-name")}
                     >
                       {projectName ?? " "}
                     </span>

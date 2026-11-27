@@ -30,12 +30,12 @@ export function useSnoozeCommands(
       const shown = filterByProjects(visibleInboxThreads(threads), scope);
       const thread = shown.find((candidate) => candidate.id === request.threadId);
       if (!thread) {
-        toast.error("This thread is not in the Thread Inbox");
+        toast.error("This thread is not in Shelves");
         return;
       }
       // A child has no shelf of its own while its parent's row carries it, so
       // it goes wherever that row goes and its menu offers no Snooze. Name the
-      // row, as `bb thread-inbox resume` does.
+      // row, as `bb shelves resume` does.
       const rowId = shelfRowIds(shown).get(thread.id) ?? thread.id;
       const row = shown.find((candidate) => candidate.id === rowId) ?? thread;
       const title = threadDisplayTitle(thread);

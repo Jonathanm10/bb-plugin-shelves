@@ -129,7 +129,7 @@ describe("lifecycle RPC", () => {
 
   it("migrates values from the previous flat settings form", async () => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-thread-inbox",
+      pluginId: "shelves",
       sdk: {
         plugins: {
           getSettings: async () => ({
@@ -173,8 +173,8 @@ describe("lifecycle RPC", () => {
 });
 
 it("writes only JSON and keeps historical columns unchanged across reloads", async () => {
-  const getSettings = vi.fn(async () => ({ values: {}, pluginId: "bb-thread-inbox" }));
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-thread-inbox", sdk: { plugins: { getSettings } } });
+  const getSettings = vi.fn(async () => ({ values: {}, pluginId: "shelves" }));
+  const { bb, harness } = createFakePluginHost({ pluginId: "shelves", sdk: { plugins: { getSettings } } });
   await plugin(bb);
   disposers.push(() => harness.lifecycle.dispose());
   const db = bb.storage.database();
@@ -204,7 +204,7 @@ it("writes only JSON and keeps historical columns unchanged across reloads", asy
 });
 
 it("defaults missing and invalid JSON fields without losing valid settings", async () => {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-thread-inbox" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "shelves" });
   await plugin(bb);
   disposers.push(() => harness.lifecycle.dispose());
   const db = bb.storage.database();
@@ -232,7 +232,7 @@ it("defaults missing and invalid JSON fields without losing valid settings", asy
 });
 
 it.each(["", "{broken", "null", "[]", "42", '"settings"'])("defaults malformed JSON %s", async (stored) => {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-thread-inbox" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "shelves" });
   await plugin(bb);
   disposers.push(() => harness.lifecycle.dispose());
   bb.storage.database().prepare("UPDATE sidebar_settings SET settings_json = ? WHERE id = 1").run(stored);
@@ -252,7 +252,7 @@ it.each([
   [{ threadDisplay: "dense-future", compactWorkingThreads: true }, "compact-working"],
   [{ threadDisplay: "dense-future", compactWorkingThreads: false }, "full"],
 ])("reads thread display %j from settings saved without a known value", async (stored, threadDisplay) => {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-thread-inbox" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "shelves" });
   await plugin(bb);
   disposers.push(() => harness.lifecycle.dispose());
   bb.storage
@@ -281,7 +281,7 @@ it("keeps the legacy switch in step when thread display changes", async () => {
 });
 
 it("keeps settling finished pull requests on for installs that already had sidebar data", async () => {
-  const { bb, harness } = createFakePluginHost({ pluginId: "bb-thread-inbox" });
+  const { bb, harness } = createFakePluginHost({ pluginId: "shelves" });
   // The shape the first release created, with one stored shelf choice.
   bb.storage.database().exec(
     `CREATE TABLE thread_lifecycle (thread_id TEXT PRIMARY KEY, settled_at INTEGER, snoozed_until INTEGER, snoozed_at INTEGER);

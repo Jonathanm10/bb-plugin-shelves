@@ -12,12 +12,12 @@
  */
 
 @media (prefers-reduced-motion: no-preference) {
-  .bb-thread-inbox-working-pulse {
-    animation: bb-thread-inbox-working-pulse 2s infinite;
+  .shelves-working-pulse {
+    animation: shelves-working-pulse 2s infinite;
   }
 }
 
-@keyframes bb-thread-inbox-working-pulse {
+@keyframes shelves-working-pulse {
   0%,
   40% {
     opacity: 1;

@@ -238,7 +238,7 @@ export async function loadPlugin(
     makeThreadResponse({ id: threadId }),
 ) {
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-thread-inbox",
+    pluginId: "shelves",
     sdk: {
       projects: { list: async () => projectsWith([projectThread({ id: "thr_1" })]) },
       threads: {

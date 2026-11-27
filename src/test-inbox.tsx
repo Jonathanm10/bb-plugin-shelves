@@ -87,10 +87,10 @@ export async function loadInboxApp() {
   afterEach(cleanupInboxTest);
   beforeEach(() => {
     // Explicit legacy layout fixture. Core acceptance clears storage to use shipped defaults.
-    localStorage.setItem("bb-thread-inbox:active-sort:v1", "manual");
-    localStorage.setItem("bb-thread-inbox:shelf-expansion:v1", JSON.stringify({ working: true }));
+    localStorage.setItem("shelves:active-sort:v1", "manual");
+    localStorage.setItem("shelves:shelf-expansion:v1", JSON.stringify({ working: true }));
     localStorage.setItem(
-      "bb-thread-inbox:settings-cache:v1",
+      "shelves:settings-cache:v1",
       JSON.stringify({ ...defaultSidebarSettings, inactiveThreadsEnabled: false }),
     );
   });

@@ -37,7 +37,7 @@ it("reloads colors after a missed signal and reconnection", async () => {
     {},
     { rpc: { getProjectColors: () => ({ colors }) }, realtimeConnectionState: "connected" },
   );
-  const style = () => screen.getByTestId("name").style.getPropertyValue("--bb-thread-inbox-project");
+  const style = () => screen.getByTestId("name").style.getPropertyValue("--shelves-project");
   await waitFor(() => expect(style()).toBe("#123456"));
   const loads = () => slot.inspection.rpcCalls.filter((c) => c.method === "getProjectColors").length;
   expect(loads()).toBe(1);
@@ -62,7 +62,7 @@ it("a change invalidated while a color read is in flight rereads instead of keep
     {},
     { rpc: { getProjectColors: () => (++loads === 1 ? older.promise : { colors: { p1: "#abcdef" } }) } },
   );
-  const style = () => screen.getByTestId("name").style.getPropertyValue("--bb-thread-inbox-project");
+  const style = () => screen.getByTestId("name").style.getPropertyValue("--shelves-project");
   // bb keeps one read in flight per query: the change waits for it, then rereads.
   const invalidated = slot.behavior.experimental_invalidateRpc(["project-colors"]);
   older.resolve({ colors: { p1: "#123456" } });

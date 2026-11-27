@@ -67,7 +67,7 @@ export function ProjectScopeControls({
                 onDragStart={(event) => {
                   event.stopPropagation();
                   event.dataTransfer.effectAllowed = "move";
-                  event.dataTransfer.setData("application/x-bb-thread-inbox-pinned-project", project.id);
+                  event.dataTransfer.setData("application/x-shelves-pinned-project", project.id);
                   setDraggingId(project.id);
                 }}
                 onDragOver={(event) => {

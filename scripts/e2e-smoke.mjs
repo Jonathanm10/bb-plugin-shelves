@@ -12,7 +12,7 @@ try {
   page.on("console", (message) => {
     if (
       message.type() === "error" &&
-      /\[plugin:bb-thread-inbox\]|is not a function|ReferenceError|TypeError/.test(message.text())
+      /\[plugin:shelves\]|is not a function|ReferenceError|TypeError/.test(message.text())
     ) {
       errors.push(message.text());
     }

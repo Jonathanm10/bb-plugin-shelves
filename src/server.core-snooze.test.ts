@@ -19,7 +19,7 @@ it("snoozes an existing question without answering or releasing its runtime", as
     latestAttentionAt: 100,
   });
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-thread-inbox",
+    pluginId: "shelves",
     sdk: { projects: { list: async () => projectsWith([thread]) } },
   });
   await plugin(bb);
@@ -57,7 +57,7 @@ it.each([
   },
 ])("rejects snoozing busy or queued work: %j", async (change) => {
   const { bb, harness } = createFakePluginHost({
-    pluginId: "bb-thread-inbox",
+    pluginId: "shelves",
     sdk: { projects: { list: async () => projectsWith([projectThread({ id: "busy", ...change })]) } },
   });
   await plugin(bb);

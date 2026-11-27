@@ -99,7 +99,7 @@ describe("lifecycle RPC", () => {
 
   it("legacy Park files work without releasing runtimes or terminals", async () => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-thread-inbox",
+      pluginId: "shelves",
       sdk: {
         projects: { list: async () => projectsWith([projectThread({ id: "thr_1" })]) },
         threads: {
@@ -132,7 +132,7 @@ describe("lifecycle RPC", () => {
 
   it("settles even when the runtime and terminals cannot be reached", async () => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-thread-inbox",
+      pluginId: "shelves",
       sdk: {
         projects: { list: async () => projectsWith([projectThread({ id: "thr_1" })]) },
         threads: {
@@ -258,7 +258,7 @@ describe("lifecycle RPC", () => {
 
   it.each(["settle", "snooze", "park"])("does not %s when native unpinning fails", async (method) => {
     const { bb, harness } = createFakePluginHost({
-      pluginId: "bb-thread-inbox",
+      pluginId: "shelves",
       sdk: {
         projects: { list: async () => projectsWith([projectThread({ id: "thr_1", pinnedAt: 1 })]) },
         threads: {

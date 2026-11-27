@@ -18,12 +18,12 @@ for (const theme of ["light", "dark"]) {
       await expect(shelf(page, "Settled")).toBeVisible();
       for (const name of ["Inactive", "Parked", "Snoozed"]) await expect(shelf(page, name)).toHaveCount(0);
       await page
-        .locator("[data-bb-thread-inbox-root]")
+        .locator("[data-shelves-root]")
         .screenshot({ path: `e2e-artifacts/screenshots/sidebar-${theme}-${width}.png`, animations: "disabled" });
       await row.hover();
       await row.getByRole("button", { name: "Settle thread" }).focus();
       await page
-        .locator("[data-bb-thread-inbox-root]")
+        .locator("[data-shelves-root]")
         .screenshot({ path: `e2e-artifacts/screenshots/actions-${theme}-${width}.png`, animations: "disabled" });
       expect(page.url()).toBe(selectedUrl);
       await page.reload();
@@ -76,7 +76,7 @@ test("core sidebar auto-settle settings persist", async ({ page, request }) => {
   await reset(request);
   await open(page, { core: true });
   await page.getByRole("button", { name: /^Settings \(/ }).click();
-  await page.getByRole("link", { name: "Thread Inbox", exact: true }).click();
+  await page.getByRole("link", { name: "Shelves", exact: true }).click();
   const keep = page.getByRole("switch", { name: "Keep threads with a PR" });
   await expect(keep).toHaveAttribute("aria-checked", "false");
   await expect(page.getByRole("switch", { name: "Working shelf" })).toBeVisible();
@@ -114,7 +114,7 @@ for (const theme of ["light", "dark"]) {
     await page.setViewportSize({ width: 1100, height: 1050 });
     await open(page, { core: true, theme });
     await page.getByRole("button", { name: /^Settings \(/ }).click();
-    await page.getByRole("link", { name: "Thread Inbox", exact: true }).click();
+    await page.getByRole("link", { name: "Shelves", exact: true }).click();
     const behavior = page.locator("#settings-thread-behavior");
     const sidebar = page.locator("#settings-sidebar");
     await expect(behavior.getByRole("switch", { name: "Keep threads with a PR" })).toBeVisible();

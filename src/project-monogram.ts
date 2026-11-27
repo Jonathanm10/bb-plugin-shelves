@@ -1,9 +1,9 @@
-/** Tile colours in src/theme.css: `.bb-thread-inbox-monogram-0` through `-7`. */
+/** Tile colours in src/theme.css: `.shelves-monogram-0` through `-7`. */
 export const MONOGRAM_COLOR_COUNT = 8;
 
 /**
  * Leading words that many project names share. Skipped while another word
- * follows, so `bb-thread-inbox` and `bb-plugin-tasks` read as T rather than
+ * follows, so `bb-thread-list` and `bb-plugin-tasks` read as T rather than
  * a column of identical Bs.
  */
 const GENERIC_WORDS = new Set(["bb", "plugin", "the", "my"]);

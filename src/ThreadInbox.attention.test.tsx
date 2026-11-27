@@ -10,9 +10,9 @@ await loadInboxApp();
 // The three states that need attention take the slot from the age label.
 describe("attention states", () => {
   const states = [
-    ["waiting-for-input", "Thread needs user input", "Needs you", "text-[color:var(--bb-thread-inbox-tone-pending)]"],
-    ["unread-error", "Unread thread failed", "Failed", "text-[color:var(--bb-thread-inbox-tone-error)]"],
-    ["unread-success", "Unread thread succeeded", "Unread", "text-[color:var(--bb-thread-inbox-tone-success)]"],
+    ["waiting-for-input", "Thread needs user input", "Needs you", "text-[color:var(--shelves-tone-pending)]"],
+    ["unread-error", "Unread thread failed", "Failed", "text-[color:var(--shelves-tone-error)]"],
+    ["unread-success", "Unread thread succeeded", "Unread", "text-[color:var(--shelves-tone-success)]"],
   ] as const;
 
   for (const [indicator, label, shortLabel, toneClass] of states) {

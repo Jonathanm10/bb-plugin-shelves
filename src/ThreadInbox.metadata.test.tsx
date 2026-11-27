@@ -242,7 +242,7 @@ describe("card metadata", () => {
       }),
     ]);
     expect(await screen.findByLabelText("Agent is working")).toBeDefined();
-    expect(screen.getByText("Working").className).toContain("text-[color:var(--bb-thread-inbox-tone-working)]");
+    expect(screen.getByText("Working").className).toContain("text-[color:var(--shelves-tone-working)]");
     expect(screen.queryByText("3h")).toBeNull();
   });
 
@@ -259,7 +259,7 @@ describe("card metadata", () => {
     ]);
     expect(await screen.findByLabelText("Background command running")).toBeDefined();
     const label = screen.getByText("Command");
-    expect(label.className).toContain("text-[color:var(--bb-thread-inbox-tone-command)]");
+    expect(label.className).toContain("text-[color:var(--shelves-tone-command)]");
     expect(label.className).not.toContain("tone-working");
   });
 
@@ -267,7 +267,7 @@ describe("card metadata", () => {
   // stamp per thread and shows how long the current stretch has run.
   it("shows how long a thread has been working", async () => {
     window.localStorage.setItem(
-      "bb-thread-inbox:working-since:v1",
+      "shelves:working-since:v1",
       JSON.stringify({ thr_run: Date.now() - 5 * 60_000 - 60_000 }),
     );
     render([thread({ id: "thr_run", indicator: "runtime" })]);
@@ -276,7 +276,7 @@ describe("card metadata", () => {
 
   it("shows monitoring when BB identifies a monitoring runtime", async () => {
     window.localStorage.setItem(
-      "bb-thread-inbox:working-since:v1",
+      "shelves:working-since:v1",
       JSON.stringify({ thr_monitor: Date.now() - 5 * 60_000 - 60_000 }),
     );
     render([
@@ -294,7 +294,7 @@ describe("card metadata", () => {
     render([thread({ id: "thr_run", indicator: "runtime" })]);
     expect(await screen.findByText("Working")).toBeDefined();
     await waitFor(() => {
-      const stored = JSON.parse(window.localStorage.getItem("bb-thread-inbox:working-since:v1") ?? "{}") as Record<
+      const stored = JSON.parse(window.localStorage.getItem("shelves:working-since:v1") ?? "{}") as Record<
         string,
         number
       >;
@@ -305,10 +305,7 @@ describe("card metadata", () => {
   // A request for input is a verdict, not a stretch of work, and reads oddly
   // with a duration behind it.
   it("leaves the duration off a status that is waiting on the user", async () => {
-    window.localStorage.setItem(
-      "bb-thread-inbox:working-since:v1",
-      JSON.stringify({ thr_ask: Date.now() - 10 * 60_000 }),
-    );
+    window.localStorage.setItem("shelves:working-since:v1", JSON.stringify({ thr_ask: Date.now() - 10 * 60_000 }));
     render([
       thread({
         id: "thr_ask",
@@ -391,7 +388,7 @@ describe("card metadata", () => {
       sidebarDraftThreadIds: ["thr_idle", "thr_busy", "thr_unread"],
     });
     expect(await screen.findByLabelText("Thread has unsubmitted draft")).toBeDefined();
-    expect(screen.getByText("Draft").className).toContain("text-[color:var(--bb-thread-inbox-tone-draft)]");
+    expect(screen.getByText("Draft").className).toContain("text-[color:var(--shelves-tone-draft)]");
     expect(screen.getByLabelText("Thread working with unsubmitted draft")).toBeDefined();
     expect(screen.getByText("Drafting")).toBeDefined();
     expect(screen.getByText("Unread")).toBeDefined();

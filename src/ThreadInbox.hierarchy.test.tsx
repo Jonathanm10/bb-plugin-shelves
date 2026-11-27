@@ -69,7 +69,7 @@ describe("four-level sidebar hierarchy", () => {
   });
 
   it("stops archived branches in sidebar rollup and disclosure", () => {
-    window.localStorage.setItem("bb-thread-inbox:child-expansion:v1", JSON.stringify(["root"]));
+    window.localStorage.setItem("shelves:child-expansion:v1", JSON.stringify(["root"]));
     renderSlot(
       inbox,
       { ...listProps, activeThreadId: "deep" },

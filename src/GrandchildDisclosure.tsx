@@ -20,13 +20,13 @@ import {
 export function childStatusBadgeClass(kind: ChildStatusKind | null): string {
   switch (kind) {
     case "failed":
-      return "bg-[color:var(--bb-thread-inbox-badge-failed-bg)] text-[color:var(--bb-thread-inbox-badge-failed-fg)]";
+      return "bg-[color:var(--shelves-badge-failed-bg)] text-[color:var(--shelves-badge-failed-fg)]";
     case "needs-you":
-      return "bg-[color:var(--bb-thread-inbox-badge-needs-you-bg)] text-[color:var(--bb-thread-inbox-badge-needs-you-fg)]";
+      return "bg-[color:var(--shelves-badge-needs-you-bg)] text-[color:var(--shelves-badge-needs-you-fg)]";
     case "done":
-      return "bg-[color:var(--bb-thread-inbox-badge-done-bg)] text-[color:var(--bb-thread-inbox-badge-done-fg)]";
+      return "bg-[color:var(--shelves-badge-done-bg)] text-[color:var(--shelves-badge-done-fg)]";
     case "working":
-      return "bg-[color:var(--bb-thread-inbox-badge-working-bg)] text-[color:var(--bb-thread-inbox-badge-working-fg)]";
+      return "bg-[color:var(--shelves-badge-working-bg)] text-[color:var(--shelves-badge-working-fg)]";
     default:
       return "bg-muted text-foreground";
   }

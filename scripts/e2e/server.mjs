@@ -16,7 +16,7 @@ export async function startScratchServer({ projectName = "Sidebar smoke" } = {})
   if (inheritedUrl && Number(new URL(inheritedUrl).port || 80) === 38886) {
     throw new Error("Refusing BB_SERVER_URL on the developer's port 38886. Strip inherited BB_* variables.");
   }
-  const scratch = mkdtempSync("/tmp/bb-thread-inbox-smoke-");
+  const scratch = mkdtempSync("/tmp/shelves-smoke-");
   if (!scratch.startsWith("/tmp/")) throw new Error("Scratch data must be under /tmp");
   const children = new Set();
   let cleaning;
@@ -252,7 +252,7 @@ trace_exporter = "none"
     });
     symlinkSync(runtimeModules, join(pluginDir, "node_modules"));
     await run(bb, ["plugin", "install", `path:${pluginDir}`, "--yes"]);
-    await run(bb, ["settings", "ui", "set", "sidebar.threadListProvider", "bb-thread-inbox/inbox"]);
+    await run(bb, ["settings", "ui", "set", "sidebar.threadListProvider", "shelves/inbox"]);
     await run(bb, ["settings", "general", "onboardingCompletedAt", new Date().toISOString()]);
     const repo = join(scratch, "repo");
     await run("git", ["init", "--initial-branch=main", repo]);

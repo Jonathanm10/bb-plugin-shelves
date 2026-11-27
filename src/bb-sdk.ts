@@ -84,7 +84,7 @@ function schema<T>(validate: (value: unknown) => value is T): StandardSchemaV1<T
   return {
     "~standard": {
       version: 1,
-      vendor: "bb-thread-inbox",
+      vendor: "shelves",
       validate: (value) => (validate(value) ? { value } : { issues: [{ message: "Unexpected value" }] }),
     },
   };

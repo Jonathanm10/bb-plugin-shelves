@@ -10,7 +10,7 @@ test.beforeEach(async ({ request, page }) => {
 
 test("selected sidebar renders all seeded threads in Active", async ({ page }) => {
   const settings = await cli(["settings", "ui", "get", "sidebar.threadListProvider"]);
-  expect(settings.value).toBe("bb-thread-inbox/inbox");
+  expect(settings.value).toBe("shelves/inbox");
   for (const thread of fixture.threads) {
     await expect(link(page, thread.title)).toBeVisible();
     const state = await cli(["thread", "get", thread.id]);
@@ -61,7 +61,7 @@ test("a row click opens the thread in place and keeps its Full Screen", async ({
 // bb owns the hold delay, numbering, and pill; the sidebar draws what it assigns.
 test("holding the shortcut modifier shows bb's jump keys on sidebar rows", async ({ page }) => {
   const modifier = process.platform === "darwin" ? "Meta" : "Control";
-  const sidebar = page.locator("[data-bb-thread-inbox-root]");
+  const sidebar = page.locator("[data-shelves-root]");
   await expect(link(page, atlas.title)).toBeVisible();
   await page.mouse.move(1000, 750);
   await page.keyboard.down(modifier);

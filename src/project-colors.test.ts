@@ -21,9 +21,9 @@ describe("project colors", () => {
   it("preserves the exact stripe color and adapts extreme colors for readable labels", () => {
     const white = projectColorStyle("#ffffff") as Record<string, string>;
     const black = projectColorStyle("#000000") as Record<string, string>;
-    expect(white["--bb-thread-inbox-project"]).toBe("#ffffff");
-    expect(white["--bb-thread-inbox-project-text-light"]).not.toBe("#ffffff");
-    expect(black["--bb-thread-inbox-project"]).toBe("#000000");
-    expect(black["--bb-thread-inbox-project-text-dark"]).not.toBe("#000000");
+    expect(white["--shelves-project"]).toBe("#ffffff");
+    expect(white["--shelves-project-text-light"]).not.toBe("#ffffff");
+    expect(black["--shelves-project"]).toBe("#000000");
+    expect(black["--shelves-project-text-dark"]).not.toBe("#000000");
   });
 });

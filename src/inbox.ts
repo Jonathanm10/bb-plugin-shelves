@@ -123,7 +123,7 @@ interface TreeThread {
  * inside the parent's row and go wherever that row goes, so they share its
  * shelf. A cycle has no row at all, and its threads map to null.
  *
- * The sidebar and `bb thread-inbox list` both place threads by this rule.
+ * The sidebar and `bb shelves list` both place threads by this rule.
  */
 export function shelfRowIds<T extends TreeThread>(threads: readonly T[]): ReadonlyMap<string, string | null> {
   const byId = new Map(threads.map((thread) => [thread.id, thread] as const));
@@ -142,7 +142,7 @@ export function shelfRowIds<T extends TreeThread>(threads: readonly T[]): Readon
 
 /**
  * Every thread with the row that carries it (`shelfRowIds`) and that row's
- * shelf, decided once per row. `bb thread-inbox list` and the live-thread filter
+ * shelf, decided once per row. `bb shelves list` and the live-thread filter
  * place threads this way across all projects; each decides a row's shelf.
  */
 export function placeOnRowShelves<T extends TreeThread, Shelf>(

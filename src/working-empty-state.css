@@ -8,43 +8,43 @@
  * holds still under reduced motion.
  */
 
-.bb-thread-inbox-working-eye {
+.shelves-working-eye {
   transform-box: fill-box;
   transform-origin: center;
 }
 
-.bb-thread-inbox-working-sprout {
+.shelves-working-sprout {
   transform-box: view-box;
   transform-origin: 90px 36px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .bb-thread-inbox-working-head {
-    animation: bb-thread-inbox-working-bob 0.9s ease-in-out 4;
+  .shelves-working-head {
+    animation: shelves-working-bob 0.9s ease-in-out 4;
   }
 
-  .bb-thread-inbox-working-eye {
-    animation: bb-thread-inbox-working-blink 4.2s ease-in-out 1;
+  .shelves-working-eye {
+    animation: shelves-working-blink 4.2s ease-in-out 1;
   }
 
-  .bb-thread-inbox-working-sprout {
-    animation: bb-thread-inbox-working-sway 2.4s ease-in-out 2;
+  .shelves-working-sprout {
+    animation: shelves-working-sway 2.4s ease-in-out 2;
   }
 
-  .bb-thread-inbox-working-dot {
-    animation: bb-thread-inbox-working-dot 1.2s ease-in-out 3;
+  .shelves-working-dot {
+    animation: shelves-working-dot 1.2s ease-in-out 3;
   }
 
-  .bb-thread-inbox-working-dot:nth-of-type(2) {
+  .shelves-working-dot:nth-of-type(2) {
     animation-delay: 0.15s;
   }
 
-  .bb-thread-inbox-working-dot:nth-of-type(3) {
+  .shelves-working-dot:nth-of-type(3) {
     animation-delay: 0.3s;
   }
 }
 
-@keyframes bb-thread-inbox-working-bob {
+@keyframes shelves-working-bob {
   0%,
   100% {
     transform: translateY(0);
@@ -54,7 +54,7 @@
   }
 }
 
-@keyframes bb-thread-inbox-working-blink {
+@keyframes shelves-working-blink {
   0%,
   92%,
   100% {
@@ -65,7 +65,7 @@
   }
 }
 
-@keyframes bb-thread-inbox-working-sway {
+@keyframes shelves-working-sway {
   0%,
   100% {
     transform: rotate(0);
@@ -78,7 +78,7 @@
   }
 }
 
-@keyframes bb-thread-inbox-working-dot {
+@keyframes shelves-working-dot {
   0%,
   60%,
   100% {

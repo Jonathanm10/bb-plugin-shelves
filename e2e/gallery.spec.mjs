@@ -8,12 +8,13 @@ test("README gallery captures real filing and search states", async ({ page, req
   const first = fixture.threads[0];
   await rpc(request, "settle", { threadId: fixture.threads[3].id });
   await open(page, { core: true, theme: "dark" });
-  const sidebar = page.locator("[data-bb-thread-inbox-root]");
+  const sidebar = page.locator("[data-shelves-root]");
   mkdirSync("e2e-artifacts/demo", { recursive: true });
   async function frame(number, screenshot) {
     await page.mouse.move(1000, 750);
     await sidebar.screenshot({ path: `e2e-artifacts/demo/${number}.png`, animations: "disabled" });
-    if (screenshot) await sidebar.screenshot({ path: `e2e-artifacts/screenshots/${screenshot}.png`, animations: "disabled" });
+    if (screenshot)
+      await sidebar.screenshot({ path: `e2e-artifacts/screenshots/${screenshot}.png`, animations: "disabled" });
     // Hold each demonstrated state long enough to read in the recording.
     await page.waitForTimeout(900);
   }
