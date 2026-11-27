@@ -181,7 +181,7 @@ describe("card metadata", () => {
     expect(unread?.getAttribute("data-row-emphasis")).toBe("unread");
     expect(unread?.className).toContain("font-medium");
     expect(unread?.className).toContain("text-foreground");
-    const project = screen.getAllByText("bb")[0]?.closest("[data-settle-fade]");
+    const project = screen.getAllByText("bb")[0]?.closest("[data-thread-project]");
     expect(project?.className).toContain("text-foreground/70");
   });
 

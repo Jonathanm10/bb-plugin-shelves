@@ -45,7 +45,6 @@ export function ThreadMachine({ host }: { host: NonNullable<PluginSidebarThread[
   return (
     <span
       data-thread-machine=""
-      data-settle-fade=""
       className={cn("pointer-events-none relative flex min-w-0 items-center gap-1.5 text-xs", SECONDARY_LABEL_CLASS)}
     >
       <Icon name={machineIconName(host.name)} aria-hidden className="size-3.5 shrink-0" />

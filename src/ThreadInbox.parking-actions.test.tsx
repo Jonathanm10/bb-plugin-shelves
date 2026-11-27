@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it, onTestFinished, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { renderSlot } from "./test-slot";
 import {
@@ -10,6 +10,7 @@ import {
   statusSlotParts,
   nestedInteractiveControls,
   loadInboxApp,
+  toastMocks,
 } from "./test-inbox";
 
 vi.mock("sonner", async () => (await import("./test-inbox")).sonnerMock());
@@ -196,47 +197,36 @@ describe("parking threads", () => {
     await waitFor(() => expect(settled).toBe("thr_park"));
   });
 
-  it("plays the settle sweep before settling, unless motion is reduced", async () => {
-    for (const reduced of [false, true]) {
-      vi.stubGlobal("matchMedia", (query: string) => ({
-        matches: reduced && query.includes("reduce"),
-        media: query,
-        addEventListener: () => {},
-        removeEventListener: () => {},
-      }));
-      onTestFinished(() => {
-        vi.unstubAllGlobals();
-      });
-      let settled: string | null = null;
-      const rendered = renderSlot(inbox, listProps, {
-        sidebarThreads: {
-          status: "ready",
-          threads: [thread({ id: "thr_park", title: "Quiet" })],
-          projects: [{ id: "proj_1", name: "bb", isPersonal: false, href: "", settingsHref: "" }],
+  it("sends the settle on the click, and a second click while it is in flight sends nothing", async () => {
+    let calls = 0;
+    let finish = () => {};
+    const inFlight = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    renderSlot(inbox, listProps, {
+      sidebarThreads: {
+        status: "ready",
+        threads: [thread({ id: "thr_park", title: "Quiet" })],
+        projects: [{ id: "proj_1", name: "bb", isPersonal: false, href: "", settingsHref: "" }],
+      },
+      rpc: {
+        listLifecycle: () => ({ rows: [] }),
+        settle: async () => {
+          calls += 1;
+          await inFlight;
+          return { ok: true, reclaim: SETTLED_NOTHING };
         },
-        rpc: {
-          listLifecycle: () => ({ rows: [] }),
-          settle: (input) => {
-            settled = (input as { threadId: string }).threadId;
-            return { ok: true, reclaim: SETTLED_NOTHING };
-          },
-        },
-      });
-      const button = await screen.findByLabelText("Settle thread");
-      fireEvent.click(button);
-      const card = button.closest("[data-parent-card]")!;
-      if (reduced) {
-        expect(card.hasAttribute("data-settling")).toBe(false);
-      } else {
-        expect(card.hasAttribute("data-settling")).toBe(true);
-        expect(card.querySelector(".bb-thread-inbox-settle-sweep")).not.toBeNull();
-        // A second click while the sweep plays is not a second settle.
-        fireEvent.click(button);
-        expect(settled).toBeNull();
-      }
-      await waitFor(() => expect(settled).toBe("thr_park"));
-      rendered.unmount();
-    }
+      },
+    });
+    const button = await screen.findByLabelText("Settle thread");
+    fireEvent.click(button);
+    // No timer stands between the click and the request.
+    expect(calls).toBe(1);
+    fireEvent.click(button);
+    expect(calls).toBe(1);
+    finish();
+    await waitFor(() => expect(toastMocks.success).toHaveBeenCalledWith("Thread settled", expect.anything()));
+    expect(calls).toBe(1);
   });
 
   // A raised hand outranks a reported runtime in the slot, and it also

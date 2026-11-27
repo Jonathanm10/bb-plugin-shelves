@@ -33,16 +33,6 @@ import { useInboxEnvironment, useInboxActions, useInboxActivity } from "./InboxC
 import { DEFAULT_SIDEBAR_SETTINGS } from "./sidebar-settings";
 import { useRowStatusRuns } from "./useLifecycle";
 import { projectIconUrl as iconUrl } from "./project-icons";
-import "./settle-button.css";
-
-/** How long the settle sweep plays before the thread actually moves. */
-const SETTLE_SWEEP_MS = 520;
-/** A settle that worked has unmounted the card by now; one that failed has not. */
-const SETTLE_RECOVER_MS = 4_000;
-
-function shouldAnimateSettle(): boolean {
-  return typeof window.matchMedia === "function" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
 
 export interface ThreadReorderControls {
   disabled: boolean;
@@ -157,31 +147,7 @@ export function ThreadCard({
   }, [thread.id]);
   const compactAtRenameStart = useRef(false);
   const [isSnoozeOpen, setIsSnoozeOpen] = useState(false);
-  const [isSettling, setIsSettling] = useState(false);
-  const settleTimer = useRef<number | null>(null);
-  useEffect(
-    () => () => {
-      if (settleTimer.current !== null) window.clearTimeout(settleTimer.current);
-    },
-    [],
-  );
-  // The sweep plays before the settle is sent, so the row leaves in its
-  // finished state instead of vanishing under the cursor.
-  const startSettle = () => {
-    if (isSettling) return;
-    if (!shouldAnimateSettle()) {
-      onSettle();
-      return;
-    }
-    setIsSettling(true);
-    settleTimer.current = window.setTimeout(() => {
-      onSettle();
-      settleTimer.current = window.setTimeout(() => setIsSettling(false), SETTLE_RECOVER_MS);
-    }, SETTLE_SWEEP_MS);
-  };
-  // The sweep keeps the actions up, as an open snooze menu does, so the check
-  // it starts from does not disappear when the cursor leaves the row.
-  const holdParkActions = isSnoozeOpen || isSettling;
+  const holdParkActions = isSnoozeOpen;
   const childListId = useId();
   // Keep busy trees compact until a failure, question, or wake needs attention.
   const working = useWorkingForDisplay();
@@ -228,7 +194,6 @@ export function ThreadCard({
   const titleLine = (
     <div
       data-row-emphasis={emphasis}
-      data-settle-fade=""
       className={cn(
         // T3 Code's 14px title on a 20px line; bb's text-sm is 13px.
         "pointer-events-none relative min-w-0 flex-1 truncate text-[0.875rem]/5",
@@ -257,7 +222,7 @@ export function ThreadCard({
       canArchive={canPark}
       snoozePresets={snoozePresets}
       onSnooze={onSnooze}
-      onSettle={canShelve ? startSettle : undefined}
+      onSettle={canShelve ? onSettle : undefined}
       onRename={() => changeRenaming(true)}
     >
       <li
@@ -290,7 +255,7 @@ export function ThreadCard({
                 if (isWoke) onAcknowledgeWake();
                 onNavigate();
               }}
-              rowProps={{ "data-parent-card": "", "data-settling": isSettling ? "" : undefined }}
+              rowProps={{ "data-parent-card": "" }}
               linkProps={{
                 draggable: false,
                 "aria-keyshortcuts": rowKeyshortcuts(shortcut?.ariaKeyshortcuts, !!reorder),
@@ -305,8 +270,6 @@ export function ThreadCard({
                   reorder && !reorder.disabled ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
                 ),
               }}
-              beforeContent={isSettling ? <span aria-hidden="true" className="bb-thread-inbox-settle-sweep" /> : null}
-              fadeContent
               trailing={
                 <span className="pointer-events-none relative flex shrink-0 items-center gap-1.5">
                   {childThreads.length > 0 ? (
@@ -338,8 +301,7 @@ export function ThreadCard({
                         snoozePresets={snoozePresets}
                         onOpenChange={setIsSnoozeOpen}
                         onSnooze={snoozable ? onSnooze : undefined}
-                        onSettle={canShelve ? startSettle : undefined}
-                        settling={isSettling}
+                        onSettle={canShelve ? onSettle : undefined}
                       />
                     </span>
                   ) : null}
@@ -350,7 +312,6 @@ export function ThreadCard({
           ) : (
             <div
               data-parent-card=""
-              data-settling={isSettling ? "" : undefined}
               className={cn(
                 "group/card relative rounded-md px-2.5 py-2 transition-colors duration-150 ease-out motion-reduce:transition-none",
                 isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/60",
@@ -360,7 +321,6 @@ export function ThreadCard({
                 reorder?.isDragging && DRAG_LIFT_CLASS,
               )}
             >
-              {isSettling ? <span aria-hidden="true" className="bb-thread-inbox-settle-sweep" /> : null}
               {showProject && projectName ? <ProjectStripe projectId={thread.projectId} view={stripeView} /> : null}
               <ThreadDetailsTooltip thread={thread} disabled={isRenaming || !!reorder?.isDragging}>
                 <a
@@ -401,7 +361,7 @@ export function ThreadCard({
               <div className="pointer-events-none relative flex h-5 min-w-0 items-center gap-1.5">
                 {showProject ? (
                   <span
-                    data-settle-fade=""
+                    data-thread-project=""
                     className={cn("flex min-w-0 flex-1 items-center gap-1.5 text-xs", SECONDARY_LABEL_CLASS)}
                   >
                     {projectName ? (
@@ -436,8 +396,7 @@ export function ThreadCard({
                       snoozePresets={snoozePresets}
                       onOpenChange={setIsSnoozeOpen}
                       onSnooze={snoozable ? onSnooze : undefined}
-                      onSettle={canShelve ? startSettle : undefined}
-                      settling={isSettling}
+                      onSettle={canShelve ? onSettle : undefined}
                     />
                   </span>
                 ) : (
@@ -479,8 +438,7 @@ export function ThreadCard({
                           snoozePresets={snoozePresets}
                           onOpenChange={setIsSnoozeOpen}
                           onSnooze={snoozable ? onSnooze : undefined}
-                          onSettle={canShelve ? startSettle : undefined}
-                          settling={isSettling}
+                          onSettle={canShelve ? onSettle : undefined}
                         />
                       </span>
                     ) : null}
@@ -494,7 +452,6 @@ export function ThreadCard({
                 {showProject ? titleLine : null}
                 {thread.host ? <ThreadMachine host={thread.host} /> : null}
                 <div
-                  data-settle-fade=""
                   className={cn(
                     "pointer-events-none relative col-start-2 flex shrink-0 items-center gap-1.5 text-2xs text-muted-foreground",
                   )}

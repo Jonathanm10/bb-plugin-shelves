@@ -108,10 +108,6 @@
 
   --bb-thread-inbox-settle-active: var(--bb-thread-inbox-emerald-700);
   --bb-thread-inbox-snooze-active: var(--bb-thread-inbox-orange-600);
-  /* The settle sweep's wash and glow, and the brighter sparkle over it. */
-  --bb-thread-inbox-settle-accent: var(--bb-thread-inbox-emerald-600);
-  --bb-thread-inbox-settle-spark: var(--bb-thread-inbox-emerald-500);
-  --bb-thread-inbox-settle-glint: color-mix(in oklab, white 35%, transparent);
 
   --bb-thread-inbox-pr-merged: var(--bb-thread-inbox-violet-600);
   --bb-thread-inbox-pr-alert: var(--bb-thread-inbox-red-600);
@@ -175,10 +171,6 @@
 
   --bb-thread-inbox-settle-active: var(--bb-thread-inbox-emerald-300);
   --bb-thread-inbox-snooze-active: var(--bb-thread-inbox-orange-300);
-  --bb-thread-inbox-settle-accent: var(--bb-thread-inbox-emerald-400);
-  --bb-thread-inbox-settle-spark: var(--bb-thread-inbox-emerald-200);
-  /* White would flash on a dark row; the glint stays a brighter green. */
-  --bb-thread-inbox-settle-glint: color-mix(in oklab, var(--bb-thread-inbox-emerald-200) 18%, transparent);
 
   --bb-thread-inbox-pr-merged: color-mix(in oklab, var(--bb-thread-inbox-violet-300) 90%, transparent);
   --bb-thread-inbox-pr-alert: color-mix(in oklab, var(--bb-thread-inbox-red-300) 90%, transparent);

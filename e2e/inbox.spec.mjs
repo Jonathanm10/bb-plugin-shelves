@@ -152,7 +152,7 @@ test("core sidebar compact titles keep space until actions are needed", async ({
   await open(page, { core: true });
   await page.mouse.move(1000, 750);
   const row = link(page, fixture.threads[0].title).locator("xpath=..");
-  expect((await row.locator("[data-settle-fade]").boundingBox()).width).toBeGreaterThan(160);
+  expect((await row.locator("[data-row-content]").boundingBox()).width).toBeGreaterThan(160);
   const settle = row.getByRole("button", { name: "Settle thread" });
   await expect(settle).toBeHidden();
   await link(page, fixture.threads[0].title).focus();

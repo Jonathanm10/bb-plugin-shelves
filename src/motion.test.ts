@@ -42,7 +42,6 @@ const LOOPING = /\banimate-(?:spin|pulse|ping|bounce|shine[\w-]*)\b|\binfinite\b
 const ALLOWED: Record<string, { count: number; reason: string }> = {
   "src/ThreadInboxEmptyStates.tsx": { count: 1, reason: '"Loading threads…" while the list first loads' },
   "src/settings-ui.tsx": { count: 1, reason: "spinner while a setting saves" },
-  "src/settle-button.css": { count: 1, reason: "star shimmer only while the settle button is hovered or focused" },
   "src/working-pulse.css": {
     count: 1,
     reason:

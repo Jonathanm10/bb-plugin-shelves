@@ -24,8 +24,6 @@ export function CompactRow({
   onOpen,
   rowProps,
   linkProps,
-  beforeContent,
-  fadeContent = false,
   trailing,
 }: {
   thread: PluginSidebarThread;
@@ -48,8 +46,6 @@ export function CompactRow({
     ComponentProps<"a">,
     "draggable" | "aria-keyshortcuts" | "onPointerDown" | "onKeyDown" | "className"
   >;
-  beforeContent?: ReactNode;
-  fadeContent?: boolean;
   trailing: ReactNode;
 }) {
   const muted = tone === "muted";
@@ -66,7 +62,6 @@ export function CompactRow({
         isDragging && DRAG_LIFT_CLASS,
       )}
     >
-      {beforeContent}
       {showProject && projectName ? <ProjectStripe projectId={thread.projectId} view="collapsed" /> : null}
       <ThreadDetailsTooltip thread={thread} disabled={isRenaming || isDragging} isOpen={isActive}>
         <a
@@ -94,7 +89,7 @@ export function CompactRow({
         />
       </ThreadDetailsTooltip>
       <span
-        data-settle-fade={fadeContent ? "" : undefined}
+        data-row-content=""
         className={cn(
           "pointer-events-none relative flex min-w-0 flex-1 items-center gap-1",
           isRenaming && "pointer-events-auto",
