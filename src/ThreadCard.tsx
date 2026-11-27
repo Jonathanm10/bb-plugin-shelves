@@ -232,6 +232,7 @@ export function ThreadCard({
       className={cn(
         "pointer-events-none relative min-w-0 flex-1 truncate text-sm",
         showProject ? "mt-0.5" : "min-w-0 flex-1",
+        showProject && thread.host && "col-span-2",
         isRenaming && "pointer-events-auto",
         emphasis === "read-idle" ? "text-muted-foreground" : "text-foreground",
         (emphasis === "unread" || emphasis === "woke") && "font-medium",
@@ -479,15 +480,16 @@ export function ThreadCard({
                   </span>
                 )}
               </div>
-              {/* T3 Code's card: the title gets its own line and the machine leads the
-                  metadata under it. Without a machine the two share one line. */}
-              {thread.host && showProject ? titleLine : null}
-              <div className={cn("flex min-w-0 items-center gap-1.5", thread.host && "mt-0.5")}>
-                {thread.host ? <ThreadMachine host={thread.host} /> : showProject ? titleLine : null}
+              {/* T3 Code's card: the title spans its own row and the machine leads the
+                  metadata under it. Without a machine the two share one row. The title
+                  keeps its place in the tree either way, so a rename survives. */}
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-1.5 gap-y-0.5">
+                {showProject ? titleLine : null}
+                {thread.host ? <ThreadMachine host={thread.host} /> : null}
                 <div
                   data-settle-fade=""
                   className={cn(
-                    "pointer-events-none relative ml-auto flex shrink-0 items-center gap-1.5 text-2xs text-muted-foreground",
+                    "pointer-events-none relative col-start-2 flex shrink-0 items-center gap-1.5 text-2xs text-muted-foreground",
                   )}
                 >
                   {childThreads.length > 0 ? (

@@ -27,14 +27,11 @@ describe("machine on the card", () => {
     const onLaptop = machine("Laptop work")!;
     expect(onLaptop.textContent).toBe("Machine: Ada’s MacBook Pro");
     expect(machine("Server work")!.textContent).toBe("Machine: build-server");
-    // The metadata line: machine first, growing; the provider glyph at its end.
-    const line = onLaptop.parentElement!;
-    expect(line.firstElementChild).toBe(onLaptop);
-    expect(onLaptop.className).toMatch(/\bflex-1\b/);
-    expect(within(line).getByLabelText("Codex")).toBeDefined();
-    // The title is the line above, not a neighbour on the metadata line.
-    expect(within(line).queryByText("Laptop work")).toBeNull();
-    expect(line.previousElementSibling?.textContent).toBe("Laptop work");
+    // The title spans the first row; the machine and then the metadata share the next.
+    const title = onLaptop.previousElementSibling!;
+    expect(title.textContent).toBe("Laptop work");
+    expect(title.className).toMatch(/\bcol-span-2\b/);
+    expect(within(onLaptop.nextElementSibling as HTMLElement).getByLabelText("Codex")).toBeDefined();
     // The whole row stays one link target: the marker never takes the pointer.
     expect(onLaptop.className).not.toContain("pointer-events-auto");
   });
@@ -61,6 +58,25 @@ describe("machine on the card", () => {
     expect(machine("No machine yet")).toBeNull();
     const glyph = within(row("No machine yet")).getByLabelText("Codex");
     expect(within(glyph.parentElement!.parentElement!).getByText("No machine yet")).toBeDefined();
+  });
+
+  // A new thread has no machine until bb resolves its environment. React keeps
+  // an element only while its place in the tree holds, so a title that moved
+  // to another parent would unmount an inline rename and save the draft.
+  it("keeps the title at the same place in the card with or without a machine", async () => {
+    render([
+      thread({ id: "thr_a", title: "Laptop work", host: laptop }),
+      thread({ id: "thr_b", title: "No machine yet", host: null }),
+    ]);
+    await screen.findByRole("link", { name: "Laptop work" });
+    const placeInCard = (title: string) => {
+      const path: string[] = [];
+      for (let node = within(row(title)).getByText(title) as Element; node !== row(title); node = node.parentElement!) {
+        path.unshift(`${node.tagName}:${[...node.parentElement!.children].indexOf(node)}`);
+      }
+      return path.join(" > ");
+    };
+    expect(placeInCard("Laptop work")).toBe(placeInCard("No machine yet"));
   });
 
   it("leads the metadata line of a card inside a project group", async () => {

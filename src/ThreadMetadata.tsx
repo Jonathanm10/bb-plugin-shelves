@@ -39,7 +39,8 @@ export function ThreadMachine({ host }: { host: NonNullable<PluginSidebarThread[
   return (
     <span
       data-thread-machine=""
-      className="pointer-events-none relative flex min-w-0 flex-1 items-center gap-1.5 text-xs text-muted-foreground"
+      data-settle-fade=""
+      className="pointer-events-none relative flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground"
     >
       <Icon name={machineIconName(host.name)} aria-hidden className="size-3.5 shrink-0" />
       <span className="truncate">
