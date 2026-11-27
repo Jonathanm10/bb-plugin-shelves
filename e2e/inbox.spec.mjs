@@ -12,7 +12,8 @@ for (const theme of ["light", "dark"]) {
       await page.mouse.move(1000, 750);
       const row = link(page, first.title).locator("xpath=..");
       await expect(row).not.toHaveClass(/\bh-8\b/);
-      expect((await row.boundingBox()).height).toBeGreaterThanOrEqual(48);
+      // T3 Code's card: project, title and machine lines in 78px.
+      expect((await row.boundingBox()).height).toBeCloseTo(78, 0);
       await expect(shelf(page, "Active").getByRole("link")).toHaveCount(3);
       await expect(shelf(page, "Settled")).toBeVisible();
       for (const name of ["Inactive", "Parked", "Snoozed"]) await expect(shelf(page, name)).toHaveCount(0);

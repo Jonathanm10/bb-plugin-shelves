@@ -230,8 +230,9 @@ export function ThreadCard({
       data-row-emphasis={emphasis}
       data-settle-fade=""
       className={cn(
-        "pointer-events-none relative min-w-0 flex-1 truncate text-sm",
-        showProject ? "mt-0.5" : "min-w-0 flex-1",
+        // T3 Code's 14px title on a 20px line; bb's text-sm is 13px.
+        "pointer-events-none relative min-w-0 flex-1 truncate text-[0.875rem]/5",
+        showProject ? "mt-1" : "min-w-0 flex-1",
         showProject && thread.host && "col-span-2",
         isRenaming && "pointer-events-auto",
         // T3 Code's card: the title keeps the foreground over its project and
@@ -351,8 +352,7 @@ export function ThreadCard({
               data-parent-card=""
               data-settling={isSettling ? "" : undefined}
               className={cn(
-                "group/card relative rounded-md px-2.5 transition-colors duration-150 ease-out motion-reduce:transition-none",
-                "py-1.5",
+                "group/card relative rounded-md px-2.5 py-2 transition-colors duration-150 ease-out motion-reduce:transition-none",
                 isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/60",
                 // A thread open in another pane gets a weaker tint than the active
                 // row, so the two states stay distinguishable.
