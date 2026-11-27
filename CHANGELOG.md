@@ -4,10 +4,12 @@
 
 ### Added
 
+- Thread cards name the machine a thread runs on, matching T3 Code: the title gets its own line and the machine name leads the metadata line under it, with the pull request and provider glyph at its end. One-line rows (compact cards, Snoozed, Settled) and threads without a machine are unchanged.
 - A "BB compat" workflow that runs the type check and scratch smoke test daily against the latest stable BB and reports a failure in a `bb-compat` issue.
 
 ### Changed
 
+- The scratch e2e server renames its machine to "Scratch MacBook", so captures and visual baselines do not contain the developer's hostname.
 - The e2e seeds tolerate any provider notification that BB does not map (`provider/unhandled`), so a newer Codex CLI cannot fail them. Agent output and provider errors still fail them.
 - CI installs the latest Codex CLI for the Browser e2e and BB compat runs instead of a pinned version. The e2e error text and `e2e/README.md` no longer name a version.
 - Added the live BB Marketplace badge and installation command, and updated the listing documentation.

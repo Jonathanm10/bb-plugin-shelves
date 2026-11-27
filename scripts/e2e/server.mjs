@@ -272,6 +272,11 @@ trace_exporter = "none"
     const project = JSON.parse(projectResult.stdout);
     const projectId = project.id ?? project.project?.id;
     if (!projectId) throw new Error(`No project id: ${projectResult.stdout}`);
+    // Rows name the machine; a fixed name keeps the developer's hostname out of captures.
+    const machineList = JSON.parse((await run(bb, ["machine", "list", "--json"])).stdout);
+    const machines = Array.isArray(machineList) ? machineList : (machineList.machines ?? machineList.hosts ?? []);
+    if (machines.length !== 1) throw new Error(`Expected one scratch machine: ${JSON.stringify(machineList)}`);
+    await run(bb, ["machine", "rename", machines[0].id, "Scratch MacBook", "--json"]);
 
     async function cli(argv, options) {
       return run(bb, argv, options);

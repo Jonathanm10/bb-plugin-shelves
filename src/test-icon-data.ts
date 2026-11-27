@@ -13,6 +13,7 @@ export { default as CheckListIcon } from "@hugeicons/core-free-icons/CheckListIc
 export { default as Clock01Icon } from "@hugeicons/core-free-icons/Clock01Icon";
 export { default as ComputerIcon } from "@hugeicons/core-free-icons/ComputerIcon";
 export { default as ComputerTerminal01Icon } from "@hugeicons/core-free-icons/ComputerTerminal01Icon";
+export { default as LaptopIcon } from "@hugeicons/core-free-icons/LaptopIcon";
 export { default as Mail01Icon } from "@hugeicons/core-free-icons/Mail01Icon";
 export { default as MailOpen01Icon } from "@hugeicons/core-free-icons/MailOpen01Icon";
 export { default as Edit02Icon } from "@hugeicons/core-free-icons/Edit02Icon";

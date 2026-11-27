@@ -81,14 +81,13 @@ describe("card metadata", () => {
         host: { id: "host_1", name: "Dev MacBook" },
       }),
     ]);
-    expect(screen.queryByText("Dev MacBook")).toBeNull();
     fireEvent.pointerMove(screen.getByRole("link"), { pointerType: "mouse" });
     expect((await screen.findByRole("dialog", { name: "Thread details" })).textContent).toContain(
       "Machine: Dev MacBook",
     );
   });
 
-  it("keeps branch and machine details off the row", async () => {
+  it("keeps branch details off the row", async () => {
     render([
       thread({
         id: "thr_b",
@@ -105,7 +104,6 @@ describe("card metadata", () => {
       }),
     ]);
     expect(screen.queryByText("bb/feature")).toBeNull();
-    expect(screen.queryByText("Dev MacBook")).toBeNull();
     fireEvent.pointerMove(screen.getByRole("link"), { pointerType: "mouse" });
     const details = await screen.findByRole("dialog", { name: "Thread details" });
     expect(details.textContent).toContain("Machine: Dev MacBook");

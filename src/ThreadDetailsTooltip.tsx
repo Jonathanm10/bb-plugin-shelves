@@ -6,6 +6,7 @@ import { ThreadHoverCard } from "./components/ThreadHoverCard";
 import { threadDisplayTitle } from "./inbox";
 import { Icon, type IconName } from "./components/Icon";
 import { ProviderGlyph } from "./ProviderGlyph";
+import { machineIconName } from "./ThreadMetadata";
 import { StatusGlyph } from "./StatusGlyph";
 import { useThreadRowStatus, useThreadWithDraft } from "./StatusSlot";
 import { StillThreadStatusGlyph } from "./StillThreadStatusGlyph";
@@ -100,7 +101,9 @@ export function ThreadDetailsTooltip({
             </span>
           </div>
         ) : null}
-        {thread.host ? <DetailRow icon="Computer" label="Machine" value={thread.host.name} /> : null}
+        {thread.host ? (
+          <DetailRow icon={machineIconName(thread.host.name)} label="Machine" value={thread.host.name} />
+        ) : null}
         {thread.environment?.branchName ? (
           <DetailRow
             icon={isWorktree ? "FolderGit" : "GitBranch"}

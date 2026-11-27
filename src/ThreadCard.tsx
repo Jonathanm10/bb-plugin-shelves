@@ -1,4 +1,4 @@
-import { ThreadPullRequest } from "./ThreadMetadata";
+import { ThreadMachine, ThreadPullRequest } from "./ThreadMetadata";
 import { CompactRow } from "./CompactRow";
 import { WokeMarker } from "./WokeMarker";
 import { ShortcutHint, useSidebarThreadSplit, useThreadActions } from "./bb-sdk";
@@ -479,8 +479,11 @@ export function ThreadCard({
                   </span>
                 )}
               </div>
-              <div className="flex min-w-0 items-center gap-1.5">
-                {showProject ? titleLine : null}
+              {/* T3 Code's card: the title gets its own line and the machine leads the
+                  metadata under it. Without a machine the two share one line. */}
+              {thread.host && showProject ? titleLine : null}
+              <div className={cn("flex min-w-0 items-center gap-1.5", thread.host && "mt-0.5")}>
+                {thread.host ? <ThreadMachine host={thread.host} /> : showProject ? titleLine : null}
                 <div
                   data-settle-fade=""
                   className={cn(
