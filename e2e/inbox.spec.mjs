@@ -19,12 +19,12 @@ for (const theme of ["light", "dark"]) {
       for (const name of ["Inactive", "Parked", "Snoozed"]) await expect(shelf(page, name)).toHaveCount(0);
       await page
         .locator("[data-bb-thread-inbox-root]")
-        .screenshot({ path: `docs/screenshots/sidebar-${theme}-${width}.png`, animations: "disabled" });
+        .screenshot({ path: `e2e-artifacts/screenshots/sidebar-${theme}-${width}.png`, animations: "disabled" });
       await row.hover();
       await row.getByRole("button", { name: "Settle thread" }).focus();
       await page
         .locator("[data-bb-thread-inbox-root]")
-        .screenshot({ path: `docs/screenshots/actions-${theme}-${width}.png`, animations: "disabled" });
+        .screenshot({ path: `e2e-artifacts/screenshots/actions-${theme}-${width}.png`, animations: "disabled" });
       expect(page.url()).toBe(selectedUrl);
       await page.reload();
       await expect(link(page, first.title).locator("xpath=..")).not.toHaveClass(/\bh-8\b/);
@@ -86,7 +86,7 @@ test("core sidebar auto-settle settings persist", async ({ page, request }) => {
   await expect.poll(async () => (await rpc(request, "getSidebarSettings")).autoSettleKeepPullRequests).toBe(true);
   await page.reload();
   await expect(keep).toHaveAttribute("aria-checked", "true");
-  await page.screenshot({ path: "docs/screenshots/auto-settle-settings.png" });
+  await page.screenshot({ path: "e2e-artifacts/screenshots/auto-settle-settings.png" });
 });
 
 test("core sidebar keeps filed threads in native search", async ({ page, request }) => {
@@ -142,7 +142,7 @@ for (const theme of ["light", "dark"]) {
     await expect(page.getByRole("combobox", { name: "Thread display" })).toBeVisible();
     await expect(page.getByRole("switch", { name: "Inactive shelf" })).toHaveCount(0);
     await advanced.click();
-    await page.screenshot({ path: `docs/screenshots/settings-${theme}.png`, animations: "disabled" });
+    await page.screenshot({ path: `e2e-artifacts/screenshots/settings-${theme}.png`, animations: "disabled" });
   });
 }
 

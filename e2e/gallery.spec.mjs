@@ -13,7 +13,7 @@ test("README gallery captures real filing and search states", async ({ page, req
   async function frame(number, screenshot) {
     await page.mouse.move(1000, 750);
     await sidebar.screenshot({ path: `e2e-artifacts/demo/${number}.png`, animations: "disabled" });
-    if (screenshot) await sidebar.screenshot({ path: `docs/screenshots/${screenshot}.png`, animations: "disabled" });
+    if (screenshot) await sidebar.screenshot({ path: `e2e-artifacts/screenshots/${screenshot}.png`, animations: "disabled" });
     // Hold each demonstrated state long enough to read in the recording.
     await page.waitForTimeout(900);
   }
@@ -51,6 +51,6 @@ test("README gallery captures real filing and search states", async ({ page, req
   await expect(palette).toBeVisible();
   await palette.getByRole("combobox").fill(fixture.threads[3].title);
   await expect(palette.getByRole("option").filter({ hasText: fixture.threads[3].title }).first()).toBeVisible();
-  await page.screenshot({ path: "docs/screenshots/native-search.png", animations: "disabled" });
+  await page.screenshot({ path: "e2e-artifacts/screenshots/native-search.png", animations: "disabled" });
   await page.waitForTimeout(900);
 });

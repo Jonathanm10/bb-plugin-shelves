@@ -28,9 +28,7 @@ and failure screenshots/traces. `e2e:cli` seeds three idle threads and runs each
 the pinned bb-app (`devDependencies.bb-app`). Neither runs as part of
 `npm run check`. Run e2e separately from Vitest; the scratch server and
 Chromium compete with the unit suite for CPU.
-Before releases on macOS: `npm run e2e`; CI: `gh workflow run "Browser e2e"`.
-
-The "BB compat" workflow (from [bb-plugin-ci](https://github.com/ysskrishna/bb-plugin-ci)) runs `typecheck` and `e2e:smoke` daily against the latest stable BB and reports a failure in a `bb-compat` issue.
+On CI: `gh workflow run "Browser e2e"`.
 
 ## Isolation and fixtures
 
@@ -175,35 +173,30 @@ and touch actions without hover. It uses fresh preferences. Historical
 manual-reorder flows explicitly seed manual order and an expanded Working
 section, without changing the shipped defaults.
 
-## README media
+## README demo
 
-Capture the current interface with a disposable Product platform project and
-fixed workflow titles. It uses the same real BB server and assertions as the
-core flows, not mocked browser responses:
+`docs/demo.gif` is the one committed capture. Record it with a disposable
+Product platform project and fixed workflow titles, on the same real BB server
+and assertions as the core flows:
 
 ```sh
-env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --readme-demo --grep 'core sidebar|README demo|README gallery'
+env -i PATH="$PATH" HOME="$HOME" npm run e2e -- --readme-demo --grep 'README demo'
 demo_trim=$(node -p 'JSON.parse(require("node:fs").readFileSync("e2e-artifacts/demo/timing.json", "utf8")).trimStartSeconds')
 ffmpeg -y -ss "$demo_trim" -i e2e-artifacts/demo/walkthrough.webm \
   -vf 'fps=10,scale=900:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle' \
-  -loop 0 docs/screenshots/thread-inbox-demo.gif
-ffmpeg -y -i docs/screenshots/sidebar-light-320.png \
-  -i docs/screenshots/actions-dark-320.png -i docs/screenshots/settled-threads.png \
-  -i docs/screenshots/snoozed-threads.png -filter_complex 'hstack=inputs=4' \
-  -frames:v 1 docs/screenshots/marketplace-overview.png
+  -loop 0 docs/demo.gif
 ```
 
-FFmpeg is only a documentation capture tool; it is not a plugin dependency.
-The GIF comes from the continuous Playwright video of Settle, Un-settle, Snooze,
-Wake, and Search, sampled at ten frames per second. The timing file trims startup
-after the real sidebar is ready. Screenshot capture runs in a separate test to
-avoid altering the video surface. Watch the entire encoded GIF and its loop,
-inspect suspicious frames, and reject flashes or layout jumps before committing. Raw video/frames stay in ignored `e2e-artifacts/demo/`; only the
-finished GIF and current PNGs are published.
-The marketplace composite joins four actual sidebar captures to meet the
-registry's minimum width without stretching the interface.
+FFmpeg is only a capture tool; it is not a plugin dependency. The GIF is the
+continuous Playwright video of Settle, Un-settle, Snooze, Wake, and Search,
+sampled at ten frames per second; the timing file trims startup. Watch the
+entire encoded GIF and its loop, and reject flashes or layout jumps before
+committing. Raw video stays in ignored `e2e-artifacts/demo/`.
 
-The committed public media uses BB 0.50.1 to match the installed desktop. To
-recapture that version on macOS, add `--app-dir /Applications/bb.app/Contents/Resources/app.asar.unpacked/node_modules/bb-app`
-to the browser command. This stages the application under scratch; it does not
-control the running desktop. The default remains the pinned BB 0.49.0 for minimum-version checks.
+The other specs save their screenshots under ignored `e2e-artifacts/screenshots/`,
+so a run leaves the working tree clean.
+
+To record against the installed desktop's BB version on macOS, add
+`--app-dir /Applications/bb.app/Contents/Resources/app.asar.unpacked/node_modules/bb-app`.
+This stages that application under scratch; it does not control the running
+desktop. The default is the pinned BB 0.49.0, the minimum supported version.
