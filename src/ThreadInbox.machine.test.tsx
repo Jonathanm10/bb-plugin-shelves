@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, screen, within } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
+import type { PluginSdkApp } from "@get-bb/plugin-sdk/app";
 import { renderSlot } from "./test-slot";
 import { inbox, defaultSidebarSettings, thread, listProps, render, loadInboxApp } from "./test-inbox";
 
@@ -60,23 +61,35 @@ describe("machine on the card", () => {
     expect(within(glyph.parentElement!.parentElement!).getByText("No machine yet")).toBeDefined();
   });
 
-  // A new thread has no machine until bb resolves its environment. React keeps
-  // an element only while its place in the tree holds, so a title that moved
-  // to another parent would unmount an inline rename and save the draft.
-  it("keeps the title at the same place in the card with or without a machine", async () => {
-    render([
-      thread({ id: "thr_a", title: "Laptop work", host: laptop }),
-      thread({ id: "thr_b", title: "No machine yet", host: null }),
-    ]);
-    await screen.findByRole("link", { name: "Laptop work" });
-    const placeInCard = (title: string) => {
-      const path: string[] = [];
-      for (let node = within(row(title)).getByText(title) as Element; node !== row(title); node = node.parentElement!) {
-        path.unshift(`${node.tagName}:${[...node.parentElement!.children].indexOf(node)}`);
-      }
-      return path.join(" > ");
-    };
-    expect(placeInCard("Laptop work")).toBe(placeInCard("No machine yet"));
+  // A new thread has no machine until bb resolves its environment. A title
+  // that moved to another parent then would unmount the editor and save the draft.
+  it("keeps an inline rename open when the thread's machine resolves", async () => {
+    const rendered = render([thread({ id: "thr_a", title: "New thread", host: null })]);
+    fireEvent.doubleClick(await screen.findByRole("link", { name: "New thread" }));
+    const input = await screen.findByRole("textbox", { name: "Rename New thread" });
+    fireEvent.change(input, { target: { value: "Half-typed" } });
+
+    const runtime = (globalThis as typeof globalThis & { __bbPluginRuntime: { pluginSdkApp: PluginSdkApp } })
+      .__bbPluginRuntime.pluginSdkApp;
+    const useThreads = runtime.experimental_useSidebarThreads;
+    const resolved = [thread({ id: "thr_a", title: "New thread", host: laptop })];
+    // One stable snapshot, as the host returns: same thread, machine now known.
+    let resolvedSnapshot: ReturnType<typeof useThreads> | undefined;
+    const spy = vi.spyOn(runtime, "experimental_useSidebarThreads").mockImplementation((...args) => {
+      const snapshot = useThreads(...args);
+      resolvedSnapshot ??= { ...snapshot, threads: resolved };
+      return resolvedSnapshot;
+    });
+    try {
+      const Inbox = inbox.component;
+      await act(async () => rendered.rerender(<Inbox {...listProps} />));
+      expect(machine("New thread")!.textContent).toBe("Machine: Ada’s MacBook Pro");
+      expect(screen.getByRole("textbox", { name: "Rename New thread" })).toBe(input);
+      expect((input as HTMLInputElement).value).toBe("Half-typed");
+      expect(rendered.sdkCalls.some((call) => call.method === "threads.update")).toBe(false);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("leads the metadata line of a card inside a project group", async () => {
