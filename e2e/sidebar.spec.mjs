@@ -146,6 +146,8 @@ test("right-click menu matches the sidebar action list", async ({ page, context 
     "Pin",
     "Snooze",
     "Settle",
+    // Added by bb's push-notifications plugin: the menu shows other plugins' thread actions.
+    "Notifications",
     "Rename",
     "Mark read",
     "Copy",
