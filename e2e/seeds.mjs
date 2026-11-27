@@ -25,6 +25,10 @@ export async function seed(title, { projectId = fixture.projectId, root } = {}) 
   const id = result.id ?? result.thread?.id;
   expect(id).toBeTruthy();
   try {
+    // A stop before provisioning attaches the checkout cancels it and leaves the thread without an environment.
+    await expect
+      .poll(async () => (await cli(["thread", "get", id])).thread.environmentId, { timeout: 30_000 })
+      .toBeTruthy();
     await cli(["thread", "stop", id]);
     await cli(["thread", "wait", id, "--status", "idle", "--timeout", "30s"]);
     const { thread } = await cli(["thread", "get", id]);

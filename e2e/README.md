@@ -78,7 +78,8 @@ are recorded with `lsof`; outbound connections do not fail the credential guard.
 The scratch homes contain no developer credentials or copied provider state.
 
 The suite seeds four fixed-title threads using CLI `thread spawn --prompt ''`
-with Codex and the scratch checkout, immediately followed by `thread stop`.
+with Codex and the scratch checkout, followed by `thread stop` once the thread
+has an environment: an earlier stop cancels provisioning and leaves it without one.
 Each must reach `idle`, have an environment, have no queued messages, and have
 no item/output/tool events or provider errors. Provider warnings and
 notifications BB does not map (`provider/unhandled`, such as account

@@ -320,6 +320,15 @@ trace_exporter = "none"
       const id = data.id ?? data.thread?.id;
       if (!id) throw new Error("Scratch thread returned no id");
       if (idle) {
+        // A stop before provisioning attaches the checkout cancels it and leaves the thread without an environment.
+        for (
+          let attempt = 1;
+          !JSON.parse((await cli(["thread", "get", id, "--json"])).stdout).thread.environmentId;
+          attempt++
+        ) {
+          if (attempt === 60) throw new Error("Idle fixture got no environment after 60 polls");
+          await delay(500);
+        }
         await cli(["thread", "stop", id, "--json"]);
         await cli(["thread", "wait", id, "--status", "idle", "--timeout", "30s", "--json"]);
         const { thread } = JSON.parse((await cli(["thread", "get", id, "--json"])).stdout);
