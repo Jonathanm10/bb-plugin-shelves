@@ -158,6 +158,8 @@ test("core sidebar compact titles keep space until actions are needed", async ({
   await link(page, fixture.threads[0].title).focus();
   await expect(settle).toBeVisible();
   const snooze = row.getByRole("combobox", { name: "Snooze thread" });
+  await expect(settle).toHaveCSS("cursor", "pointer");
+  await expect(snooze).toHaveCSS("cursor", "pointer");
   const trigger = await snooze.elementHandle();
   await snooze.press("Enter");
   await expect(page.getByRole("option", { name: "1 hour", exact: true })).toBeVisible();
