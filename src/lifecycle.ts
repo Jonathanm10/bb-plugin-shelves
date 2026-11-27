@@ -101,9 +101,13 @@ export function parkBlocker(signals: ParkSignals): ParkBlocker | null {
   return null;
 }
 
-/** A turn bb has accepted and not yet finished, in either thread view. */
+/**
+ * A turn bb has accepted and not yet finished, in either thread view. bb
+ * creates every thread `pending` and moves it to `starting` with its first
+ * message, so a pending thread has nothing in flight.
+ */
 function isTurnInFlight(status: PluginSidebarThread["status"]): boolean {
-  return status === "active" || status === "pending" || status === "starting" || status === "stopping";
+  return status === "active" || status === "starting" || status === "stopping";
 }
 
 /**

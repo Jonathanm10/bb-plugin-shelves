@@ -138,6 +138,13 @@ describe("working, for display", () => {
     expect(within(card("Offline work")).queryByRole("button", { name: "Settle thread" })).toBeNull();
     expect(within(card("Offline work")).queryByRole("combobox", { name: "Snooze thread" })).toBeNull();
   });
+
+  it("offers Snooze and Settle for a thread that never started", async () => {
+    renderInbox([thread({ id: "unstarted", title: "Unstarted work", ...unstarted })]);
+    await screen.findByRole("link", { name: "Unstarted work" });
+    expect(within(card("Unstarted work")).getByRole("button", { name: "Settle thread" })).toBeDefined();
+    expect(within(card("Unstarted work")).getByRole("combobox", { name: "Snooze thread" })).toBeDefined();
+  });
 });
 
 describe("another plugin's running status blocks shelving from the sidebar", () => {

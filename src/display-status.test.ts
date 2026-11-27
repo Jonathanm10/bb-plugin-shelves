@@ -6,7 +6,6 @@ import type {
 } from "@get-bb/plugin-sdk/app";
 import { resolveThreadStatus } from "./bb-sdk";
 import { childStatusKind, childSubtree, isKnownIndicator, threadAsksForInput } from "./child-status";
-import { isThreadWorking } from "./lifecycle";
 import { threadRowStatus, threadShortStatus, threadWithDraft } from "./StatusSlot";
 import { idleSidebarThreadFields } from "./test-fixtures";
 import { isThreadWorkingForDisplay, isWorkingTree } from "./working-tree";
@@ -22,6 +21,18 @@ import { isThreadWorkingForDisplay, isWorkingTree } from "./working-tree";
 
 // The sidebar's rules before bb's resolver, frozen as the baseline.
 const OLD = {
+  /** lifecycle.ts's isThreadWorking before it stopped counting `pending`. */
+  isThreadWorking(thread: PluginSidebarThread): boolean {
+    const { activity, status } = thread;
+    return (
+      ["active", "pending", "starting", "stopping"].includes(status) ||
+      thread.indicator === "runtime" ||
+      activity.workflows > 0 ||
+      activity.backgroundAgents > 0 ||
+      activity.backgroundCommands > 0 ||
+      activity.planMode > 0
+    );
+  },
   isWorkingIndicator(indicator: PluginSidebarThreadIndicator): boolean {
     return ["runtime", "workflow", "background-agent", "background-command", "plan-mode", "working-draft"].includes(
       indicator,
@@ -49,11 +60,11 @@ const OLD = {
     }
     const descendants = childSubtree(childThreads, childrenByParent);
     if (descendants.some(threadAsksForInput)) return false;
-    if (threadShortStatus(thread)?.showsDuration === true || isThreadWorking(thread)) return true;
+    if (threadShortStatus(thread)?.showsDuration === true || OLD.isThreadWorking(thread)) return true;
     return descendants.some(
       (child) =>
         OLD.childStatusKind(child) === "working" ||
-        (child.indicator !== "unread-error" && child.queuedWork !== "failed" && isThreadWorking(child)),
+        (child.indicator !== "unread-error" && child.queuedWork !== "failed" && OLD.isThreadWorking(child)),
     );
   },
   rowStatus(thread: PluginSidebarThread, rowStatus: PluginSidebarThreadRowStatus | null, limited: boolean) {
