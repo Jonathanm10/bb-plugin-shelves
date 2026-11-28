@@ -57,8 +57,7 @@ out what it lacks. Read its source before proposing a design:
   `npm run check` and `npm test` stop at once on another version.
 - `npm ci` once, then `npm run check` before and after a change.
 - Browser tests run only through the scratch launcher (`npm run e2e`, see
-  `e2e/README.md`), never against the live BB. The seeder can lose a race on a
-  busy machine ("Idle fixture is not initialized"): run it again.
+  `e2e/README.md`), never against the live BB.
 - A regression test fails before its fix.
 - `npm run test:stress` runs only when Jonathan asks.
 
